@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        Thu Nhiên Gallery
+    </title>
+    <link rel="icon" href="..assets/gallery icon 32x32.png">
+
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="A beautiful photo gallery.">
+    <meta property="og:title" content="Thu Nhiên Gallery">
+    <meta property="og:description" content="A beautiful photo gallery.">
+    <meta property="og:image"
+        content="..assets/gallery icon 100x100.png">
+    <meta property="og:url" content="https://username.github.io/repo/">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="../assets/vendor/bootstrap.min.css">
+    <!-- Ionicons -->
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-dark: #121212;
+            --bg-card: #1e1e1e;
+            --accent-color: #0d6efd;
+            --text-primary: #e0e0e0;
+        }
+
+        /* body selector removed to fix Light Mode */
+        /* Navbar */
+        .navbar {
+            background: rgba(30, 30, 30, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #333;
+        }
+
+        .navbar-brand img {
+            height: 40px;
+        }
+
+        /* Lightbox - Advanced Split Layout */
+        #lightbox-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        #lightbox-modal.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .lightbox-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* Left: Stage */
+        .lightbox-stage {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+            /* Clean black stage */
+            overflow: hidden;
+        }
+
+        .lightbox-close-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            color: white;
+            font-size: 2rem;
+            z-index: 30;
+            cursor: pointer;
+        }
+
+        /* Sidebar */
+        /* Sidebar (Overlay Mode) */
+        .lightbox-sidebar {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 33vw;
+            /* 1/3 Screen */
+            min-width: 320px;
+            max-width: 90vw;
+            /* Mobile safe */
+
+            background: rgba(30, 30, 30, 0.5);
+            /* Semi-transparent */
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: -5px 0 20px rgba(0, 0, 0, 0.5);
+
+            z-index: 2001;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateX(0);
+        }
+
+        .lightbox-sidebar.hidden {
+            transform: translateX(100%);
+            /* Slide out to right */
+        }
+
+        @media (max-width: 768px) {
+            .lightbox-sidebar {
+                width: 85vw;
+                max-width: none;
+            }
+        }
+
+        /* Stage Toggle Button (Visible when sidebar hidden) */
+        .stage-toggle-btn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            z-index: 20;
+            transition: all 0.2s;
+            opacity: 0;
+            /* Hidden by default if sidebar is open */
+            pointer-events: none;
+        }
+
+        .stage-toggle-btn:hover {
+            background: rgba(0, 0, 0, 0.8);
+            border-color: #fff;
+        }
+
+        /* Show toggle button when sidebar is hidden */
+        .lightbox-container.sidebar-closed .stage-toggle-btn {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Toolbar */
+        .sidebar-toolbar {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            border-bottom: 1px solid #333;
+            background: #252525;
+        }
+
+        .icon-btn {
+            background: transparent;
+            border: none;
+            color: #aaa;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .icon-btn:hover {
+            color: #fff;
+            background: #333;
+        }
+
+        .icon-btn.close-btn:hover {
+            color: #f44;
+        }
+
+        /* Content */
+        .sidebar-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        #lightbox-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        .tags-container {
+            margin-bottom: 15px;
+        }
+
+        .tag-chip {
+            display: inline-block;
+            background: #333;
+            color: #ccc;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .tag-chip:hover {
+            background: #0d6efd;
+            color: #fff;
+        }
+
+        .description-text {
+            font-size: 0.9rem;
+            color: #ccc;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+
+        /* Footer / Zoom */
+        .sidebar-footer {
+            padding: 15px;
+            border-top: 1px solid #333;
+            background: #252525;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .zoom-controls button {
+            background: #333;
+            border: none;
+            color: #fff;
+            padding: 5px 10px;
+            margin-right: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .zoom-controls button:hover {
+            background: #555;
+        }
+
+        .counter-text {
+            font-size: 0.8rem;
+            color: #777;
+        }
+
+        /* Navigation Overlays */
+        .nav-overlay {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 15%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 3rem;
+        }
+
+        .nav-overlay:hover {
+            opacity: 1;
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-left {
+            left: 0;
+        }
+
+        .nav-right {
+            right: 0;
+        }
+
+        /* Mobile Tweaks */
+        @media (max-width: 768px) {
+            .lightbox-container {
+                flex-direction: column;
+            }
+
+            .lightbox-sidebar {
+                width: 100%;
+                max-width: none;
+                height: 40%;
+                /* Bottom sheet style */
+                margin-right: 0 !important;
+                transition: margin-bottom 0.3s ease;
+            }
+
+            .lightbox-sidebar.hidden {
+                margin-bottom: -40%;
+            }
+
+            .lightbox-stage {
+                flex: 1;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="../index.html">
+            <img src="../assets/gallery icon 100x100.png" alt="Thu Nhiên Gallery" height="40"
+                class="d-inline-block align-text-top">
+            Thu Nhiên Gallery
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="../index.html">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="../photos.html">Photos</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="../albums.html">Albums</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="../tags.html">Tags</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+        <main>
+            <div class="bg-white border-bottom py-3 mb-4">
+    <div class="container">
+        <div class="d-flex align-items-center">
+            <a id="smart-back-link" href="../index.html"
+                class="text-decoration-none text-primary">Home</a>
+            <span class="text-muted mx-2">/</span>
+            <h4 class="fw-bold mb-0 text-dark text-truncate" title="Chụp ảnh cùng ngựa" style="max-width: 70%;">
+                Chụp ảnh cùng ngựa
+            </h4>
+
+            <button class="btn btn-sm btn-outline-primary rounded-pill px-3 ms-auto" onclick="copyCurrentUrl()">
+                <ion-icon name="share-social-outline" style="vertical-align: -1px; margin-right: 4px;"></ion-icon>
+                Share
+            </button>
+        </div>
+        <div class="text-muted small mt-2">
+            <ion-icon name="images-outline" style="vertical-align: -2px;"></ion-icon>
+            13 photos
+        </div>
+    </div>
+</div>
+
+<script>
+    // Smart Back Link Logic
+    document.addEventListener("DOMContentLoaded", function () {
+        const backLink = document.getElementById('smart-back-link');
+        if (document.referrer && document.referrer.includes('albums')) {
+            backLink.textContent = 'Albums';
+            backLink.href = '../albums.html';
+        }
+    });
+
+    function copyCurrentUrl() {
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            alert('Album link copied to clipboard!');
+        }).catch(err => {
+            console.error('Failed to copy', err);
+        });
+    }
+</script>
+
+<div class="container" id="album-container">
+    
+            <div class="row" data-masonry='{"percentPosition": true }'>
+                
+                    <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
+                        <div class="photo-card" onclick="openLightbox(0)" style="cursor: pointer; position: relative;"
+    data-view-id="chup-anh-cung-ngua__chup-cung-ngua (1)_jpg">
+    <img src="../thumbnails/chup-anh-cung-ngua/chup-cung-ngua (1).jpg" alt="chup-cung-ngua (1)" loading="lazy">
+    
+        <div class="view-overlay"
+            style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 4px; color: white; font-size: 0.75rem; display: flex; align-items: center; gap: 4px; pointer-events: none;">
+            <ion-icon name="eye-outline"></ion-icon>
+            <span class="view-count-text">...</span>
+        </div>
+        
+</div>
+                    </div>
+                    
+                    <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
+                        <div class="photo-card" onclick="openLightbox(1)" style="cursor: pointer; position: relative;"
+    data-view-id="chup-anh-cung-ngua__chup-cung-ngua (10)_jpg">
+    <img src="../thumbnails/chup-anh-cung-ngua/chup-cung-ngua (10).jpg" alt="chup-cung-ngua (10)" loading="lazy">
+    
+        <div class="view-overlay"
+            style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 4px; color: white; font-size: 0.75rem; display: flex; align-items: center; gap: 4px; pointer-events: none;">
+            <ion-icon name="eye-outline"></ion-icon>
+            <span class="view-count-text">...</span>
+        </div>
+        
+</div>
+                    </div>
+                    
+                    <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
+                        <div class="photo-card" onclick="openLightbox(2)" style="cursor: pointer; position: relative;"
+    data-view-id="chup-anh-cung-ngua__chup-cung-ngua (11)_jpg">
+    <img src="../thumbnails/chup-anh-cung-ngua/chup-cung-ngua (11).jpg" alt="chup-cung-ngua (11)" loading="lazy">
+    
+        <div class="view-overlay"
+            style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 4px; color: white; font-size: 0.75rem; display: flex; align-items: center; gap: 4px; pointer-events: none;">
+            <ion-icon name="eye-outline"></ion-icon>
+            <span class="view-count-text">...</span>
+        </div>
+        
+</div>
+                    </div>
+                    
+                    <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
+                        <div class="photo-card" onclick="openLightbox(3)" style="cursor: pointer; position: relative;"
+    data-view-id="chup-anh-cung-ngua__chup-cung-ngua (12)_jpg">
+    <img src="../thumbnails/chup-anh-cung-ngua/chup-cung-ngua (12).jpg" alt="chup-cung-ngua (12)" loading="lazy">
+    
+        <div class="view-overlay"
+            style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 4px; color: white; font-size: 0.75rem; display: flex; align-items: center; gap: 4px; pointer-events: none;">
+            <ion-icon name="eye-outline"></ion-icon>
+            <span class="view-count-text">...</span>
+        </div>
+        
+</div>
+                    </div>
+                    
+                    <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
+                        <div class="photo-card" onclick="openLightbox(4)" style="cursor: pointer; position: relative;"
+    data-view-id="chup-anh-cung-ngua__chup-cung-ngua (13)_jpg">
+    <img src="../thumbnails/chup-anh-cung-ngua/chup-cung-ngua (13).jpg" alt="chup-cung-ngua (13)" loading="lazy">
+    
+        <div class="view-overlay"
+            style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 4px; color: white; font-size: 0.75rem; display: flex; align-items: center; gap: 4px; pointer-events: none;">
+            <ion-icon name="eye-outline"></ion-icon>
+            <span class="view-count-text">...</span>
+        </div>
+        
+</div>
+                    </div>
+                    
+                    <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
+                        <div class="photo-card" onclick="openLightbox(5)" style="cursor: pointer; position: relative;"
+    data-view-id="chup-anh-cung-ngua__chup-cung-ngua (2)_jpg">
+    <img src="../thumbnails/chup-anh-cung-ngua/chup-cung-ngua (2).jpg" alt="chup-cung-ngua (2)" loading="lazy">
+    
+        <div class="view-overlay"
+            style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 4px; color: white; font-size: 0.75rem; display: flex; align-items: center; gap: 4px; pointer-events: none;">
+            <ion-icon name="eye-outline"></ion-icon>
+            <span class="view-count-text">...</span>
+        </div>
+        
+</div>
+                    </div>
+                    
+                    <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
+                        <div class="photo-card" onclick="openLightbox(6)" style="cursor: pointer; position: relative;"
+    data-view-id="chup-anh-cung-ngua__chup-cung-ngua (3)_jpg">
+    <img src="../thumbnails/chup-anh-cung-ngua/chup-cung-ngua (3).jpg" alt="chup-cung-ngua (3)" loading="lazy">
+    
+        <div class="view-overlay"
+            style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 4px; color: white; font-size: 0.75rem; display: flex; align-items: center; gap: 4px; pointer-events: none;">
+            <ion-icon name="eye-outline"></ion-icon>
+            <span class="view-count-text">...</span>
+        </div>
+        
+</div>
+                    </div>
+                    
+                    <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
+                        <div class="photo-card" onclick="openLightbox(7)" style="cursor: pointer; position: relative;"
+    data-view-id="chup-anh-cung-ngua__chup-cung-ngua (4)_jpg">
+    <img src="../thumbnails/chup-anh-cung-ngua/chup-cung-ngua (4).jpg" alt="chup-cung-ngua (4)" loading="lazy">
+    
+        <div class="view-overlay"
+            style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 4px; color: white; font-size: 0.75rem; display: flex; align-items: center; gap: 4px; pointer-events: none;">
+            <ion-icon name="eye-outline"></ion-icon>
+            <span class="view-count-text">...</span>
+        </div>
+        
+</div>
+                    </div>
+                    
+                    <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
+                        <div class="photo-card" onclick="openLightbox(8)" style="cursor: pointer; position: relative;"
+    data-view-id="chup-anh-cung-ngua__chup-cung-ngua (5)_jpg">
+    <img src="../thumbnails/chup-anh-cung-ngua/chup-cung-ngua (5).jpg" alt="chup-cung-ngua (5)" loading="lazy">
+    
+        <div class="view-overlay"
+            style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 4px; color: white; font-size: 0.75rem; display: flex; align-items: center; gap: 4px; pointer-events: none;">
+            <ion-icon name="eye-outline"></ion-icon>
+            <span class="view-count-text">...</span>
+        </div>
+        
+</div>
+                    </div>
+                    
+                    <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
+                        <div class="photo-card" onclick="openLightbox(9)" style="cursor: pointer; position: relative;"
+    data-view-id="chup-anh-cung-ngua__chup-cung-ngua (6)_jpg">
+    <img src="../thumbnails/chup-anh-cung-ngua/chup-cung-ngua (6).jpg" alt="chup-cung-ngua (6)" loading="lazy">
+    
+        <div class="view-overlay"
+            style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 4px; color: white; font-size: 0.75rem; display: flex; align-items: center; gap: 4px; pointer-events: none;">
+            <ion-icon name="eye-outline"></ion-icon>
+            <span class="view-count-text">...</span>
+        </div>
+        
+</div>
+                    </div>
+                    
+                    <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
+                        <div class="photo-card" onclick="openLightbox(10)" style="cursor: pointer; position: relative;"
+    data-view-id="chup-anh-cung-ngua__chup-cung-ngua (7)_jpg">
+    <img src="../thumbnails/chup-anh-cung-ngua/chup-cung-ngua (7).jpg" alt="chup-cung-ngua (7)" loading="lazy">
+    
+        <div class="view-overlay"
+            style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 4px; color: white; font-size: 0.75rem; display: flex; align-items: center; gap: 4px; pointer-events: none;">
+            <ion-icon name="eye-outline"></ion-icon>
+            <span class="view-count-text">...</span>
+        </div>
+        
+</div>
+                    </div>
+                    
+                    <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
+                        <div class="photo-card" onclick="openLightbox(11)" style="cursor: pointer; position: relative;"
+    data-view-id="chup-anh-cung-ngua__chup-cung-ngua (8)_jpg">
+    <img src="../thumbnails/chup-anh-cung-ngua/chup-cung-ngua (8).jpg" alt="chup-cung-ngua (8)" loading="lazy">
+    
+        <div class="view-overlay"
+            style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 4px; color: white; font-size: 0.75rem; display: flex; align-items: center; gap: 4px; pointer-events: none;">
+            <ion-icon name="eye-outline"></ion-icon>
+            <span class="view-count-text">...</span>
+        </div>
+        
+</div>
+                    </div>
+                    
+                    <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
+                        <div class="photo-card" onclick="openLightbox(12)" style="cursor: pointer; position: relative;"
+    data-view-id="chup-anh-cung-ngua__chup-cung-ngua (9)_jpg">
+    <img src="../thumbnails/chup-anh-cung-ngua/chup-cung-ngua (9).jpg" alt="chup-cung-ngua (9)" loading="lazy">
+    
+        <div class="view-overlay"
+            style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 4px; color: white; font-size: 0.75rem; display: flex; align-items: center; gap: 4px; pointer-events: none;">
+            <ion-icon name="eye-outline"></ion-icon>
+            <span class="view-count-text">...</span>
+        </div>
+        
+</div>
+                    </div>
+                    
+            </div>
+
+            <!-- Safe Data Injection -->
+            <script id="gallery-model" type="application/json">
+                [{"type":"split","src":"../thumbnails/chup-anh-cung-ngua/chup-cung-ngua (1).jpg","src_a":"../split/chup-anh-cung-ngua/chup-cung-ngua (1)-a.jpg","src_b":"../split/chup-anh-cung-ngua/chup-cung-ngua (1)-b.jpg","name":"chup-cung-ngua (1)","metadata":{"title":"Năm ngọ chụp ảnh cùng ngựa","date":"2025-12-31 11:00","tags":["bính ngọ","ngựa","Tạo ảnh AI"],"description":null},"content":"\r\nChỉnh sửa ảnh tải lên (khuôn mặt dựa trên ảnh tham khảo). Đảm bảo khuôn mặt vẫn nhất quán 100% với người trong ảnh đã tải lên, không thay đổi cấu trúc khuôn mặt, mắt, mũi, miệng, tông màu da hoặc kiểu tóc. Chất lượng ảnh 4k. Cinematic realism. Độ chân thực đẳng cấp chuyên nghiệp và chi tiết, màu sắc rực rỡ, chủ thể được lấy nét sắc nét, độ phân giải 4K, tỷ lệ khung hình 9:16. Tạo cho tôi ảnh với miêu tả như sau.\r\nTạo hình chân dung cận cảnh ấn tượng ghi lại người phụ nữ có lông mày tự nhiên nổi bật. Mắt nâu nhìn thẳng vào máy ảnh. Đôi môi của nàng được tô màu mềm mại, tự nhiên. Cô ấy đeo một chiếc khăn voan trong suốt thêu hoa văn che phủ đầu và vai sáng màu, với những điểm lấp lánh tinh tế dọc cạnh khăn, một phần khuôn mặt của một con ngựa với bộ lông đỏ rực rỡ, cụ thể là mắt và hốc của nó, được nhìn thấy ở phía trái của khung, một phần bị che mờ bởi người phụ nữ. Ánh sáng ấm áp, cũng gợi ý bình minh hay hoàng hôn, tỏa một ánh sáng vàng trên khuôn mặt cô ấy và vải. Ấn tượng tổng thể là vẻ đẹp thanh lịch và thanh thản.￼ ","id":"chup-cung-ngua (1)","filename":"chup-cung-ngua (1).jpg","albumSlug":"chup-anh-cung-ngua"},{"type":"split","src":"../thumbnails/chup-anh-cung-ngua/chup-cung-ngua (10).jpg","src_a":"../split/chup-anh-cung-ngua/chup-cung-ngua (10)-a.jpg","src_b":"../split/chup-anh-cung-ngua/chup-cung-ngua (10)-b.jpg","name":"chup-cung-ngua (10)","metadata":{"title":"Năm ngọ chụp ảnh cùng ngựa","date":"2025-12-31 11:00","tags":["bính ngọ","ngựa","Tạo ảnh AI"],"description":null},"content":"\r\nChỉnh sửa ảnh tải lên (khuôn mặt dựa trên ảnh tham khảo). Đảm bảo khuôn mặt vẫn nhất quán 100% với người trong ảnh đã tải lên, không thay đổi cấu trúc khuôn mặt, mắt, mũi, miệng, tông màu da hoặc kiểu tóc. Chất lượng ảnh 8k. Cinematic realism. Pthu. Độ chân thực đẳng cấp chuyên nghiệp và chi tiết, màu sắc rực rỡ, chủ thể được lấy nét sắc nét, độ phân giải 8K, tỷ lệ khung hình 9:16. Tạo cho tôi ảnh với miêu tả như sau.\r\nCảnh, Tâm trạng\r\nTruyện cổ tích, điện ảnh, bầu không khí kịch tính. Khu rừng huyền bí tối tăm tương phản bởi ánh sáng vàng óng. Chủ nghĩa Hyperreal, độ phân giải cao, xử lý hậu kỳ chuyên nghiệp\r\nChủ đề\r\nThiếu nữ duyên dáng cưỡi ngựa phát sáng.\r\nTrang phục: Áo váy dài bồng bềnh bằng tia lửa và sợi chỉ đen tuyền, kết hợp với ánh sáng của chú ngựa.\r\nTạo dáng:Dáng thẳng, ánh nhìn ngang nhẹ nhàng, thanh lịch và tinh tế. Tóc ngắn gợn sóng trong một phong cách cascading\r\nNgựa:\r\nLớn, uy nghi, tỏa sáng từ bên trong với ánh sáng vàng/hổ phách. Bờm và đuôi lấp lánh với các hạt rạng rỡ. Đứng kiêu hãnh hay di chuyển duyên dáng.\r\nÁnh sáng & Màu sắc:\r\nÁnh sáng chính từ ánh sáng của người phụ nữ và con ngựa. Tia vàng xuyên qua khu rừng đen tối, tạo ra hiệu ứng chiaroscuro kỳ diệu.\r\nBảng màu: xanh lá và đen đậm với tông màu vàng và hổ phách sống động\r\nPrompt tiêu cực: không sơn dầu, không minh họa, không anime, không hoạt hình, không render 3D, không CGI, không màu da bị khuếch tán.","id":"chup-cung-ngua (10)","filename":"chup-cung-ngua (10).jpg","albumSlug":"chup-anh-cung-ngua"},{"type":"split","src":"../thumbnails/chup-anh-cung-ngua/chup-cung-ngua (11).jpg","src_a":"../split/chup-anh-cung-ngua/chup-cung-ngua (11)-a.jpg","src_b":"../split/chup-anh-cung-ngua/chup-cung-ngua (11)-b.jpg","name":"chup-cung-ngua (11)","metadata":{"title":"Năm ngọ chụp ảnh cùng ngựa","date":"2025-12-31 11:00","tags":["bính ngọ","ngựa","Tạo ảnh AI"],"description":null},"content":"\r\nChỉnh sửa ảnh tải lên (khuôn mặt dựa trên ảnh tham khảo). Đảm bảo khuôn mặt vẫn nhất quán 100% với người trong ảnh đã tải lên, không thay đổi cấu trúc khuôn mặt, mắt, mũi, miệng, tông màu da hoặc kiểu tóc. Chất lượng ảnh 8k. Cinematic realism. Pthu. Độ chân thực đẳng cấp chuyên nghiệp và chi tiết, màu sắc rực rỡ, chủ thể được lấy nét sắc nét, độ phân giải 8K, tỷ lệ khung hình 9:16. Tạo cho tôi ảnh với miêu tả như sau.\r\nCảnh, Tâm trạng\r\nTruyện cổ tích, điện ảnh, bầu không khí kịch tính. Khu rừng huyền bí tối tăm tương phản bởi ánh sáng vàng óng. Chủ nghĩa Hyperreal, độ phân giải cao, xử lý hậu kỳ chuyên nghiệp\r\nChủ đề\r\nThiếu nữ duyên dáng cưỡi ngựa phát sáng.\r\nTrang phục: Áo váy dài bồng bềnh bằng tia lửa và sợi chỉ vàng óng ánh, kết hợp với ánh sáng của chú ngựa.\r\nTạo dáng:Dáng thẳng, ánh nhìn ngang nhẹ nhàng, thanh lịch và tinh tế. Tóc ngắn gợn sóng trong một phong cách cascading\r\nNgựa:\r\nLớn màu vàng ánh lửa, uy nghi, tỏa sáng từ bên trong với ánh sáng vàng/hổ phách. Bờm và đuôi lấp lánh với các hạt rạng rỡ. Đứng kiêu hãnh hay di chuyển duyên dáng.\r\nÁnh sáng & Màu sắc:\r\nÁnh sáng chính từ ánh sáng của người phụ nữ và con ngựa. Tia vàng xuyên qua khu rừng đen tối, tạo ra hiệu ứng chiaroscuro kỳ diệu.\r\nBảng màu: xanh lá và đen đậm với tông màu vàng và hổ phách sống động\r\nPrompt tiêu cực: không sơn dầu, không minh họa, không anime, không hoạt hình, không render 3D, không CGI, không màu da bị khuếch tán.","id":"chup-cung-ngua (11)","filename":"chup-cung-ngua (11).jpg","albumSlug":"chup-anh-cung-ngua"},{"type":"split","src":"../thumbnails/chup-anh-cung-ngua/chup-cung-ngua (12).jpg","src_a":"../split/chup-anh-cung-ngua/chup-cung-ngua (12)-a.jpg","src_b":"../split/chup-anh-cung-ngua/chup-cung-ngua (12)-b.jpg","name":"chup-cung-ngua (12)","metadata":{"title":"Năm ngọ chụp ảnh cùng ngựa","date":"2025-12-31 11:00","tags":["bính ngọ","ngựa","Tạo ảnh AI"],"description":null},"content":"\r\nSử dụng ảnh đã tải lên, sao chép khuôn mặt 100%, tạo một bức ảnh siêu thực 8K về một người phụ nữ tóc ngắn màu nâu Cô ấy make up nhẹ nhàng trong trẻo với style make up theo trend Douyin. Tóc ngắn màu nâu sẫm dầy và bóng mượt được cắt theo kiểu bob và xếp nhiều tầng gợn sóng tinh tế, mặc một chiếc áo khoác lông giả màu trắng sang trọng, hở vai, đứng cạnh một con ngựa trắng oai vệ trong khung cảnh mùa đông tuyết trắng rực rỡ. Cô ấy đang mỉm cười dịu dàng với máy ảnh.\r\nĐược chụp bằng máy ảnh Fujifilm GFX 100S với ánh sáng ban ngày tự nhiên sắc nét, sử dụng khẩu độ f/4 và ống kính tele 110mm để tạo ra bức ảnh siêu thực sống động.\r\nKhông vẽ tay và không sử dụng hoạt hình. Siêu thực, 8K.","id":"chup-cung-ngua (12)","filename":"chup-cung-ngua (12).jpg","albumSlug":"chup-anh-cung-ngua"},{"type":"split","src":"../thumbnails/chup-anh-cung-ngua/chup-cung-ngua (13).jpg","src_a":"../split/chup-anh-cung-ngua/chup-cung-ngua (13)-a.jpg","src_b":"../split/chup-anh-cung-ngua/chup-cung-ngua (13)-b.jpg","name":"chup-cung-ngua (13)","metadata":{"title":"Năm ngọ chụp ảnh cùng ngựa","date":"2025-12-31 11:00","tags":["bính ngọ","ngựa","Tạo ảnh AI"],"description":null},"content":"\r\nSử dụng bức ảnh đính kèm của tôi và tạo ra một bức chân dung biên tập siêu thực 8K của một người phụ nữ châu Á, da trắng sứ, làn da không tì vết, Cô ấy make up nhẹ nhàng trong trẻo với style make up theo trend Douyin. Tóc ngắn màu nâu sẫm dầy và bóng mượt được cắt theo kiểu bob và xếp nhiều tầng gợn sóng tinh tế\r\nCô ấy mặc một chiếc váy màu kem, trong suốt, tay áo phồng, hở vai, chiếc váy voan dài bồng bềnh, nhẹ nhàng trong gió nhẹ nhàng, cô ấy đang đứng quay sang trái với hai tay kéo khuôn mặt con ngựa trắng to lớn đến gần mặt cô ấy, con ngựa đang đứng bên cạnh cô ấy ở bên trái, cô ấy đang đứng giữa một bãi cỏ cao khô như cánh đồng lúa mì với bầu trời trắng và sương mù làm nổi bật màu tóc nâu rực rỡ.\r\nĐây là ảnh chụp cận cảnh từ đầu gối trở lên của cô ấy, độ phân giải cao, độ sâu trường ảnh nông, 8K, chi tiết cao, màu sắc rực rỡ, nhiếp ảnh chuyên nghiệp.","id":"chup-cung-ngua (13)","filename":"chup-cung-ngua (13).jpg","albumSlug":"chup-anh-cung-ngua"},{"type":"split","src":"../thumbnails/chup-anh-cung-ngua/chup-cung-ngua (2).jpg","src_a":"../split/chup-anh-cung-ngua/chup-cung-ngua (2)-a.jpg","src_b":"../split/chup-anh-cung-ngua/chup-cung-ngua (2)-b.jpg","name":"chup-cung-ngua (2)","metadata":{"title":"Năm ngọ chụp ảnh cùng ngựa","date":"2025-12-31 11:00","tags":["bính ngọ","ngựa","Tạo ảnh AI"],"description":null},"content":"\r\nSử dụng khuôn mặt trong ảnh tham khảo.\r\n\r\nTạo ra một hình ảnh biên tập cực kỳ chân thực, thời trang cao cấp.\r\n\r\nĐộ phân giải 8K, chủ nghĩa hiện thực điện ảnh, không minh họa, không tưởng tượng, không cách điệu.\r\n\r\nCẢNH & BỐ CỤC\r\n\r\nMột bài xã luận thời trang phương Tây sang trọng được thiết lập trong giờ vàng ấm áp, với ánh nắng mặt trời màu hổ phách mềm mại tạo ra những điểm nhấn dài, tâng bốc.\r\n\r\nĐối tượng đang cưỡi một con ngựa sang trọng hùng vĩ, được chăm sóc chu đáo (bộ lông màu hạt dẻ đậm hoặc đen bóng), được chụp ở giữa cảnh (từ eo đến đùi trên) trong khi ngồi tự tin trên yên ngựa.\r\n\r\nCon ngựa chuyển động chậm, có kiểm soát, mang lại cảm giác mạnh mẽ và thanh lịch - không phải hành động hay hỗn loạn.\r\n\r\nGóc máy ảnh hơi thấp và nghiêng về phía trước để thống trị và tự tin.\r\n\r\nĐộ sâu trường ảnh tự nhiên với nền mờ màu kem (bokeh), làm nổi bật chủ thể và kết cấu ngựa.\r\n\r\nTỦ QUẦN ÁO (CÔ GÁI CAO BỒI GỢI CẢM - BIÊN TẬP, KHÔNG PHẢI TRANG PHỤC)\r\n\r\nCô ấy mặc một cô gái cao bồi thời trang cao cấp:\r\n\r\n– Áo nịt da hoặc da lộn có cấu trúc (màu nâu ấm, caramel hoặc màu cát)\r\n\r\n– Các đường may điêu khắc tinh tế, may đo thời trang cao cấp\r\n\r\n– Quần dài bằng da. eo cao cảm hứng từ phương Tây được thiết kế riêng (có thể nhìn thấy một cách tinh tế ở giữa cảnh) mang bốt cao tới gối màu nâu\r\n\r\n– Thắt lưng phương Tây Statement với khóa khắc thanh lịch\r\n\r\n– Găng tay da cao cấp hoặc tay không cầm dây cương cao cấp\r\n\r\nVẻ ngoài gợi cảm, mạnh mẽ và sang trọng - không bao giờ rẻ tiền, không bao giờ vui tươi.\r\n\r\nTÓC (MÔ TẢ ĐẦY ĐỦ)\r\n\r\nMái tóc ngắn, bồng bềnh được tạo kiểu theo những làn sóng mềm mại, được chiếu sáng bởi ánh nắng mặt trời, bồng bềnh tự nhiên theo chuyển động của con ngựa.\r\n\r\nMàu tóc nâu phát sáng dưới ánh sáng\r\nKết cấu thoáng mát và dễ chạm vào, với những đường bay tinh tế đón ánh sáng mặt trời.\r\n\r\nTRANG ĐIỂM (BẬT TẬP & GỢI CẢM)\r\n\r\n– Làn da rám nắng ấm áp với ánh sáng tự nhiên\r\n\r\n– Xương gò má điêu khắc mềm mại\r\n\r\n– Phấn mắt vàng đào với ánh sáng lung linh tinh tế\r\n\r\n– Lông mi được xác định, góc ngoài mềm mại như khói\r\n\r\n– Lông mày đầy đặn và chải lên trên\r\n\r\n– Môi trong một màu hồng nude hoặc caramel bóng ấm áp\r\n\r\nTrang điểm gợi cảm, tự tin và thời trang, không nặng nề.\r\n\r\nPHỤ KIỆN & CHI TIẾT\r\n\r\n– Yên da cao cấp với đường khâu thanh lịch\r\n\r\n– Trang sức vàng tối giản (vòng nhỏ hoặc vòng cổ nhiều lớp)\r\n\r\n– Móng tay màu nude trung tính hoặc màu nâu mềm mại\r\n\r\n– Kết cấu da có thể nhìn thấy, lỗ chân lông chân thực\r\n\r\nSự chiếu sáng\r\n\r\nChỉ có ánh sáng mặt trời giờ vàng tự nhiên.\r\n\r\nĐiểm nổi bật ấm áp trên da, tóc và lông ngựa.\r\n\r\nBóng mềm cho chiều sâu và chủ nghĩa hiện thực.\r\n\r\nKhông có ánh sáng phòng thu, không có độ tương phản gay gắt.\r\n\r\nMÁY ẢNH & KỸ THUẬT\r\n\r\nMáy ảnh Canon EOS R5\r\n\r\nỐng kính 85mm\r\n\r\nF/1.8\r\n\r\nTiêu chuẩn ISO 100\r\n\r\nĐộ sâu trường ảnh nông\r\n\r\nTập trung cực kỳ sắc nét vào khuôn mặt của đối tượng\r\n\r\nPhong cách nhiếp ảnh thời trang biên tập\r\n\r\nTỷ lệ dọc 3:4\r\n\r\nTÂM TRẠNG & NĂNG LƯỢNG\r\n\r\nTự tin. Gợi cảm. Mạnh mẽ.\r\n\r\nNàng thơ phương Tây sang trọng.\r\n\r\nTạp chí thời trang cao cấp bao gồm năng lượng.\r\n\r\nLỜI NHẮC TIÊU CỰC\r\n\r\nKhông có yếu tố tưởng tượng\r\n\r\nKhông minh họa\r\n\r\nKhông có phim hoạt hình\r\n\r\nKhông có giải phẫu phóng đại\r\n\r\nKhông có kiểu trang phục rẻ tiền\r\n\r\nKhông chỉnh sửa quá mức\r\n\r\nKhông có da nhựa\r\n\r\nKhông có văn bản, logo hoặc hình mờ\r\n","id":"chup-cung-ngua (2)","filename":"chup-cung-ngua (2).jpg","albumSlug":"chup-anh-cung-ngua"},{"type":"split","src":"../thumbnails/chup-anh-cung-ngua/chup-cung-ngua (3).jpg","src_a":"../split/chup-anh-cung-ngua/chup-cung-ngua (3)-a.jpg","src_b":"../split/chup-anh-cung-ngua/chup-cung-ngua (3)-b.jpg","name":"chup-cung-ngua (3)","metadata":{"title":"Năm ngọ chụp ảnh cùng ngựa","date":"2025-12-31 11:00","tags":["bính ngọ","ngựa","Tạo ảnh AI"],"description":null},"content":"\r\nSử dụng khuôn mặt trong ảnh tham khảo.\r\nTạo ra một hình ảnh biên tập cực kỳ chân thực, thời trang cao cấp.\r\nĐộ phân giải 8K, chủ nghĩa hiện thực điện ảnh, không minh họa, không tưởng tượng, không cách điệu.\r\nCẢNH & BỐ CỤC\r\nMột bài xã luận thời trang phương Tây sang trọng được thiết lập trong giờ vàng ấm áp, với ánh nắng mặt trời màu hổ phách mềm mại tạo ra những điểm nhấn dài, tâng bốc.\r\nĐối tượng đang đứng canh một con ngựa sang trọng hùng vĩ, được chăm sóc chu đáo (bộ lông màu hạt dẻ đậm hoặc đen bóng), được chụp ở giữa cảnh (từ eo đến đùi trên)\r\nCon ngựa chuyển động chậm, có kiểm soát, mang lại cảm giác mạnh mẽ và thanh lịch - không phải hành động hay hỗn loạn.\r\nGóc máy ảnh hơi thấp và nghiêng về phía trước để thống trị và tự tin.\r\nĐộ sâu trường ảnh tự nhiên với nền mờ màu kem (bokeh), làm nổi bật chủ thể và kết cấu ngựa.\r\nTỦ QUẦN ÁO (CÔ GÁI CAO BỒI GỢI CẢM - BIÊN TẬP, KHÔNG PHẢI TRANG PHỤC)\r\nCô ấy mặc một cô gái cao bồi thời trang cao cấp:\r\n– Áo nịt da hoặc da lộn có cấu trúc (màu nâu ấm, caramel hoặc màu cát)\r\n– Các đường may điêu khắc tinh tế, may đo thời trang cao cấp\r\n– Quần dài bằng da. eo cao cảm hứng từ phương Tây được thiết kế riêng (có thể nhìn thấy một cách tinh tế ở giữa cảnh) mang bốt cao tới gối màu nâu\r\n– Thắt lưng phương Tây Statement với khóa khắc thanh lịch\r\n– Găng tay da cao cấp hoặc tay không cầm dây cương cao cấp\r\nVẻ ngoài gợi cảm, mạnh mẽ và sang trọng - không bao giờ rẻ tiền, không bao giờ vui tươi.\r\nMái tóc ngắn, bồng bềnh được tạo kiểu theo những làn sóng mềm mại, được chiếu sáng bởi ánh nắng mặt trời, bồng bềnh tự nhiên theo chuyển động của con ngựa.\r\nMàu tóc nâu phát sáng dưới ánh sáng\r\nKết cấu thoáng mát và dễ chạm vào, với những đường bay tinh tế đón ánh sáng mặt trời.\r\nTRANG ĐIỂM (BẬT TẬP & GỢI CẢM)\r\n– Làn da rám nắng ấm áp với ánh sáng tự nhiên\r\n– Xương gò má điêu khắc mềm mại\r\n– Phấn mắt vàng đào với ánh sáng lung linh tinh tế\r\n– Lông mi được xác định, góc ngoài mềm mại như khói\r\n– Lông mày đầy đặn và chải lên trên\r\n– Môi trong một màu hồng nude hoặc caramel bóng ấm áp\r\nTrang điểm gợi cảm, tự tin và thời trang, không nặng nề.\r\nPHỤ KIỆN & CHI TIẾT\r\n– Yên da cao cấp với đường khâu thanh lịch\r\n– Trang sức vàng tối giản (vòng nhỏ hoặc vòng cổ nhiều lớp)\r\n– Móng tay màu nude trung tính hoặc màu nâu mềm mại\r\n– Kết cấu da có thể nhìn thấy, lỗ chân lông chân thực\r\nSự chiếu sáng\r\nChỉ có ánh sáng mặt trời giờ vàng tự nhiên.\r\nĐiểm nổi bật ấm áp trên da, tóc và lông ngựa.\r\nBóng mềm cho chiều sâu và chủ nghĩa hiện thực.\r\nKhông có ánh sáng phòng thu, không có độ tương phản gay gắt.\r\nMÁY ẢNH & KỸ THUẬT\r\nMáy ảnh Canon EOS R5\r\nỐng kính 85mm\r\nF/1.8\r\nTiêu chuẩn ISO 100\r\nĐộ sâu trường ảnh nông\r\nTập trung cực kỳ sắc nét vào khuôn mặt của đối tượng\r\nPhong cách nhiếp ảnh thời trang biên tập\r\nTỷ lệ dọc 3:4\r\nTÂM TRẠNG & NĂNG LƯỢNG\r\nTự tin. Gợi cảm. Mạnh mẽ.\r\nNàng thơ phương Tây sang trọng.\r\nTạp chí thời trang cao cấp bao gồm năng lượng.\r\nLỜI NHẮC TIÊU CỰC\r\nKhông có yếu tố tưởng tượng\r\nKhông minh họa\r\nKhông có phim hoạt hình\r\nKhông có giải phẫu phóng đại\r\nKhông có kiểu trang phục rẻ tiền\r\nKhông chỉnh sửa quá mức\r\nKhông có da nhựa\r\nKhông có văn bản, logo hoặc hình mờ","id":"chup-cung-ngua (3)","filename":"chup-cung-ngua (3).jpg","albumSlug":"chup-anh-cung-ngua"},{"type":"split","src":"../thumbnails/chup-anh-cung-ngua/chup-cung-ngua (4).jpg","src_a":"../split/chup-anh-cung-ngua/chup-cung-ngua (4)-a.jpg","src_b":"../split/chup-anh-cung-ngua/chup-cung-ngua (4)-b.jpg","name":"chup-cung-ngua (4)","metadata":{"title":"Năm ngọ chụp ảnh cùng ngựa","date":"2025-12-31 11:00","tags":["bính ngọ","ngựa","Tạo ảnh AI"],"description":null},"content":"\r\nChỉnh sửa ảnh tải lên (khuôn mặt dựa trên ảnh tham khảo). Đảm bảo khuôn mặt vẫn nhất quán 100% với người trong ảnh đã tải lên, không thay đổi cấu trúc khuôn mặt, mắt, mũi, miệng, tông màu da hoặc kiểu tóc. Chất lượng ảnh 8k. Cinematic realism. Pthu. Độ chân thực đẳng cấp chuyên nghiệp và chi tiết, màu sắc rực rỡ, chủ thể được lấy nét sắc nét, độ phân giải 8K, tỷ lệ khung hình 9:16. Tạo cho tôi ảnh với miêu tả như sau.\r\nMột bức ảnh điện ảnh và kịch tính của một phụ nữ trẻ xinh đẹp cưỡi một con ngựa đen. Cô mặc một chiếc áo choàng Hanfu truyền thống của Trung Quốc nhiều lớp với tông màu đen sẫm và xám than. Mái tóc dài và sẫm màu của cô ấy được tạo kiểu bồng bềnh xõa, với các phụ kiện/búi tóc màu bạc ở hai bên, và cô ấy trang điểm hoa guofeng nổi bật với son môi đỏ tươi. Cô ta cầm thanh kiếm hoặc dây cương, nhìn thẳng vào ống kính với vẻ mặt mãnh liệt, quyết đoán và quyết tâm. Bức ảnh được chụp từ một phương tiện cận cảnh, tập trung vào một người phụ nữ và một con ngựa, với bầu trời xám bao la, nhiều mây và nhiều mây, và một khung cảnh ngoài trời mờ ảo (trông giống như một con đê hoặc một cây cầu đá). Độ phân giải cao, thẩm mỹ kịch thời kỳ, bầu không khí, vải và kiểu tóc chi tiết.","id":"chup-cung-ngua (4)","filename":"chup-cung-ngua (4).jpg","albumSlug":"chup-anh-cung-ngua"},{"type":"split","src":"../thumbnails/chup-anh-cung-ngua/chup-cung-ngua (5).jpg","src_a":"../split/chup-anh-cung-ngua/chup-cung-ngua (5)-a.jpg","src_b":"../split/chup-anh-cung-ngua/chup-cung-ngua (5)-b.jpg","name":"chup-cung-ngua (5)","metadata":{"title":"Năm ngọ chụp ảnh cùng ngựa","date":"2025-12-31 11:00","tags":["bính ngọ","ngựa","Tạo ảnh AI"],"description":null},"content":"\r\nChỉnh sửa ảnh tải lên (khuôn mặt dựa trên ảnh tham khảo). Đảm bảo khuôn mặt vẫn nhất quán 100% với người trong ảnh đã tải lên, không thay đổi cấu trúc khuôn mặt, mắt, mũi, miệng, tông màu da hoặc kiểu tóc. Chất lượng ảnh 8k. Cinematic realism. Pthu. Độ chân thực đẳng cấp chuyên nghiệp và chi tiết, màu sắc rực rỡ, chủ thể được lấy nét sắc nét, độ phân giải 8K, tỷ lệ khung hình 9:16. Tạo cho tôi ảnh với miêu tả như sau.\r\nMột bức ảnh điện ảnh và kịch tính của một phụ nữ trẻ xinh đẹp cưỡi một con ngựa đen. Cô mặc một chiếc áo choàng Hanfu truyền thống của Trung Quốc nhiều lớp với tông màu đen sẫm và xám than. Mái tóc dài và sẫm màu của cô ấy được tạo kiểu bồng bềnh xõa, với các phụ kiện/búi tóc màu bạc ở hai bên, và cô ấy trang điểm hoa guofeng nổi bật với son môi đỏ tươi. Cô ta cầm thanh kiếm hoặc dây cương, nhìn phía trước theo hướng đi của con ngựa với vẻ mặt mãnh liệt, quyết đoán và quyết tâm. Bức ảnh được chụp từ một phương tiện cận cảnh, tập trung vào một người phụ nữ và một con ngựa, với bầu trời xám bao la, nhiều mây và nhiều mây, và một khung cảnh ngoài trời mờ ảo (trông giống như một con đê hoặc một cây cầu đá). Độ phân giải cao, thẩm mỹ kịch thời kỳ, bầu không khí, vải và kiểu tóc chi tiết.","id":"chup-cung-ngua (5)","filename":"chup-cung-ngua (5).jpg","albumSlug":"chup-anh-cung-ngua"},{"type":"split","src":"../thumbnails/chup-anh-cung-ngua/chup-cung-ngua (6).jpg","src_a":"../split/chup-anh-cung-ngua/chup-cung-ngua (6)-a.jpg","src_b":"../split/chup-anh-cung-ngua/chup-cung-ngua (6)-b.jpg","name":"chup-cung-ngua (6)","metadata":{"title":"Năm ngọ chụp ảnh cùng ngựa","date":"2025-12-31 11:00","tags":["bính ngọ","ngựa","Tạo ảnh AI"],"description":null},"content":"\r\nSử dụng khuôn mặt trong ảnh. Tạo một bức ảnh biên tập thời trang cao cấp cực kỳ chi tiết, cực kỳ chân thực ở độ phân giải 8K. Chất lượng bìa tạp chí sang trọng.pthu\r\n2026 — Năm Bính Ngọ.\r\nLửa như sức nóng, sức mạnh, sự thanh lịch và chuyển động - tinh tế, biên tập, vượt thời gian.\r\n\r\nCHỦ ĐỀ & THÀNH PHẦN\r\nMột người phụ nữ mạnh mẽ đứng bên cạnh một con ngựa đỏ hùng vĩ.\r\nCô ấy được đặt hơi phía trước, một tay đặt tự nhiên lên cổ con ngựa, tay kia giơ lên trong tư thế soạn thảo.\r\nCô ấy nhìn thẳng vào máy ảnh - bình tĩnh, mạnh mẽ, tự tin.\r\nThành phần thẳng đứng toàn thân.\r\nKhung bìa tạp chí thời trang cao cấp.\r\n\r\nNGỰA (GIỮ NGUYÊN VẺ NGOÀI BAN ĐẦU)\r\nMột con ngựa màu đỏ đậm với năng lượng lửa tự nhiên.\r\n• Bộ lông: màu hạt dẻ đậm và màu đỏ than\r\n• Bờm: chảy tự do theo gió\r\n• Không thêm ánh sáng, không có hiệu ứng - lửa được ngụ ý thông qua màu sắc, kết cấu và sự hiện diện\r\n• Ngựa vẫn thực tế, mạnh mẽ và thanh lịch\r\n\r\nMÔI TRƯỜNG (KHÔNG THAY ĐỔI TÂM TRẠNG)\r\nĐịa hình núi lửa mở hoặc cháy xém.\r\n• Than hồng tinh tế lơ lửng trong không khí\r\n• S sương mù không khí mềm\r\n• Bầu trời biên tập trung tính - không phải hoàng hôn vàng, không phải bão tối\r\n• Độ tương phản và tông màu cân bằng\r\n\r\nCHIẾU SÁNG (SỬA CHỮA CHÍNH)\r\n• Ánh sáng điện ảnh biên tập\r\n• Tông màu trung tính-ấm áp\r\n• Không phơi sáng quá mức\r\n• Không có bầu trời phát sáng\r\n• Không có bóng tối kịch tính\r\n• Ngay cả ánh sáng trên khuôn mặt, trang phục và ngựa\r\nÁnh sáng chụp ảnh thời trang - được kiểm soát và sạch sẽ.\r\n\r\n👗 ÁO KHOÁC CAO CẤP\r\nÁo corset\r\n• Áo lót có cấu trúc thanh lịch (không bó sát corset)\r\n• Thêu lấy cảm hứng từ ngọn lửa nhô lên từ đường viền cổ áo\r\n• Thêu được khâu, tinh tế, thời trang cao cấp - không phải là ngọn lửa minh họa\r\n\r\nĐÁ QUÝ (ĐIỀU KHIỂN)\r\n• Đá quý chỉ xuất hiện ở phần giữa thân áo và vòng eo\r\n• Vị trí đối xứng\r\n• Những viên đá cỡ trung bình\r\n• Màu sắc: đỏ ruby, hổ phách, garnet, vàng nhạt\r\n• Không có đá quý rải rác trên thân\r\n• Vị trí thời trang cao cấp sạch sẽ, có chủ ý\r\nTHIẾT KẾ LỬA (KHÔNG CÓ HOẠT HÌNH)\r\n• Lửa chỉ được thể hiện thông qua thêu và hoa văn vải\r\n• Không có cạnh phát sáng\r\n• Không có hình dạng ngọn lửa hoạt hình\r\n• Không có hiệu ứng hình ảnh\r\nMọi thứ trông đều được may, thủ công, thời trang cao cấp.\r\n\r\nVÁY & DÒNG CHẢY (ĐƯỢC PHỤC HỒI)\r\n• Các lớp voan và organza dài\r\n• Chuyển động gió tự nhiên mạnh\r\n• Vải nâng và đường mòn thanh lịch\r\n• Tông màu gradient: đỏ đậm → than hồng → cam cháy\r\n• Thêu ngọn lửa chỉ xuất hiện ở viền, tinh tế và tinh tế\r\n\r\nTóc ngắn màu nâu sẫm dầy và bóng mượt được cắt theo kiểu bob và xếp nhiều tầng gợn sóng tinh tế\r\nLỏng lẻo, chảy, gió thổi.\r\nKhối lượng tự nhiên.\r\nKhông tối. Không quá sáng.\r\nSự bổ sung\r\nBiên tập lửa quyến rũ.\r\n• Đôi mắt màu đồng ấm áp và màu vàng\r\n• Kết thúc khói mềm mại\r\n• Lông mày được xác định\r\n• Da sáng\r\n• Môi satin đỏ đậm\r\nThanh lịch, sẵn sàng cho tạp chí.\r\nPhụ kiện\r\nChỉ trang sức vàng tối thiểu.\r\n• Hoa tai nhỏ\r\n• Vòng tay vàng mỏng hoặc còng tay\r\nKhông có gì nặng cả.\r\nMáy ảnh\r\nMáy ảnh Canon EOS R5\r\nỐng kính 85mm\r\nF/1.8\r\nTiêu chuẩn ISO 100\r\nLấy nét cực kỳ sắc nét\r\nĐộ sâu trường ảnh nông\r\nTỷ lệ dọc 3:4\r\n\r\nCÁC QUY TẮC NGHIÊM NGẶT\r\n✔ Tiếp xúc cân bằng\r\n✔ Tâm trạng lửa biên tập\r\n✔ Vải chảy\r\n✔ thời trang cao cấp thanh lịch\r\n❌ Không quá sáng\r\n❌ Không có bóng tối\r\n❌ Không có hoạt hình\r\n❌ Không có hiệu ứng tưởng tượng\r\n❌ Không có văn bản hoặc số\r\nTính khí\r\nLửa được kiểm soát.\r\nSức mạnh thanh lịch.\r\nSức mạnh thời trang cao cấp.\r\nMột bài xã luận tinh tế của Year of the Fire Horse - giống như phiên bản đầu tiên, nhưng được hoàn thiện.","id":"chup-cung-ngua (6)","filename":"chup-cung-ngua (6).jpg","albumSlug":"chup-anh-cung-ngua"},{"type":"split","src":"../thumbnails/chup-anh-cung-ngua/chup-cung-ngua (7).jpg","src_a":"../split/chup-anh-cung-ngua/chup-cung-ngua (7)-a.jpg","src_b":"../split/chup-anh-cung-ngua/chup-cung-ngua (7)-b.jpg","name":"chup-cung-ngua (7)","metadata":{"title":"Năm ngọ chụp ảnh cùng ngựa","date":"2025-12-31 11:00","tags":["bính ngọ","ngựa","Tạo ảnh AI"],"description":null},"content":"\r\nSử dụng khuôn mặt trong ảnh. Tạo một bức ảnh biên tập thời trang cao cấp cực kỳ chi tiết, cực kỳ chân thực ở độ phân giải 8K. Chất lượng bìa tạp chí sang trọng.pthu\r\n\r\n2026 — Năm Bính Ngọ.\r\n\r\nLửa như sức nóng, sức mạnh, sự thanh lịch và chuyển động - tinh tế, biên tập, vượt thời gian.\r\n\r\nCHỦ ĐỀ & THÀNH PHẦN\r\n\r\nMột người phụ nữ mạnh mẽ đứng bên cạnh một con ngựa đỏ hùng vĩ.\r\n\r\nCô ấy được đặt hơi phía trước, hai tay đặt tự nhiên lên cổ con ngựa như đang ôm ngựa và đang nói chuyện với nó\r\n\r\nCô ấy ôm chú ngựa và chạm trán cô ấy vào trán của chú ngựa - yêu thương dịu dàng\r\n\r\nThành phần thẳng đứng toàn thân.\r\n\r\nKhung bìa tạp chí thời trang cao cấp.\r\n\r\nNGỰA (GIỮ NGUYÊN VẺ NGOÀI BAN ĐẦU)\r\n\r\nMột con ngựa màu đỏ đậm với năng lượng lửa tự nhiên.\r\n\r\n• Bộ lông: màu hạt dẻ đậm và màu đỏ than\r\n\r\n• Bờm: chảy tự do theo gió\r\n\r\n• Không thêm ánh sáng, không có hiệu ứng - lửa được ngụ ý thông qua màu sắc, kết cấu và sự hiện diện\r\n\r\n• Ngựa vẫn thực tế, mạnh mẽ và thanh lịch\r\n\r\nMÔI TRƯỜNG (KHÔNG THAY ĐỔI TÂM TRẠNG)\r\n\r\nĐịa hình núi lửa mở hoặc cháy xém.\r\n\r\n• Than hồng tinh tế lơ lửng trong không khí\r\n\r\n• S sương mù không khí mềm\r\n\r\n• Bầu trời biên tập trung tính - không phải hoàng hôn vàng, không phải bão tối\r\n\r\n• Độ tương phản và tông màu cân bằng\r\n\r\nCHIẾU SÁNG (SỬA CHỮA CHÍNH)\r\n\r\n• Ánh sáng điện ảnh biên tập\r\n\r\n• Tông màu trung tính-ấm áp\r\n\r\n• Không phơi sáng quá mức\r\n\r\n• Không có bầu trời phát sáng\r\n\r\n• Không có bóng tối kịch tính\r\n\r\n• Ngay cả ánh sáng trên khuôn mặt, trang phục và ngựa\r\n\r\nÁnh sáng chụp ảnh thời trang - được kiểm soát và sạch sẽ.\r\n\r\n👗 ÁO KHOÁC CAO CẤP\r\n\r\nÁo corset\r\n\r\n• Áo lót có cấu trúc thanh lịch (không bó sát corset)\r\n\r\n• Thêu lấy cảm hứng từ ngọn lửa nhô lên từ đường viền cổ áo\r\n\r\n• Thêu được khâu, tinh tế, thời trang cao cấp - không phải là ngọn lửa minh họa\r\n\r\nĐÁ QUÝ (ĐIỀU KHIỂN)\r\n\r\n• Đá quý chỉ xuất hiện ở phần giữa thân áo và vòng eo\r\n\r\n• Vị trí đối xứng\r\n\r\n• Những viên đá cỡ trung bình\r\n\r\n• Màu sắc: đỏ ruby, hổ phách, garnet, vàng nhạt\r\n\r\n• Không có đá quý rải rác trên thân\r\n\r\n• Vị trí thời trang cao cấp sạch sẽ, có chủ ý\r\n\r\nTHIẾT KẾ LỬA (KHÔNG CÓ HOẠT HÌNH)\r\n\r\n• Lửa chỉ được thể hiện thông qua thêu và hoa văn vải\r\n\r\n• Không có cạnh phát sáng\r\n\r\n• Không có hình dạng ngọn lửa hoạt hình\r\n\r\n• Không có hiệu ứng hình ảnh\r\n\r\nMọi thứ trông đều được may, thủ công, thời trang cao cấp.\r\n\r\nVÁY & DÒNG CHẢY (ĐƯỢC PHỤC HỒI)\r\n\r\n• Các lớp voan và organza dài\r\n\r\n• Chuyển động gió tự nhiên mạnh\r\n\r\n• Vải nâng và đường mòn thanh lịch\r\n\r\n• Tông màu gradient: đỏ đậm → than hồng → cam cháy\r\n\r\n• Thêu ngọn lửa chỉ xuất hiện ở viền, tinh tế và tinh tế\r\nTóc ngắn màu nâu sẫm dầy và bóng mượt được cắt theo kiểu bob và xếp nhiều tầng gợn sóng tinh tế\r\n\r\nLỏng lẻo, chảy, gió thổi.\r\n\r\nKhối lượng tự nhiên.\r\n\r\nKhông tối. Không quá sáng.\r\n\r\nSự bổ sung\r\n\r\nBiên tập lửa quyến rũ.\r\n\r\n• Đôi mắt màu đồng ấm áp và màu vàng\r\n\r\n• Kết thúc khói mềm mại\r\n\r\n• Lông mày được xác định\r\n\r\n• Da sáng\r\n\r\n• Môi satin đỏ đậm\r\n\r\nThanh lịch, sẵn sàng cho tạp chí.\r\n\r\nPhụ kiện\r\n\r\nChỉ trang sức vàng tối thiểu.\r\n\r\n• Hoa tai nhỏ\r\n\r\n• Vòng tay vàng mỏng hoặc còng tay\r\n\r\nKhông có gì nặng cả.\r\n\r\nMáy ảnh\r\n\r\nMáy ảnh Canon EOS R5\r\n\r\nỐng kính 85mm\r\nF/1.8\r\nTiêu chuẩn ISO 100\r\nLấy nét cực kỳ sắc nét\r\nĐộ sâu trường ảnh nông\r\nTỷ lệ dọc 3:4\r\nCÁC QUY TẮC NGHIÊM NGẶT\r\n✔ Tiếp xúc cân bằng\r\n✔ Tâm trạng lửa biên tập\r\n✔ Vải chảy\r\n✔ thời trang cao cấp thanh lịch\r\n❌ Không quá sáng\r\n❌ Không có bóng tối\r\n❌ Không có hoạt hình\r\n❌ Không có hiệu ứng tưởng tượng\r\n❌ Không có văn bản hoặc số\r\nTính khí\r\nLửa được kiểm soát.\r\nSức mạnh thanh lịch.\r\nSức mạnh thời trang cao cấp.\r\nMột bài xã luận tinh tế của Year of the Fire Horse - giống như phiên bản đầu tiên, nhưng được hoàn thiện.","id":"chup-cung-ngua (7)","filename":"chup-cung-ngua (7).jpg","albumSlug":"chup-anh-cung-ngua"},{"type":"split","src":"../thumbnails/chup-anh-cung-ngua/chup-cung-ngua (8).jpg","src_a":"../split/chup-anh-cung-ngua/chup-cung-ngua (8)-a.jpg","src_b":"../split/chup-anh-cung-ngua/chup-cung-ngua (8)-b.jpg","name":"chup-cung-ngua (8)","metadata":{"title":"Năm ngọ chụp ảnh cùng ngựa","date":"2025-12-31 11:00","tags":["bính ngọ","ngựa","Tạo ảnh AI"],"description":null},"content":"\r\nChỉnh sửa ảnh tải lên (khuôn mặt dựa trên ảnh tham khảo). Đảm bảo khuôn mặt vẫn nhất quán 100% với người trong ảnh đã tải lên, không thay đổi cấu trúc khuôn mặt, mắt, mũi, miệng, tông màu da hoặc kiểu tóc. Chất lượng ảnh 8k. Cinematic realism. Pthu. Độ chân thực đẳng cấp chuyên nghiệp và chi tiết, màu sắc rực rỡ, chủ thể được lấy nét sắc nét, độ phân giải 8K, tỷ lệ khung hình 9:16. Tạo cho tôi ảnh với miêu tả như sau.\r\nNhiếp ảnh thời trang cao cấp, một người phụ nữ mặc váy dài bằng vải tuyn nhiều tầng màu hồng, đứng gần một con ngựa hồng nhạt, cả hai đều nhìn vào máy ảnh, bối cảnh là sa mạc lúc bình minh, ánh sáng huyền ảo, phong cách thần bí --chaos 10 --ar 3:4 --style raw --profile 8j4a5xo. ","id":"chup-cung-ngua (8)","filename":"chup-cung-ngua (8).jpg","albumSlug":"chup-anh-cung-ngua"},{"type":"split","src":"../thumbnails/chup-anh-cung-ngua/chup-cung-ngua (9).jpg","src_a":"../split/chup-anh-cung-ngua/chup-cung-ngua (9)-a.jpg","src_b":"../split/chup-anh-cung-ngua/chup-cung-ngua (9)-b.jpg","name":"chup-cung-ngua (9)","metadata":{"title":"Năm ngọ chụp ảnh cùng ngựa","date":"2025-12-31 11:00","tags":["bính ngọ","ngựa","Tạo ảnh AI"],"description":null},"content":"\r\nChỉnh sửa ảnh tải lên (khuôn mặt dựa trên ảnh tham khảo). Đảm bảo khuôn mặt vẫn nhất quán 100% với người trong ảnh đã tải lên, không thay đổi cấu trúc khuôn mặt, mắt, mũi, miệng, tông màu da hoặc kiểu tóc. Chất lượng ảnh 8k. Cinematic realism. Pthu. Độ chân thực đẳng cấp chuyên nghiệp và chi tiết, màu sắc rực rỡ, chủ thể được lấy nét sắc nét, độ phân giải 8K, tỷ lệ khung hình 9:16. Tạo cho tôi ảnh với miêu tả như sau.\r\nCảnh, Tâm trạng\r\nTruyện cổ tích, điện ảnh, bầu không khí kịch tính. Khu rừng huyền bí tối tăm tương phản bởi ánh sáng vàng óng. Chủ nghĩa Hyperreal, độ phân giải cao, xử lý hậu kỳ chuyên nghiệp\r\nChủ đề\r\nThiếu nữ duyên dáng cưỡi ngựa phát sáng.\r\nTrang phục: Áo váy dài bồng bềnh bằng tia lửa và sợi chỉ vàng óng ánh, kết hợp với ánh sáng của chú ngựa.\r\nTạo dáng:Dáng thẳng, ánh nhìn ngang nhẹ nhàng, thanh lịch và tinh tế. Tóc ngắn gợn sóng trong một phong cách cascading\r\nNgựa:\r\nLớn, uy nghi, tỏa sáng từ bên trong với ánh sáng vàng/hổ phách. Bờm và đuôi lấp lánh với các hạt rạng rỡ. Đứng kiêu hãnh hay di chuyển duyên dáng.\r\nÁnh sáng & Màu sắc:\r\nÁnh sáng chính từ ánh sáng của người phụ nữ và con ngựa. Tia vàng xuyên qua khu rừng đen tối, tạo ra hiệu ứng chiaroscuro kỳ diệu.\r\nBảng màu: xanh lá và đen đậm với tông màu vàng và hổ phách sống động\r\nPrompt tiêu cực: không sơn dầu, không minh họa, không anime, không hoạt hình, không render 3D, không CGI, không màu da bị khuếch tán.","id":"chup-cung-ngua (9)","filename":"chup-cung-ngua (9).jpg","albumSlug":"chup-anh-cung-ngua"}]
+            </script>
+
+            <script>
+                console.log("Parsing Gallery Data...");
+                try {
+                    const rawData = document.getElementById('gallery-model').textContent;
+                    if (rawData && rawData.trim().length > 0) {
+                        currentPhotos = JSON.parse(rawData);
+                        console.log("Album Data Populated Successfully:", currentPhotos.length, "items");
+                    } else {
+                        console.error("Gallery Model Data is empty!");
+                        currentPhotos = [];
+                    }
+                } catch (e) {
+                    console.error("Failed to parse gallery data:", e);
+                    currentPhotos = [];
+                }
+            </script>
+            
+</div>
+
+
+<!-- Scripts (Local) -->
+<script src="../assets/vendor/jquery.min.js"></script>
+<script src="../assets/vendor/imagesloaded.pkgd.min.js"></script>
+<script src="../assets/vendor/masonry.pkgd.min.js"></script>
+
+<script>
+    // Init Masonry after images load
+    var $grid = $('.row').masonry({
+        itemSelector: '.col-sm-6',
+        percentPosition: true
+    });
+
+    // layout Masonry after each image loads
+    $grid.imagesLoaded().progress(function () {
+        $grid.masonry('layout');
+    });
+</script>
+        </main>
+
+        <!-- Lightbox Modal (Advanced UI) -->
+        <div id="lightbox-modal">
+            <!-- Main Container: Flex Row -->
+            <div class="lightbox-container">
+
+                <!-- Left: Image Stage -->
+                <div class="lightbox-stage">
+                    <!-- Close Button (Mobile/Tablet or when sidebar hidden) -->
+                    <button class="lightbox-close-btn d-md-none" onclick="closeLightbox()">&times;</button>
+
+                    <div id="lightbox-image-container"></div>
+
+                    <!-- Floating Info Toggle (New) -->
+                    <button class="stage-toggle-btn" onclick="toggleSidebar()" title="Show Info (i)">
+                        <ion-icon name="information-circle-outline"></ion-icon>
+                    </button>
+
+                    <!-- Navigation Overlays -->
+                    <div class="nav-overlay nav-left" onclick="prevPhoto()">
+                        <ion-icon name="chevron-back-outline"></ion-icon>
+                    </div>
+                    <div class="nav-overlay nav-right" onclick="nextPhoto()">
+                        <ion-icon name="chevron-forward-outline"></ion-icon>
+                    </div>
+                </div>
+
+                <!-- Right: Sidebar (Info Panel) -->
+                <div id="lightbox-sidebar" class="lightbox-sidebar">
+                    <!-- Toolbar -->
+                    <div class="sidebar-toolbar">
+                        <div class="left-tools d-flex align-items-center gap-2">
+                            <button class="icon-btn" onclick="toggleSidebar()" title="Toggle Info (i)">
+                                <ion-icon name="information-circle-outline"></ion-icon>
+                            </button>
+                            <!-- View Count (New Location) -->
+                            <div class="d-flex align-items-center gap-1 ms-3" title="Total Views"
+                                style="font-size: 0.9rem; color: rgba(255,255,255,0.8);">
+                                <ion-icon name="eye-outline"></ion-icon>
+                                <span id="lightbox-view-count-val">...</span>
+                            </div>
+                        </div>
+                        <div class="right-tools">
+                            <button class="icon-btn" onclick="copyMeta()" title="Copy Metadata (c)">
+                                <ion-icon name="copy-outline"></ion-icon>
+                            </button>
+                            <button class="icon-btn" onclick="sharePhoto()" title="Share (s)">
+                                <ion-icon name="share-social-outline"></ion-icon>
+                            </button>
+                            <button class="icon-btn close-btn" onclick="closeLightbox()" title="Close (Escape)">
+                                <ion-icon name="close-outline"></ion-icon>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="sidebar-content">
+                        <h3 id="lightbox-title">Photo Title</h3>
+
+                        <div id="lightbox-desc" class="description-text" style="margin-bottom: 15px;">
+                            <!-- Description injected here -->
+                        </div>
+
+                        <div id="lightbox-tags" class="tags-container">
+                            <!-- Tags injected here -->
+                        </div>
+
+                        <div id="lightbox-content" class="description-text"
+                            style="white-space: pre-wrap; margin-top: 15px; border-top: 1px solid #444; padding-top: 15px;">
+                            <!-- Body content injected here -->
+                        </div>
+                    </div>
+
+                    <div class="sidebar-footer">
+                        <div class="zoom-controls">
+                            <button onclick="zoomOut()" title="Zoom Out (-)">-</button>
+                            <button onclick="resetZoom()" title="Reset (F)">1:1</button>
+                            <button onclick="zoomIn()" title="Zoom In (+)">+</button>
+                        </div>
+                        <div id="lightbox-counter" class="counter-text">1 / 1</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <footer class="bg-dark text-white text-center py-4 mt-5">
+    <div class="container">
+        <p class="mb-0">&copy; 2026
+                Thu Nhiên Gallery. Built with Gallery AI.</p>
+    </div>
+</footer>
+
+            <!-- Custom Lightbox Logic (Moved up to load before libraries verify dependencies dynamically) -->
+            <script>
+                console.log("🚀 INLINED LIGHTBOX SCRIPT ACTIVE 🚀 TS: " + Date.now());
+
+                // Ensure global array exists
+                if (typeof currentPhotos === 'undefined') {
+                    console.warn("currentPhotos is undefined initially");
+                    window.currentPhotos = [];
+                } else {
+                    console.log("currentPhotos found:", currentPhotos.length, "items");
+                }
+
+                let currentIndex = 0;
+                let panzoomInstance = null;
+
+                function openLightbox(index) {
+                    // Safety checks
+                    if (!currentPhotos || currentPhotos.length === 0) return;
+                    currentIndex = index;
+                    const photo = currentPhotos[index];
+
+                    // 1. Deep Link
+                    const safeName = photo.name.replace(/\s+/g, '-').toLowerCase();
+                    history.pushState(null, null, `#${safeName}`);
+
+                    const modal = document.getElementById('lightbox-modal');
+                    const container = document.getElementById('lightbox-image-container');
+
+                    // 2. Render Sidebar Info
+                    document.getElementById('lightbox-title').innerText = photo.metadata?.title || photo.name;
+                    document.getElementById('lightbox-counter').innerText = `${currentIndex + 1} / ${currentPhotos.length}`;
+                    document.getElementById('lightbox-desc').innerText = photo.metadata?.description || '';
+                    document.getElementById('lightbox-content').innerText = photo.content || ''; // Render body content
+
+                    // Render Tags
+                    const tagSelect = document.getElementById('lightbox-tags');
+                    const rootPath = ".." || ".";
+                    tagSelect.innerHTML = (photo.metadata?.tags || []).map(tag =>
+                        `<a href="${rootPath}/tag?id=${encodeURIComponent(tag)}" class="tag-chip">${tag}</a>`
+                    ).join('');
+
+                    // 3. Render Image Stage
+                    if (panzoomInstance) { try { panzoomInstance.dispose(); } catch (e) { } }
+                    panzoomInstance = null;
+                    container.innerHTML = '';
+
+                    // Split vs Single Logic
+                    if ((photo.type === 'split' || (photo.src_a && photo.src_b)) && photo.src_a && photo.src_b) {
+                        // V4: Canvas Stitching (SRCIS) - Secure Runtime
+                        console.log("Rendering SPLIT mode via CANVAS (SRCIS)");
+
+                        // 1. Setup Canvas Element
+                        container.innerHTML = `<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#000;"><canvas id="stitchCanvas" style="max-width:100%; max-height:100%; cursor: grab; display:block;"></canvas></div>`;
+
+                        const canvas = document.getElementById('stitchCanvas');
+
+                        // 2. Initialize Viewer
+                        if (typeof CanvasStitchViewer !== 'undefined') {
+                            if (window.canvasViewer) {
+                                // Clean up old viewer
+                                // window.canvasViewer.dispose(); 
+                            }
+
+                            // Initialize
+                            window.canvasViewer = new CanvasStitchViewer(canvas, photo.src_a, photo.src_b);
+
+                            // 3. Disable standard Panzoom for this mode
+                            panzoomInstance = null;
+
+                        } else {
+                            console.error("CanvasStitchViewer script not loaded!");
+                            container.innerHTML = "<p style='color:white'>Error: Viewer component missing.</p>";
+                        }
+                    } else {
+                        // Clear canvas viewer if exists
+                        if (window.canvasViewer) {
+                            window.canvasViewer = null;
+                        }
+
+                        const img = document.createElement('img');
+                        img.src = photo.src;
+                        img.style.maxHeight = '90vh';
+                        img.style.maxWidth = '90vw';
+                        img.draggable = false;
+                        img.onload = () => initPanzoom(img);
+                        container.appendChild(img);
+                    }
+
+                    if (typeof window.trackView === 'function') {
+                        window.trackView(photo);
+                    } else {
+                        console.warn("trackView function missing");
+                    }
+
+                    modal.classList.add('active');
+                }
+
+                function initPanzoom(target) {
+                    if (typeof Panzoom === 'undefined' || !target) return;
+                    panzoomInstance = Panzoom(target, {
+                        maxScale: 10, minScale: 0.1, startScale: 1,
+                        contain: null // Free movement
+                    });
+                    target.parentElement.addEventListener('wheel', panzoomInstance.zoomWithWheel);
+                }
+
+                // --- Sidebar & Tools ---
+                function toggleSidebar() {
+                    const sidebar = document.getElementById('lightbox-sidebar');
+                    const container = document.querySelector('.lightbox-container');
+                    sidebar.classList.toggle('hidden');
+                    container.classList.toggle('sidebar-closed');
+                }
+
+                function copyMeta() {
+                    if (!currentPhotos[currentIndex]) return;
+                    const p = currentPhotos[currentIndex];
+                    // Copy ONLY body content
+                    const content = p.content || '';
+                    if (content) {
+                        navigator.clipboard.writeText(content).catch(err => console.error("Copy failed:", err));
+                    }
+                }
+
+                function sharePhoto() {
+                    if (navigator.share) {
+                        navigator.share({
+                            title: document.title,
+                            text: 'Check out this photo!',
+                            url: window.location.href
+                        }).catch(console.error);
+                    } else {
+                        copyMeta(); // Fallback
+                    }
+                }
+
+                // --- Zoom Controls (Global) ---
+                window.zoomIn = function () {
+                    if (window.canvasViewer) window.canvasViewer.zoomIn();
+                    else if (panzoomInstance) panzoomInstance.zoomIn();
+                };
+
+                window.zoomOut = function () {
+                    if (window.canvasViewer) window.canvasViewer.zoomOut();
+                    else if (panzoomInstance) panzoomInstance.zoomOut();
+                };
+
+                window.resetZoom = function () {
+                    if (window.canvasViewer) window.canvasViewer.reset();
+                    else if (panzoomInstance) panzoomInstance.reset();
+                };
+
+                // --- Navigation ---
+                function closeLightbox() {
+                    document.getElementById('lightbox-modal').classList.remove('active');
+                    history.pushState(null, null, ' ');
+                    if (panzoomInstance) { try { panzoomInstance.dispose(); } catch (e) { } panzoomInstance = null; }
+                }
+                function nextPhoto() { if (currentIndex < currentPhotos.length - 1) openLightbox(currentIndex + 1); }
+                function prevPhoto() { if (currentIndex > 0) openLightbox(currentIndex - 1); }
+
+                // --- Event Listeners ---
+                // --- Event Listeners ---
+                document.addEventListener('keydown', (e) => {
+                    const modal = document.getElementById('lightbox-modal');
+                    if (!modal || !modal.classList.contains('active')) return;
+
+                    switch (e.key.toLowerCase()) {
+                        case 'escape': closeLightbox(); break;
+                        case 'arrowright': nextPhoto(); break;
+                        case 'arrowleft': prevPhoto(); break;
+                        case 'i': toggleSidebar(); break;
+                        case 'c': copyMeta(); break;
+                        case 's': sharePhoto(); break;
+
+                        // Zoom Keys
+                        case '+':
+                        case '=': // Plus without shift on some layouts
+                            zoomIn();
+                            break;
+
+                        case '-':
+                        case '_': // Minus with shift
+                            zoomOut();
+                            break;
+
+                        case 'f':
+                        case '0': // Ctrl+0 style reset
+                            resetZoom();
+                            break;
+                    }
+                });
+
+                // Wheel Navigation (on Stage background only)
+                document.addEventListener('wheel', (e) => {
+                    const modal = document.getElementById('lightbox-modal');
+                    if (!modal || !modal.classList.contains('active')) return;
+
+                    // If target is the stage (black background) or nav overlay, navigate
+                    if (e.target.classList.contains('lightbox-stage') || e.target.classList.contains('nav-overlay')) {
+                        if (e.deltaY > 0) nextPhoto();
+                        else prevPhoto();
+                    }
+                });
+
+                // Helper for key exports
+                window.openLightbox = openLightbox;
+                window.closeLightbox = closeLightbox;
+                window.nextPhoto = nextPhoto;
+                window.prevPhoto = prevPhoto;
+                window.toggleSidebar = toggleSidebar;
+                window.copyMeta = copyMeta;
+                window.sharePhoto = sharePhoto;
+                window.zoomIn = zoomIn;
+                window.zoomOut = zoomOut;
+                window.resetZoom = resetZoom;
+
+                // Deep Link Check on Load
+                window.addEventListener('DOMContentLoaded', () => {
+                    const hash = window.location.hash.substring(1); // Remove #
+                    if (hash && typeof currentPhotos !== 'undefined' && currentPhotos.length > 0) {
+                        // Find photo by loosely matching name
+                        const idx = currentPhotos.findIndex(p =>
+                            p.name.replace(/\s+/g, '-').toLowerCase() === hash.toLowerCase()
+                        );
+                        if (idx !== -1) {
+                            console.log("Deep link found:", hash, "Opening index:", idx);
+                            // Wait a bit for masonry/ui to settle? No, just open.
+                            openLightbox(idx);
+                        }
+                    }
+                });
+
+                // Global Export
+                window.openLightbox = openLightbox;
+                window.closeLightbox = closeLightbox;
+                window.nextPhoto = nextPhoto;
+                window.prevPhoto = prevPhoto;
+                console.log("✅ Lightbox functions attached to window.");
+            </script>
+
+            <!-- Canvas Viewer (SRCIS) -->
+            <script src="../assets/js/canvas-viewer.js"></script>
+
+            <!-- Bootstrap JS (Local) -->
+            <script src="../assets/vendor/bootstrap.bundle.min.js"></script>
+
+            <!-- Panzoom (Local) -->
+            <script src="../assets/vendor/panzoom.min.js"></script>
+            <!-- CryptoJS (Local) -->
+            <script src="../assets/vendor/crypto-js.min.js"></script>
+
+            <!-- Firebase SDK -->
+            <!-- Firebase Config (Generated) -->
+            <script src="../assets/js/firebase-init-config.js"></script>
+
+            <script type="module">
+                import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+                import { getDatabase, ref, increment, onValue, get, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+                const firebaseConfig = window.FIREBASE_CONFIG || {};
+                const enableViewCounting = true;
+
+                let db = null;
+
+                if (enableViewCounting && firebaseConfig.apiKey) {
+                    try {
+                        const app = initializeApp(firebaseConfig);
+                        db = getDatabase(app);
+                        console.log("🔥 Firebase Initialized");
+
+                        // 1. Initial Sync (Get all views once for Grid)
+                        syncGlobalViews();
+
+                    } catch (e) {
+                        console.error("Firebase Init Error:", e);
+                    }
+                }
+
+                // --- Global View Functions ---
+
+                // A. Sync all views for Grid Items
+                async function syncGlobalViews() {
+                    if (!db) return;
+                    const viewNodes = document.querySelectorAll('[data-view-id]');
+                    if (viewNodes.length === 0) return;
+
+                    // Optimization: Fetch ALL views once (assuming lightweight dataset < 1MB)
+                    // If dataset grows > 10k items, we might need batched gets, but for now this is fastest/cheapest.
+                    const dbRef = ref(db, 'views');
+                    try {
+                        const snapshot = await get(dbRef);
+                        if (snapshot.exists()) {
+                            const allViews = snapshot.val();
+                            updateDomCounts(allViews);
+                        }
+
+                        // Optional: Listen for changes? 
+                        // For cost savings, we usually don't listen to the WHOLE list. 
+                        // Just fetching once on load is enough for grid.
+                        // Lightbox handles real-time single updates.
+                    } catch (e) {
+                        console.error("View Sync Error:", e);
+                    }
+                }
+
+                function updateDomCounts(allViews) {
+                    const viewNodes = document.querySelectorAll('[data-view-id]');
+                    viewNodes.forEach(node => {
+                        const id = node.getAttribute('data-view-id');
+                        if (allViews[id]) {
+                            const countParams = node.querySelectorAll('.view-count-text');
+                            countParams.forEach(el => el.innerText = allViews[id]);
+                        } else {
+                            const countParams = node.querySelectorAll('.view-count-text');
+                            countParams.forEach(el => el.innerText = '0');
+                        }
+                    });
+                }
+
+                // B. Track View (triggered by Lightbox)
+                window.trackView = function (photo) {
+                    if (!db) { console.error("❌ Firebase DB not initialized."); return; }
+                    if (!photo) { console.warn("❌ TrackView called with null photo."); return; }
+
+                    // const viewId = `${photo.albumSlug}__${photo.filename.replace(/\./g, '_')}`; 
+                    // Wait, `photo.id` in feed/album JSONs is ALREADY generated correctly.
+                    const viewId = photo.id;
+                    console.log("👀 Tracking View for:", viewId);
+
+                    if (!viewId) { console.warn("No viewId for photo", photo); return; }
+
+                    // Real-time Listener for Lightbox Sidebar
+                    const viewRef = ref(db, `views/${viewId}`);
+
+                    // 1. Listen (Realtime UI Update)
+                    // Unsubscribe previous if exists? (Simple way: just new listener, it overwrites context if clean)
+                    // Better: Store unsubscribe fn if needed. For now, onValue returns unsubscribe.
+                    const unsub = onValue(viewRef, (snapshot) => {
+                        const count = snapshot.val() || 0;
+                        // Update Lightbox Sidebar
+                        const lbCount = document.getElementById('lightbox-view-count-val');
+                        if (lbCount) lbCount.innerText = count;
+                    });
+                    // Store unsub to cleanup on close? (Valid optimization for SPA users)
+                    window.currentViewUnsub = unsub;
+
+
+                    // 2. Increment Transaction (Spam Control: localStorage)
+                    const storageKey = `viewed_${viewId}`;
+                    const hasViewed = localStorage.getItem(storageKey);
+
+                    if (!hasViewed) {
+                        console.log("🚀 Incrementing view count...");
+                        update(ref(db), {
+                            [`views/${viewId}`]: increment(1)
+                        }).then(() => {
+                            console.log("✅ View Count Incremented:", viewId);
+                            localStorage.setItem(storageKey, 'true');
+                        }).catch(e => {
+                            console.error("❌ Firebase Update Error:", e);
+                            if (e.code === 'PERMISSION_DENIED') console.warn("💡 Check Firebase Rules test mode.");
+                        });
+                    } else {
+                        console.log("Duplicate view ignored (localStorage check).");
+                    }
+                };
+
+                // Cleanup listener helper
+                window.cleanupViewListener = function () {
+                    if (window.currentViewUnsub) {
+                        window.currentViewUnsub();
+                        window.currentViewUnsub = null;
+                    }
+                }
+
+                // Global Debug Helper
+                window.debugFirebase = {
+                    checkConnection: () => {
+                        if (db) console.log("✅ Firebase DB Instance exists.");
+                        else console.error("❌ Firebase DB is NULL.");
+                    },
+                    forceTrack: (id) => {
+                        if (!db) return;
+                        update(ref(db), { [`views/${id}`]: increment(1) })
+                            .then(() => console.log("Forced update success"))
+                            .catch(e => console.error(e));
+                    },
+                    clearHistory: () => {
+                        localStorage.clear();
+                        console.log("Cleared localStorage history.");
+                    }
+                };
+
+                // Expose sync for infinite scrollMasonry to call after append
+                window.refreshViewCounts = syncGlobalViews;
+
+            </script>
+</body>
+
+</html>

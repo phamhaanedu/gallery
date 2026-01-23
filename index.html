@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        Thu Nhiên Gallery
+    </title>
+    <link rel="icon" href=".assets/gallery icon 32x32.png">
+
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="A beautiful photo gallery.">
+    <meta property="og:title" content="Thu Nhiên Gallery">
+    <meta property="og:description" content="A beautiful photo gallery.">
+    <meta property="og:image"
+        content=".assets/gallery icon 100x100.png">
+    <meta property="og:url" content="https://username.github.io/repo/">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="./assets/vendor/bootstrap.min.css">
+    <!-- Ionicons -->
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-dark: #121212;
+            --bg-card: #1e1e1e;
+            --accent-color: #0d6efd;
+            --text-primary: #e0e0e0;
+        }
+
+        /* body selector removed to fix Light Mode */
+        /* Navbar */
+        .navbar {
+            background: rgba(30, 30, 30, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #333;
+        }
+
+        .navbar-brand img {
+            height: 40px;
+        }
+
+        /* Lightbox - Advanced Split Layout */
+        #lightbox-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        #lightbox-modal.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .lightbox-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* Left: Stage */
+        .lightbox-stage {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+            /* Clean black stage */
+            overflow: hidden;
+        }
+
+        .lightbox-close-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            color: white;
+            font-size: 2rem;
+            z-index: 30;
+            cursor: pointer;
+        }
+
+        /* Sidebar */
+        /* Sidebar (Overlay Mode) */
+        .lightbox-sidebar {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 33vw;
+            /* 1/3 Screen */
+            min-width: 320px;
+            max-width: 90vw;
+            /* Mobile safe */
+
+            background: rgba(30, 30, 30, 0.5);
+            /* Semi-transparent */
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: -5px 0 20px rgba(0, 0, 0, 0.5);
+
+            z-index: 2001;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateX(0);
+        }
+
+        .lightbox-sidebar.hidden {
+            transform: translateX(100%);
+            /* Slide out to right */
+        }
+
+        @media (max-width: 768px) {
+            .lightbox-sidebar {
+                width: 85vw;
+                max-width: none;
+            }
+        }
+
+        /* Stage Toggle Button (Visible when sidebar hidden) */
+        .stage-toggle-btn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            z-index: 20;
+            transition: all 0.2s;
+            opacity: 0;
+            /* Hidden by default if sidebar is open */
+            pointer-events: none;
+        }
+
+        .stage-toggle-btn:hover {
+            background: rgba(0, 0, 0, 0.8);
+            border-color: #fff;
+        }
+
+        /* Show toggle button when sidebar is hidden */
+        .lightbox-container.sidebar-closed .stage-toggle-btn {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Toolbar */
+        .sidebar-toolbar {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            border-bottom: 1px solid #333;
+            background: #252525;
+        }
+
+        .icon-btn {
+            background: transparent;
+            border: none;
+            color: #aaa;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .icon-btn:hover {
+            color: #fff;
+            background: #333;
+        }
+
+        .icon-btn.close-btn:hover {
+            color: #f44;
+        }
+
+        /* Content */
+        .sidebar-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        #lightbox-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        .tags-container {
+            margin-bottom: 15px;
+        }
+
+        .tag-chip {
+            display: inline-block;
+            background: #333;
+            color: #ccc;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .tag-chip:hover {
+            background: #0d6efd;
+            color: #fff;
+        }
+
+        .description-text {
+            font-size: 0.9rem;
+            color: #ccc;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+
+        /* Footer / Zoom */
+        .sidebar-footer {
+            padding: 15px;
+            border-top: 1px solid #333;
+            background: #252525;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .zoom-controls button {
+            background: #333;
+            border: none;
+            color: #fff;
+            padding: 5px 10px;
+            margin-right: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .zoom-controls button:hover {
+            background: #555;
+        }
+
+        .counter-text {
+            font-size: 0.8rem;
+            color: #777;
+        }
+
+        /* Navigation Overlays */
+        .nav-overlay {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 15%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 3rem;
+        }
+
+        .nav-overlay:hover {
+            opacity: 1;
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-left {
+            left: 0;
+        }
+
+        .nav-right {
+            right: 0;
+        }
+
+        /* Mobile Tweaks */
+        @media (max-width: 768px) {
+            .lightbox-container {
+                flex-direction: column;
+            }
+
+            .lightbox-sidebar {
+                width: 100%;
+                max-width: none;
+                height: 40%;
+                /* Bottom sheet style */
+                margin-right: 0 !important;
+                transition: margin-bottom 0.3s ease;
+            }
+
+            .lightbox-sidebar.hidden {
+                margin-bottom: -40%;
+            }
+
+            .lightbox-stage {
+                flex: 1;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="./assets/css/style.css">
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="./index.html">
+            <img src="./assets/gallery icon 100x100.png" alt="Thu Nhiên Gallery" height="40"
+                class="d-inline-block align-text-top">
+            Thu Nhiên Gallery
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="./index.html">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="./photos.html">Photos</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="./albums.html">Albums</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="./tags.html">Tags</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+        <main>
+            <div class="hero-section text-center">
+    <div class="container">
+        <h1 class="display-4 fw-bold mb-3">
+            Thu Nhiên Gallery
+        </h1>
+        <p class="lead text-muted">A private, static, and beautiful photo gallery.</p>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Pinned / Latest Feed Section (Placeholder for Masonry) -->
+    <h3 class="mb-4 border-bottom pb-2">Favorite Photos</h3>
+    <div class="row m-3 d-block" id="feed-grid" style="position: relative; min-height: 200px;">
+        <!-- JS will load photos here -->
+        <div class="col-12 text-center text-muted py-5">
+            <!-- Loading ... -->
+        </div>
+    </div>
+
+    <!-- Albums Sections -->
+    <h3 class="mb-4 border-bottom pb-2 mt-5" id="albums">Albums</h3>
+    <div class="row g-4">
+        
+            <div class="col-md-4 col-sm-6">
+                <div class="card h-100 shadow-sm border-0">
+                    <a href="albums/chup-anh-cung-ngua.html" class="text-decoration-none text-dark">
+                        <div
+                            style="height: 200px; background-color: #eee; overflow: hidden; border-radius: 8px 8px 0 0;">
+                            
+                                    <img src="../thumbnails/chup-anh-cung-ngua-thumbnail.jpg"
+                                        class="w-100 h-100 object-fit-cover" alt="Chụp ảnh cùng ngựa"
+                                        onerror="this.src='../assets/default-album 200x200.png'">
+                                    
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title text-truncate">
+                                Chụp ảnh cùng ngựa
+                            </h5>
+
+                            
+                                    <span class="badge bg-primary">
+                                        13 Photos
+                                    </span>
+                                    
+                        </div>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="col-md-4 col-sm-6">
+                <div class="card h-100 shadow-sm border-0">
+                    <a href="albums/tam-biet-2025-chao-2026.html" class="text-decoration-none text-dark">
+                        <div
+                            style="height: 200px; background-color: #eee; overflow: hidden; border-radius: 8px 8px 0 0;">
+                            
+                                    <img src="../thumbnails/tam-biet-2025-chao-2026-thumbnail.jpg"
+                                        class="w-100 h-100 object-fit-cover" alt="Tạm biệt 2025 - Chào 2026"
+                                        onerror="this.src='../assets/default-album 200x200.png'">
+                                    
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title text-truncate">
+                                Tạm biệt 2025 - Chào 2026
+                            </h5>
+
+                            
+                                    <span class="badge bg-primary">
+                                        8 Photos
+                                    </span>
+                                    
+                        </div>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="col-md-4 col-sm-6">
+                <div class="card h-100 shadow-sm border-0">
+                    <a href="albums/test-album-2024.html" class="text-decoration-none text-dark">
+                        <div
+                            style="height: 200px; background-color: #eee; overflow: hidden; border-radius: 8px 8px 0 0;">
+                            
+                                <div
+                                    class="d-flex align-items-center justify-content-center h-100 bg-secondary text-white">
+                                    <ion-icon name="lock-closed" size="large"></ion-icon>
+                                </div>
+                                
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title text-truncate">
+                                Test Album 2024
+                            </h5>
+
+                            
+                                <span class="badge bg-secondary"><ion-icon name="lock-closed"></ion-icon> Locked</span>
+                                
+                        </div>
+                    </a>
+                </div>
+            </div>
+            
+    </div>
+</div>
+</div>
+
+<!-- Masonry Scripts -->
+<script src="assets/vendor/jquery.min.js"></script>
+<script src="assets/vendor/imagesloaded.pkgd.min.js"></script>
+<script src="assets/vendor/masonry.pkgd.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        const feedGrid = document.getElementById('feed-grid');
+        // Pinned IDs from Build System (Base64 Encoded to avoid EJS issues)
+        const pinnedIds = JSON.parse(atob("WyJEYS1MYXQtMjAyNV9faW1nXzA1X2pwZyIsIkhhbm9pLTIwMjRfX2ltZ19zdW5zZXRfcG5nIiwiY2h1cC1hbmgtY3VuZy1uZ3VhX19jaHVwLWN1bmctbmd1YSAoMSlfanBnIiwiY2h1cC1hbmgtY3VuZy1uZ3VhX19jaHVwLWN1bmctbmd1YSAoMilfanBnIiwiY2h1cC1hbmgtY3VuZy1uZ3VhX19jaHVwLWN1bmctbmd1YSAoMylfanBnIiwiY2h1cC1hbmgtY3VuZy1uZ3VhX19jaHVwLWN1bmctbmd1YSAoNClfanBnIiwiY2h1cC1hbmgtY3VuZy1uZ3VhX19jaHVwLWN1bmctbmd1YSAoNSlfanBnIiwiY2h1cC1hbmgtY3VuZy1uZ3VhX19jaHVwLWN1bmctbmd1YSAoNilfanBnIiwiY2h1cC1hbmgtY3VuZy1uZ3VhX19jaHVwLWN1bmctbmd1YSAoNylfanBnIiwiY2h1cC1hbmgtY3VuZy1uZ3VhX19jaHVwLWN1bmctbmd1YSAoOClfanBnIiwiY2h1cC1hbmgtY3VuZy1uZ3VhX19jaHVwLWN1bmctbmd1YSAoOSlfanBnIl0="));
+
+        // Initialize Masonry
+        let $grid = null;
+        if (typeof $ !== 'undefined') {
+            $grid = $('#feed-grid').masonry({
+                itemSelector: '.gallery-item',
+                percentPosition: true
+            });
+        }
+
+        // Initialize Global Photos for Lightbox
+        window.currentPhotos = [];
+
+        try {
+            const res = await fetch('feed/page_1.json');
+            if (!res.ok) throw new Error('Failed to load feed');
+
+            const photos = await res.json();
+
+            // Calculate Limit: Max(8, Count of Pinned photos in this feed)
+            let pinnedCount = 0;
+            photos.forEach(p => {
+                if (pinnedIds.includes(p.id)) pinnedCount++;
+            });
+
+            // If pinned count exceeds 8, show all pinned. Otherwise default to 8.
+            const limit = Math.max(8, pinnedCount);
+
+            // Take Photos
+            const displayPhotos = photos.slice(0, limit);
+            window.currentPhotos = displayPhotos;
+
+            if (displayPhotos.length === 0) {
+                feedGrid.innerHTML = '<div class="col-12 text-center text-muted">No photos found.</div>';
+                return;
+            }
+
+            // Generate HTML
+            const itemsHtml = displayPhotos.map((photo, index) => {
+                const viewId = photo.id; // Already generated correctly in feed
+                return `
+                <div class="col-6 col-md-4 col-lg-3 mb-4 gallery-item">
+                     <div class="photo-card" onclick="openLightbox(${index})" style="cursor: pointer; position: relative;" data-view-id="${viewId}">
+                        <img src="${photo.thumb}" 
+                                class="w-100 object-fit-cover hover-zoom" 
+                                alt="${photo.name}"
+                                style="border-radius: 8px; display: block;"
+                                loading="lazy">
+                        ${true ? `
+                        <div class="view-overlay" style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 4px; color: white; font-size: 0.75rem; display: flex; align-items: center; gap: 4px; pointer-events: none;">
+                            <ion-icon name="eye-outline"></ion-icon>
+                            <span class="view-count-text">...</span>
+                        </div>` : ''}
+                    </div>
+                </div>
+            `}).join('');
+
+            // Append using Masonry
+            const $items = $(itemsHtml);
+            $grid.append($items).masonry('appended', $items);
+
+            // Reflow
+            $grid.imagesLoaded().progress(function () {
+                $grid.masonry('layout');
+                if (window.refreshViewCounts) window.refreshViewCounts();
+            });
+
+            // Remove loading text if it was there (Masonry append might keep it if not cleared, but we are appending to empty or pre-cleared logic. 
+            // Better to clear "Loading..." manually first if we use append)
+            // Actually, $grid.append adds to existing. The existing content is "Loading feed...".
+            // We should clear it first.
+            const loadingMsg = document.querySelector('#feed-grid .col-12');
+            if (loadingMsg) $grid.masonry('remove', $(loadingMsg)).masonry('layout');
+
+
+        } catch (err) {
+            console.error(err);
+            feedGrid.innerHTML = '<div class="col-12 text-center text-muted">Could not load photos.</div>';
+        }
+    });
+</script>
+
+<style>
+    .hover-zoom {
+        transition: transform 0.3s ease;
+    }
+
+    .photo-card:hover .hover-zoom {
+        transform: scale(1.05);
+    }
+</style>
+        </main>
+
+        <!-- Lightbox Modal (Advanced UI) -->
+        <div id="lightbox-modal">
+            <!-- Main Container: Flex Row -->
+            <div class="lightbox-container">
+
+                <!-- Left: Image Stage -->
+                <div class="lightbox-stage">
+                    <!-- Close Button (Mobile/Tablet or when sidebar hidden) -->
+                    <button class="lightbox-close-btn d-md-none" onclick="closeLightbox()">&times;</button>
+
+                    <div id="lightbox-image-container"></div>
+
+                    <!-- Floating Info Toggle (New) -->
+                    <button class="stage-toggle-btn" onclick="toggleSidebar()" title="Show Info (i)">
+                        <ion-icon name="information-circle-outline"></ion-icon>
+                    </button>
+
+                    <!-- Navigation Overlays -->
+                    <div class="nav-overlay nav-left" onclick="prevPhoto()">
+                        <ion-icon name="chevron-back-outline"></ion-icon>
+                    </div>
+                    <div class="nav-overlay nav-right" onclick="nextPhoto()">
+                        <ion-icon name="chevron-forward-outline"></ion-icon>
+                    </div>
+                </div>
+
+                <!-- Right: Sidebar (Info Panel) -->
+                <div id="lightbox-sidebar" class="lightbox-sidebar">
+                    <!-- Toolbar -->
+                    <div class="sidebar-toolbar">
+                        <div class="left-tools d-flex align-items-center gap-2">
+                            <button class="icon-btn" onclick="toggleSidebar()" title="Toggle Info (i)">
+                                <ion-icon name="information-circle-outline"></ion-icon>
+                            </button>
+                            <!-- View Count (New Location) -->
+                            <div class="d-flex align-items-center gap-1 ms-3" title="Total Views"
+                                style="font-size: 0.9rem; color: rgba(255,255,255,0.8);">
+                                <ion-icon name="eye-outline"></ion-icon>
+                                <span id="lightbox-view-count-val">...</span>
+                            </div>
+                        </div>
+                        <div class="right-tools">
+                            <button class="icon-btn" onclick="copyMeta()" title="Copy Metadata (c)">
+                                <ion-icon name="copy-outline"></ion-icon>
+                            </button>
+                            <button class="icon-btn" onclick="sharePhoto()" title="Share (s)">
+                                <ion-icon name="share-social-outline"></ion-icon>
+                            </button>
+                            <button class="icon-btn close-btn" onclick="closeLightbox()" title="Close (Escape)">
+                                <ion-icon name="close-outline"></ion-icon>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="sidebar-content">
+                        <h3 id="lightbox-title">Photo Title</h3>
+
+                        <div id="lightbox-desc" class="description-text" style="margin-bottom: 15px;">
+                            <!-- Description injected here -->
+                        </div>
+
+                        <div id="lightbox-tags" class="tags-container">
+                            <!-- Tags injected here -->
+                        </div>
+
+                        <div id="lightbox-content" class="description-text"
+                            style="white-space: pre-wrap; margin-top: 15px; border-top: 1px solid #444; padding-top: 15px;">
+                            <!-- Body content injected here -->
+                        </div>
+                    </div>
+
+                    <div class="sidebar-footer">
+                        <div class="zoom-controls">
+                            <button onclick="zoomOut()" title="Zoom Out (-)">-</button>
+                            <button onclick="resetZoom()" title="Reset (F)">1:1</button>
+                            <button onclick="zoomIn()" title="Zoom In (+)">+</button>
+                        </div>
+                        <div id="lightbox-counter" class="counter-text">1 / 1</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <footer class="bg-dark text-white text-center py-4 mt-5">
+    <div class="container">
+        <p class="mb-0">&copy; 2026
+                Thu Nhiên Gallery. Built with Gallery AI.</p>
+    </div>
+</footer>
+
+            <!-- Custom Lightbox Logic (Moved up to load before libraries verify dependencies dynamically) -->
+            <script>
+                console.log("🚀 INLINED LIGHTBOX SCRIPT ACTIVE 🚀 TS: " + Date.now());
+
+                // Ensure global array exists
+                if (typeof currentPhotos === 'undefined') {
+                    console.warn("currentPhotos is undefined initially");
+                    window.currentPhotos = [];
+                } else {
+                    console.log("currentPhotos found:", currentPhotos.length, "items");
+                }
+
+                let currentIndex = 0;
+                let panzoomInstance = null;
+
+                function openLightbox(index) {
+                    // Safety checks
+                    if (!currentPhotos || currentPhotos.length === 0) return;
+                    currentIndex = index;
+                    const photo = currentPhotos[index];
+
+                    // 1. Deep Link
+                    const safeName = photo.name.replace(/\s+/g, '-').toLowerCase();
+                    history.pushState(null, null, `#${safeName}`);
+
+                    const modal = document.getElementById('lightbox-modal');
+                    const container = document.getElementById('lightbox-image-container');
+
+                    // 2. Render Sidebar Info
+                    document.getElementById('lightbox-title').innerText = photo.metadata?.title || photo.name;
+                    document.getElementById('lightbox-counter').innerText = `${currentIndex + 1} / ${currentPhotos.length}`;
+                    document.getElementById('lightbox-desc').innerText = photo.metadata?.description || '';
+                    document.getElementById('lightbox-content').innerText = photo.content || ''; // Render body content
+
+                    // Render Tags
+                    const tagSelect = document.getElementById('lightbox-tags');
+                    const rootPath = "." || ".";
+                    tagSelect.innerHTML = (photo.metadata?.tags || []).map(tag =>
+                        `<a href="${rootPath}/tag?id=${encodeURIComponent(tag)}" class="tag-chip">${tag}</a>`
+                    ).join('');
+
+                    // 3. Render Image Stage
+                    if (panzoomInstance) { try { panzoomInstance.dispose(); } catch (e) { } }
+                    panzoomInstance = null;
+                    container.innerHTML = '';
+
+                    // Split vs Single Logic
+                    if ((photo.type === 'split' || (photo.src_a && photo.src_b)) && photo.src_a && photo.src_b) {
+                        // V4: Canvas Stitching (SRCIS) - Secure Runtime
+                        console.log("Rendering SPLIT mode via CANVAS (SRCIS)");
+
+                        // 1. Setup Canvas Element
+                        container.innerHTML = `<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#000;"><canvas id="stitchCanvas" style="max-width:100%; max-height:100%; cursor: grab; display:block;"></canvas></div>`;
+
+                        const canvas = document.getElementById('stitchCanvas');
+
+                        // 2. Initialize Viewer
+                        if (typeof CanvasStitchViewer !== 'undefined') {
+                            if (window.canvasViewer) {
+                                // Clean up old viewer
+                                // window.canvasViewer.dispose(); 
+                            }
+
+                            // Initialize
+                            window.canvasViewer = new CanvasStitchViewer(canvas, photo.src_a, photo.src_b);
+
+                            // 3. Disable standard Panzoom for this mode
+                            panzoomInstance = null;
+
+                        } else {
+                            console.error("CanvasStitchViewer script not loaded!");
+                            container.innerHTML = "<p style='color:white'>Error: Viewer component missing.</p>";
+                        }
+                    } else {
+                        // Clear canvas viewer if exists
+                        if (window.canvasViewer) {
+                            window.canvasViewer = null;
+                        }
+
+                        const img = document.createElement('img');
+                        img.src = photo.src;
+                        img.style.maxHeight = '90vh';
+                        img.style.maxWidth = '90vw';
+                        img.draggable = false;
+                        img.onload = () => initPanzoom(img);
+                        container.appendChild(img);
+                    }
+
+                    if (typeof window.trackView === 'function') {
+                        window.trackView(photo);
+                    } else {
+                        console.warn("trackView function missing");
+                    }
+
+                    modal.classList.add('active');
+                }
+
+                function initPanzoom(target) {
+                    if (typeof Panzoom === 'undefined' || !target) return;
+                    panzoomInstance = Panzoom(target, {
+                        maxScale: 10, minScale: 0.1, startScale: 1,
+                        contain: null // Free movement
+                    });
+                    target.parentElement.addEventListener('wheel', panzoomInstance.zoomWithWheel);
+                }
+
+                // --- Sidebar & Tools ---
+                function toggleSidebar() {
+                    const sidebar = document.getElementById('lightbox-sidebar');
+                    const container = document.querySelector('.lightbox-container');
+                    sidebar.classList.toggle('hidden');
+                    container.classList.toggle('sidebar-closed');
+                }
+
+                function copyMeta() {
+                    if (!currentPhotos[currentIndex]) return;
+                    const p = currentPhotos[currentIndex];
+                    // Copy ONLY body content
+                    const content = p.content || '';
+                    if (content) {
+                        navigator.clipboard.writeText(content).catch(err => console.error("Copy failed:", err));
+                    }
+                }
+
+                function sharePhoto() {
+                    if (navigator.share) {
+                        navigator.share({
+                            title: document.title,
+                            text: 'Check out this photo!',
+                            url: window.location.href
+                        }).catch(console.error);
+                    } else {
+                        copyMeta(); // Fallback
+                    }
+                }
+
+                // --- Zoom Controls (Global) ---
+                window.zoomIn = function () {
+                    if (window.canvasViewer) window.canvasViewer.zoomIn();
+                    else if (panzoomInstance) panzoomInstance.zoomIn();
+                };
+
+                window.zoomOut = function () {
+                    if (window.canvasViewer) window.canvasViewer.zoomOut();
+                    else if (panzoomInstance) panzoomInstance.zoomOut();
+                };
+
+                window.resetZoom = function () {
+                    if (window.canvasViewer) window.canvasViewer.reset();
+                    else if (panzoomInstance) panzoomInstance.reset();
+                };
+
+                // --- Navigation ---
+                function closeLightbox() {
+                    document.getElementById('lightbox-modal').classList.remove('active');
+                    history.pushState(null, null, ' ');
+                    if (panzoomInstance) { try { panzoomInstance.dispose(); } catch (e) { } panzoomInstance = null; }
+                }
+                function nextPhoto() { if (currentIndex < currentPhotos.length - 1) openLightbox(currentIndex + 1); }
+                function prevPhoto() { if (currentIndex > 0) openLightbox(currentIndex - 1); }
+
+                // --- Event Listeners ---
+                // --- Event Listeners ---
+                document.addEventListener('keydown', (e) => {
+                    const modal = document.getElementById('lightbox-modal');
+                    if (!modal || !modal.classList.contains('active')) return;
+
+                    switch (e.key.toLowerCase()) {
+                        case 'escape': closeLightbox(); break;
+                        case 'arrowright': nextPhoto(); break;
+                        case 'arrowleft': prevPhoto(); break;
+                        case 'i': toggleSidebar(); break;
+                        case 'c': copyMeta(); break;
+                        case 's': sharePhoto(); break;
+
+                        // Zoom Keys
+                        case '+':
+                        case '=': // Plus without shift on some layouts
+                            zoomIn();
+                            break;
+
+                        case '-':
+                        case '_': // Minus with shift
+                            zoomOut();
+                            break;
+
+                        case 'f':
+                        case '0': // Ctrl+0 style reset
+                            resetZoom();
+                            break;
+                    }
+                });
+
+                // Wheel Navigation (on Stage background only)
+                document.addEventListener('wheel', (e) => {
+                    const modal = document.getElementById('lightbox-modal');
+                    if (!modal || !modal.classList.contains('active')) return;
+
+                    // If target is the stage (black background) or nav overlay, navigate
+                    if (e.target.classList.contains('lightbox-stage') || e.target.classList.contains('nav-overlay')) {
+                        if (e.deltaY > 0) nextPhoto();
+                        else prevPhoto();
+                    }
+                });
+
+                // Helper for key exports
+                window.openLightbox = openLightbox;
+                window.closeLightbox = closeLightbox;
+                window.nextPhoto = nextPhoto;
+                window.prevPhoto = prevPhoto;
+                window.toggleSidebar = toggleSidebar;
+                window.copyMeta = copyMeta;
+                window.sharePhoto = sharePhoto;
+                window.zoomIn = zoomIn;
+                window.zoomOut = zoomOut;
+                window.resetZoom = resetZoom;
+
+                // Deep Link Check on Load
+                window.addEventListener('DOMContentLoaded', () => {
+                    const hash = window.location.hash.substring(1); // Remove #
+                    if (hash && typeof currentPhotos !== 'undefined' && currentPhotos.length > 0) {
+                        // Find photo by loosely matching name
+                        const idx = currentPhotos.findIndex(p =>
+                            p.name.replace(/\s+/g, '-').toLowerCase() === hash.toLowerCase()
+                        );
+                        if (idx !== -1) {
+                            console.log("Deep link found:", hash, "Opening index:", idx);
+                            // Wait a bit for masonry/ui to settle? No, just open.
+                            openLightbox(idx);
+                        }
+                    }
+                });
+
+                // Global Export
+                window.openLightbox = openLightbox;
+                window.closeLightbox = closeLightbox;
+                window.nextPhoto = nextPhoto;
+                window.prevPhoto = prevPhoto;
+                console.log("✅ Lightbox functions attached to window.");
+            </script>
+
+            <!-- Canvas Viewer (SRCIS) -->
+            <script src="./assets/js/canvas-viewer.js"></script>
+
+            <!-- Bootstrap JS (Local) -->
+            <script src="./assets/vendor/bootstrap.bundle.min.js"></script>
+
+            <!-- Panzoom (Local) -->
+            <script src="./assets/vendor/panzoom.min.js"></script>
+            <!-- CryptoJS (Local) -->
+            <script src="./assets/vendor/crypto-js.min.js"></script>
+
+            <!-- Firebase SDK -->
+            <!-- Firebase Config (Generated) -->
+            <script src="./assets/js/firebase-init-config.js"></script>
+
+            <script type="module">
+                import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+                import { getDatabase, ref, increment, onValue, get, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+                const firebaseConfig = window.FIREBASE_CONFIG || {};
+                const enableViewCounting = true;
+
+                let db = null;
+
+                if (enableViewCounting && firebaseConfig.apiKey) {
+                    try {
+                        const app = initializeApp(firebaseConfig);
+                        db = getDatabase(app);
+                        console.log("🔥 Firebase Initialized");
+
+                        // 1. Initial Sync (Get all views once for Grid)
+                        syncGlobalViews();
+
+                    } catch (e) {
+                        console.error("Firebase Init Error:", e);
+                    }
+                }
+
+                // --- Global View Functions ---
+
+                // A. Sync all views for Grid Items
+                async function syncGlobalViews() {
+                    if (!db) return;
+                    const viewNodes = document.querySelectorAll('[data-view-id]');
+                    if (viewNodes.length === 0) return;
+
+                    // Optimization: Fetch ALL views once (assuming lightweight dataset < 1MB)
+                    // If dataset grows > 10k items, we might need batched gets, but for now this is fastest/cheapest.
+                    const dbRef = ref(db, 'views');
+                    try {
+                        const snapshot = await get(dbRef);
+                        if (snapshot.exists()) {
+                            const allViews = snapshot.val();
+                            updateDomCounts(allViews);
+                        }
+
+                        // Optional: Listen for changes? 
+                        // For cost savings, we usually don't listen to the WHOLE list. 
+                        // Just fetching once on load is enough for grid.
+                        // Lightbox handles real-time single updates.
+                    } catch (e) {
+                        console.error("View Sync Error:", e);
+                    }
+                }
+
+                function updateDomCounts(allViews) {
+                    const viewNodes = document.querySelectorAll('[data-view-id]');
+                    viewNodes.forEach(node => {
+                        const id = node.getAttribute('data-view-id');
+                        if (allViews[id]) {
+                            const countParams = node.querySelectorAll('.view-count-text');
+                            countParams.forEach(el => el.innerText = allViews[id]);
+                        } else {
+                            const countParams = node.querySelectorAll('.view-count-text');
+                            countParams.forEach(el => el.innerText = '0');
+                        }
+                    });
+                }
+
+                // B. Track View (triggered by Lightbox)
+                window.trackView = function (photo) {
+                    if (!db) { console.error("❌ Firebase DB not initialized."); return; }
+                    if (!photo) { console.warn("❌ TrackView called with null photo."); return; }
+
+                    // const viewId = `${photo.albumSlug}__${photo.filename.replace(/\./g, '_')}`; 
+                    // Wait, `photo.id` in feed/album JSONs is ALREADY generated correctly.
+                    const viewId = photo.id;
+                    console.log("👀 Tracking View for:", viewId);
+
+                    if (!viewId) { console.warn("No viewId for photo", photo); return; }
+
+                    // Real-time Listener for Lightbox Sidebar
+                    const viewRef = ref(db, `views/${viewId}`);
+
+                    // 1. Listen (Realtime UI Update)
+                    // Unsubscribe previous if exists? (Simple way: just new listener, it overwrites context if clean)
+                    // Better: Store unsubscribe fn if needed. For now, onValue returns unsubscribe.
+                    const unsub = onValue(viewRef, (snapshot) => {
+                        const count = snapshot.val() || 0;
+                        // Update Lightbox Sidebar
+                        const lbCount = document.getElementById('lightbox-view-count-val');
+                        if (lbCount) lbCount.innerText = count;
+                    });
+                    // Store unsub to cleanup on close? (Valid optimization for SPA users)
+                    window.currentViewUnsub = unsub;
+
+
+                    // 2. Increment Transaction (Spam Control: localStorage)
+                    const storageKey = `viewed_${viewId}`;
+                    const hasViewed = localStorage.getItem(storageKey);
+
+                    if (!hasViewed) {
+                        console.log("🚀 Incrementing view count...");
+                        update(ref(db), {
+                            [`views/${viewId}`]: increment(1)
+                        }).then(() => {
+                            console.log("✅ View Count Incremented:", viewId);
+                            localStorage.setItem(storageKey, 'true');
+                        }).catch(e => {
+                            console.error("❌ Firebase Update Error:", e);
+                            if (e.code === 'PERMISSION_DENIED') console.warn("💡 Check Firebase Rules test mode.");
+                        });
+                    } else {
+                        console.log("Duplicate view ignored (localStorage check).");
+                    }
+                };
+
+                // Cleanup listener helper
+                window.cleanupViewListener = function () {
+                    if (window.currentViewUnsub) {
+                        window.currentViewUnsub();
+                        window.currentViewUnsub = null;
+                    }
+                }
+
+                // Global Debug Helper
+                window.debugFirebase = {
+                    checkConnection: () => {
+                        if (db) console.log("✅ Firebase DB Instance exists.");
+                        else console.error("❌ Firebase DB is NULL.");
+                    },
+                    forceTrack: (id) => {
+                        if (!db) return;
+                        update(ref(db), { [`views/${id}`]: increment(1) })
+                            .then(() => console.log("Forced update success"))
+                            .catch(e => console.error(e));
+                    },
+                    clearHistory: () => {
+                        localStorage.clear();
+                        console.log("Cleared localStorage history.");
+                    }
+                };
+
+                // Expose sync for infinite scrollMasonry to call after append
+                window.refreshViewCounts = syncGlobalViews;
+
+            </script>
+</body>
+
+</html>
