@@ -325,18 +325,34 @@ Thu Nhiên Gallery">
             .lightbox-sidebar {
                 width: 100%;
                 max-width: none;
-                height: 40%;
-                /* Bottom sheet style */
+                height: 100% !important;
+                /* Full screen height */
+                top: 0;
+                bottom: 0;
                 margin-right: 0 !important;
-                transition: margin-bottom 0.3s ease;
+
+                /* Transform for Slide Up/Down */
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                transform: translateY(0);
+                /* Visible state */
+
+                /* Darker background for full screen overlay */
+                background: rgba(10, 10, 10, 0.95);
+                z-index: 2002;
+                /* Above everything */
             }
 
             .lightbox-sidebar.hidden {
-                margin-bottom: -40%;
+                transform: translateY(100%);
+                /* Slide down out of view */
+                margin-bottom: 0;
+                /* Reset previous logic */
             }
 
             .lightbox-stage {
                 flex: 1;
+                width: 100%;
+                height: 100%;
             }
         }
     </style>
@@ -385,7 +401,8 @@ Thu Nhiên Gallery">
                 Test Album 2024
             </h4>
 
-            <button class="btn btn-sm btn-outline-primary rounded-pill px-3 ms-auto" onclick="copyCurrentUrl()">
+            <button class="btn btn-sm btn-outline-primary rounded-pill px-3 ms-auto"
+                onclick="shareUrl('Test Album 2024', 'Check out this album', window.location.href)">
                 <ion-icon name="share-social-outline" style="vertical-align: -1px; margin-right: 4px;"></ion-icon>
                 Share
             </button>
@@ -713,6 +730,18 @@ Thu Nhiên Gallery">
 
                     const modal = document.getElementById('lightbox-modal');
                     const container = document.getElementById('lightbox-image-container');
+                    const sidebar = document.getElementById('lightbox-sidebar');
+                    const mainContainer = document.querySelector('.lightbox-container');
+
+                    // Mobile Optimization: Auto-hide sidebar by default
+                    if (window.innerWidth <= 768) {
+                        sidebar.classList.add('hidden');
+                        mainContainer.classList.add('sidebar-closed');
+                    } else {
+                        // Desktop: Ensure open by default
+                        sidebar.classList.remove('hidden');
+                        mainContainer.classList.remove('sidebar-closed');
+                    }
 
                     // 2. Render Sidebar Info
                     document.getElementById('lightbox-title').innerText = photo.metadata?.title || photo.name;
@@ -810,16 +839,28 @@ Thu Nhiên Gallery">
                     }
                 }
 
-                function sharePhoto() {
+                // --- Unified Share Helper ---
+                window.shareUrl = async function (title, text, url) {
                     if (navigator.share) {
-                        navigator.share({
-                            title: document.title,
-                            text: 'Check out this photo!',
-                            url: window.location.href
-                        }).catch(console.error);
+                        try {
+                            await navigator.share({ title, text, url });
+                        } catch (err) {
+                            console.error("Share failed:", err);
+                        }
                     } else {
-                        copyMeta(); // Fallback
+                        try {
+                            await navigator.clipboard.writeText(url);
+                            alert('Link copied to clipboard!');
+                        } catch (err) {
+                            console.error("Clipboard failed:", err);
+                            prompt("Copy this link:", url);
+                        }
                     }
+                };
+
+                function sharePhoto() {
+                    const url = window.location.href;
+                    window.shareUrl(document.title, 'Check out this photo!', url);
                 }
 
                 // --- Zoom Controls (Global) ---
@@ -891,7 +932,7 @@ Thu Nhiên Gallery">
                     }
                 });
 
-                // Helper for key exports
+                // --- Global Exports ---
                 window.openLightbox = openLightbox;
                 window.closeLightbox = closeLightbox;
                 window.nextPhoto = nextPhoto;
@@ -899,9 +940,7 @@ Thu Nhiên Gallery">
                 window.toggleSidebar = toggleSidebar;
                 window.copyMeta = copyMeta;
                 window.sharePhoto = sharePhoto;
-                window.zoomIn = zoomIn;
-                window.zoomOut = zoomOut;
-                window.resetZoom = resetZoom;
+                // zoom functions are already on window (defined as window.zoomIn, etc.)
 
                 // Deep Link Check on Load
                 window.addEventListener('DOMContentLoaded', () => {
@@ -919,11 +958,6 @@ Thu Nhiên Gallery">
                     }
                 });
 
-                // Global Export
-                window.openLightbox = openLightbox;
-                window.closeLightbox = closeLightbox;
-                window.nextPhoto = nextPhoto;
-                window.prevPhoto = prevPhoto;
                 console.log("✅ Lightbox functions attached to window.");
             </script>
 
@@ -947,11 +981,11 @@ Thu Nhiên Gallery">
                 import { getDatabase, ref, increment, onValue, get, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
                 const firebaseConfig = window.FIREBASE_CONFIG || {};
-                const enableViewCounting = true;
+                // Removed duplicate declaration
 
                 let db = null;
 
-                if (enableViewCounting && firebaseConfig.apiKey) {
+                if (true && firebaseConfig.apiKey) {
                     try {
                         const app = initializeApp(firebaseConfig);
                         db = getDatabase(app);

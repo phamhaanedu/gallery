@@ -321,18 +321,34 @@
             .lightbox-sidebar {
                 width: 100%;
                 max-width: none;
-                height: 40%;
-                /* Bottom sheet style */
+                height: 100% !important;
+                /* Full screen height */
+                top: 0;
+                bottom: 0;
                 margin-right: 0 !important;
-                transition: margin-bottom 0.3s ease;
+
+                /* Transform for Slide Up/Down */
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                transform: translateY(0);
+                /* Visible state */
+
+                /* Darker background for full screen overlay */
+                background: rgba(10, 10, 10, 0.95);
+                z-index: 2002;
+                /* Above everything */
             }
 
             .lightbox-sidebar.hidden {
-                margin-bottom: -40%;
+                transform: translateY(100%);
+                /* Slide down out of view */
+                margin-bottom: 0;
+                /* Reset previous logic */
             }
 
             .lightbox-stage {
                 flex: 1;
+                width: 100%;
+                height: 100%;
             }
         }
     </style>
@@ -402,7 +418,7 @@
                             </h5>
                             <div class="d-flex justify-content-between align-items-center mt-3">
                                 <button class="btn btn-sm btn-outline-primary rounded-pill px-3"
-                                    onclick="copyAlbumLink(event, 'albums/chup-anh-cung-ngua.html')">
+                                    onclick="shareAlbum(event, 'Chụp ảnh cùng ngựa', 'chup-anh-cung-ngua')">
                                     <ion-icon name="share-social-outline"
                                         style="vertical-align: -1px; margin-right: 4px;"></ion-icon>
                                     Share
@@ -435,7 +451,7 @@
                             </h5>
                             <div class="d-flex justify-content-between align-items-center mt-3">
                                 <button class="btn btn-sm btn-outline-primary rounded-pill px-3"
-                                    onclick="copyAlbumLink(event, 'albums/tam-biet-2025-chao-2026.html')">
+                                    onclick="shareAlbum(event, 'Tạm biệt 2025 - Chào 2026', 'tam-biet-2025-chao-2026')">
                                     <ion-icon name="share-social-outline"
                                         style="vertical-align: -1px; margin-right: 4px;"></ion-icon>
                                     Share
@@ -476,7 +492,7 @@
                             </h5>
                             <div class="d-flex justify-content-between align-items-center mt-3">
                                 <button class="btn btn-sm btn-outline-primary rounded-pill px-3"
-                                    onclick="copyAlbumLink(event, 'albums/test-album-2024.html')">
+                                    onclick="shareAlbum(event, 'Test Album 2024', 'test-album-2024')">
                                     <ion-icon name="share-social-outline"
                                         style="vertical-align: -1px; margin-right: 4px;"></ion-icon>
                                     Share
@@ -490,51 +506,39 @@
                     </div>
                 </div>
                 
-                    <script>
-                        function copyAlbumLink(e, path) {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            // Construct absolute URL
-                            // Assume we are at /albums.html, so we remove albums.html and append path
-                            // Actually path is 'albums/slug.html'.
-                            // If we are at root /, path works.
-                            // If we are at /albums.html, we need to be careful.
-
-                            // Simple robust way:
-                            const baseUrl = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
-                            // If pathname is /albums.html, base is / (if at root). 
-                            // Let's just use the relative logic the user requested or generic.
-
-                            // The path passed is 'albums/slug.html'. 
-                            // If site is hosted at root: localhost:3000/albums/slug.html
-                            const fullUrl = new URL(path, document.baseURI).href;
-
-                            navigator.clipboard.writeText(fullUrl).then(() => {
-                                alert('Album link copied to clipboard!');
-                            }).catch(err => {
-                                console.error('Failed to copy: ', err);
-                                fallbackCopy(fullUrl);
-                            });
-                        }
-
-                        function fallbackCopy(text) {
-                            var textArea = document.createElement("textarea");
-                            textArea.value = text;
-                            document.body.appendChild(textArea);
-                            textArea.focus();
-                            textArea.select();
-                            try {
-                                document.execCommand('copy');
-                                alert('Album link copied to clipboard!');
-                            } catch (err) {
-                                console.error('Fallback: Oops, unable to copy', err);
-                            }
-                            document.body.removeChild(textArea);
-                        }
-                    </script>
                     
     </div>
 </div>
+
+<script>
+    function shareAlbum(event, title, slug) {
+        event.stopPropagation();
+
+        try {
+            // Construct absolute URL (assuming albums are in /albums/ subfolder)
+            // Use window.location.origin to be safe about the root
+            // If deployed at a subpath (e.g. username.github.io/repo/), we need to be careful.
+            // Using document.baseURI is usually best as it handles <base> tag if present.
+            // But let's verify if 'albums/' is relative to the current page or root.
+            // If we are at /index.html, 'albums/slug.html' works.
+            // If we are at /albums.html, 'albums/slug.html' might be wrong if albums.html is same level.
+
+            // Let's use the anchor link logic.
+            // Better: find the parent card's link? No.
+
+            const url = new URL('albums/' + slug + '.html', document.baseURI).href;
+
+            if (typeof window.shareUrl === 'function') {
+                window.shareUrl(title, 'Check out this album', url);
+            } else {
+                console.error("shareUrl function not found on window");
+                navigator.clipboard.writeText(url).then(() => alert('Link copied (Fallback)'));
+            }
+        } catch (e) {
+            console.error("Error in shareAlbum:", e);
+        }
+    }
+</script>
         </main>
 
         <!-- Lightbox Modal (Advanced UI) -->
@@ -656,6 +660,18 @@
 
                     const modal = document.getElementById('lightbox-modal');
                     const container = document.getElementById('lightbox-image-container');
+                    const sidebar = document.getElementById('lightbox-sidebar');
+                    const mainContainer = document.querySelector('.lightbox-container');
+
+                    // Mobile Optimization: Auto-hide sidebar by default
+                    if (window.innerWidth <= 768) {
+                        sidebar.classList.add('hidden');
+                        mainContainer.classList.add('sidebar-closed');
+                    } else {
+                        // Desktop: Ensure open by default
+                        sidebar.classList.remove('hidden');
+                        mainContainer.classList.remove('sidebar-closed');
+                    }
 
                     // 2. Render Sidebar Info
                     document.getElementById('lightbox-title').innerText = photo.metadata?.title || photo.name;
@@ -753,16 +769,28 @@
                     }
                 }
 
-                function sharePhoto() {
+                // --- Unified Share Helper ---
+                window.shareUrl = async function (title, text, url) {
                     if (navigator.share) {
-                        navigator.share({
-                            title: document.title,
-                            text: 'Check out this photo!',
-                            url: window.location.href
-                        }).catch(console.error);
+                        try {
+                            await navigator.share({ title, text, url });
+                        } catch (err) {
+                            console.error("Share failed:", err);
+                        }
                     } else {
-                        copyMeta(); // Fallback
+                        try {
+                            await navigator.clipboard.writeText(url);
+                            alert('Link copied to clipboard!');
+                        } catch (err) {
+                            console.error("Clipboard failed:", err);
+                            prompt("Copy this link:", url);
+                        }
                     }
+                };
+
+                function sharePhoto() {
+                    const url = window.location.href;
+                    window.shareUrl(document.title, 'Check out this photo!', url);
                 }
 
                 // --- Zoom Controls (Global) ---
@@ -834,7 +862,7 @@
                     }
                 });
 
-                // Helper for key exports
+                // --- Global Exports ---
                 window.openLightbox = openLightbox;
                 window.closeLightbox = closeLightbox;
                 window.nextPhoto = nextPhoto;
@@ -842,9 +870,7 @@
                 window.toggleSidebar = toggleSidebar;
                 window.copyMeta = copyMeta;
                 window.sharePhoto = sharePhoto;
-                window.zoomIn = zoomIn;
-                window.zoomOut = zoomOut;
-                window.resetZoom = resetZoom;
+                // zoom functions are already on window (defined as window.zoomIn, etc.)
 
                 // Deep Link Check on Load
                 window.addEventListener('DOMContentLoaded', () => {
@@ -862,11 +888,6 @@
                     }
                 });
 
-                // Global Export
-                window.openLightbox = openLightbox;
-                window.closeLightbox = closeLightbox;
-                window.nextPhoto = nextPhoto;
-                window.prevPhoto = prevPhoto;
                 console.log("✅ Lightbox functions attached to window.");
             </script>
 
@@ -890,11 +911,11 @@
                 import { getDatabase, ref, increment, onValue, get, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
                 const firebaseConfig = window.FIREBASE_CONFIG || {};
-                const enableViewCounting = true;
+                // Removed duplicate declaration
 
                 let db = null;
 
-                if (enableViewCounting && firebaseConfig.apiKey) {
+                if (true && firebaseConfig.apiKey) {
                     try {
                         const app = initializeApp(firebaseConfig);
                         db = getDatabase(app);
