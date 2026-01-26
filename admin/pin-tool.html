@@ -11,21 +11,17 @@
 
     <!-- SEO Meta Tags -->
     <meta name="description"
-        content="Album: Tạm biệt 2025 - Chào 2026
-#bính ngọ #new year #couple #Tạo ảnh AI #gia đình
-Thu Nhiên Gallery">
-    <meta property="og:title" content="Tạm biệt 2025 - Chào 2026">
+        content="A beautiful photo gallery.">
+    <meta property="og:title" content="Admin Pinning Tool">
     <meta property="og:description"
-        content="Album: Tạm biệt 2025 - Chào 2026
-#bính ngọ #new year #couple #Tạo ảnh AI #gia đình
-Thu Nhiên Gallery">
+        content="A beautiful photo gallery.">
     <meta property="og:image"
-        content="https://thunhien.edu.vn/gallery/thumbnails/tam-biet-2025-chao-2026-thumbnail.jpg">
+        content="https://thunhien.edu.vn/gallery/assets/gallery icon 100x100.png">
     <meta property="og:image:type" content="image/jpeg">
     <meta property="og:image:width" content="300">
-    <meta property="og:type" content="article">
+    <meta property="og:type" content="website">
     <meta property="og:url"
-        content="https://thunhien.edu.vn/gallery/albums/tam-biet-2025-chao-2026.html">
+        content="https://thunhien.edu.vn/gallery/">
     <!-- <meta property="fb:app_id" content="YOUR_APP_ID"> -->
 
     <!-- Bootstrap CSS -->
@@ -391,207 +387,341 @@ Thu Nhiên Gallery">
 </nav>
 
         <main>
-            <div class="bg-white border-bottom py-3 mb-4">
-    <div class="container">
-        <div class="d-flex align-items-center">
-            <a id="smart-back-link" href="../index.html"
-                class="text-decoration-none text-primary">Home</a>
-            <span class="text-muted mx-2">/</span>
-            <h4 class="fw-bold mb-0 text-dark text-truncate" title="Tạm biệt 2025 - Chào 2026" style="max-width: 70%;">
-                Tạm biệt 2025 - Chào 2026
-            </h4>
-
-            <button class="btn btn-sm btn-outline-primary rounded-pill px-3 ms-auto"
-                onclick="shareUrl('Tạm biệt 2025 - Chào 2026', 'Check out this album', window.location.href)">
-                <ion-icon name="share-social-outline" style="vertical-align: -1px; margin-right: 4px;"></ion-icon>
-                Share
+            <div class="container py-5">
+    <div class="row mb-4 align-items-center">
+        <div class="col">
+            <h2 class="text-white mb-0">📌 Pinning Console</h2>
+            <p class="text-muted">Local File Management Mode</p>
+        </div>
+        <div class="col-auto">
+            <button id="auth-btn" class="btn btn-outline-light d-none" onclick="location.reload()">
+                <ion-icon name="log-out-outline"></ion-icon> Lock
             </button>
         </div>
-        <div class="text-muted small mt-2">
-            <ion-icon name="images-outline" style="vertical-align: -2px;"></ion-icon>
-            8 photos
+    </div>
+
+    <!-- Auth Gate -->
+    <div id="admin-gate" class="text-center py-5">
+        <div class="card bg-dark text-white mx-auto" style="max-width: 400px; border: 1px solid #333;">
+            <div class="card-body p-4">
+                <ion-icon name="lock-closed-outline" style="font-size: 3rem;" class="mb-3 text-warning"></ion-icon>
+                <h4 class="mb-3">Admin Access</h4>
+                <div class="mb-3">
+                    <input type="password" id="admin-passcode"
+                        class="form-control bg-black text-white border-secondary text-center"
+                        placeholder="Enter Passcode">
+                </div>
+                <button class="btn btn-primary w-100" onclick="unlockAdmin()">Unlock</button>
+                <div id="auth-error" class="text-danger mt-2 small d-none">Invalid Passcode</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Tool (Hidden by default) -->
+    <div id="pin-tool-ui" class="d-none">
+
+        <!-- Tabs -->
+        <ul class="nav nav-pills mb-4" id="pills-tab" role="tablist">
+            <li class="nav-item d-flex gap-2" role="presentation">
+                <button class="nav-link active d-flex align-items-center gap-2" id="tab-photos" data-bs-toggle="pill"
+                    data-bs-target="#pills-photos" type="button" role="tab" onclick="switchMode('photos')">
+                    <ion-icon name="images"></ion-icon> Photos
+                </button>
+                <button class="nav-link d-flex align-items-center gap-2" id="tab-albums" data-bs-toggle="pill"
+                    data-bs-target="#pills-albums" type="button" role="tab" onclick="switchMode('albums')">
+                    <ion-icon name="albums"></ion-icon> Albums
+                </button>
+            </li>
+        </ul>
+
+        <!-- File Manager Toolbar -->
+        <div class="card bg-dark border-secondary mb-4">
+            <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div class="d-flex align-items-center gap-3">
+                    <!-- Step 1: Open File -->
+                    <button id="open-file-btn" class="btn btn-info" onclick="openLocalFile()">
+                        <ion-icon name="folder-open-outline"></ion-icon> Open File
+                    </button>
+
+                    <div class="text-muted small">
+                        Target: <code id="target-filename">pinned_images.json</code>
+                    </div>
+                </div>
+
+                <!-- Step 2: Save -->
+                <div class="d-flex gap-2 align-items-center">
+                    <span id="pending-indicator" class="badge bg-warning text-dark d-none">Unsaved</span>
+                    <button id="save-btn" class="btn btn-success" onclick="saveLocalFile()" disabled>
+                        <ion-icon name="save-outline"></ion-icon> Save
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="row align-items-center mb-4 g-2">
+            <div class="col-md-4">
+                <h4 class="text-white mb-0">Pinned: <span id="pinned-count" class="text-primary">0</span></h4>
+            </div>
+            <div class="col-md-8">
+                <input type="text" id="search-box" class="form-control bg-dark text-white border-secondary"
+                    placeholder="Filter..." onkeyup="filterGrid()">
+            </div>
+        </div>
+
+        <!-- Grid Container -->
+        <div class="grid row g-3" id="admin-grid">
+            <div class="text-center text-muted py-5">
+                <div class="spinner-border text-primary mb-2" role="status"></div>
+                <div>Starting...</div>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-    // Smart Back Link Logic
-    document.addEventListener("DOMContentLoaded", function () {
-        const backLink = document.getElementById('smart-back-link');
-        if (document.referrer && document.referrer.includes('albums')) {
-            backLink.textContent = 'Albums';
-            backLink.href = '../albums.html';
+    // State
+    const STATE = {
+        mode: 'photos', // 'photos' | 'albums'
+        photos: [],
+        albums: [],
+        pinnedPhotos: [],
+        pinnedAlbums: [],
+        fileHandle: null,
+        isModified: false
+    };
+
+    // Config Mapping
+    const MODE_CONFIG = {
+        photos: {
+            filename: 'pinned_images.json',
+            dataUrl: '../data/admin/full_feed.json',
+            idKey: 'id'
+        },
+        albums: {
+            filename: 'pinned_albums.json',
+            dataUrl: '../data/admin/full_albums.json',
+            idKey: 'id'
         }
-    });
+    };
 
-    function copyCurrentUrl() {
-        navigator.clipboard.writeText(window.location.href).then(() => {
-            alert('Album link copied to clipboard!');
-        }).catch(err => {
-            console.error('Failed to copy', err);
-        });
+    // --- 1. Auth ---
+    async function unlockAdmin() {
+        const pass = document.getElementById('admin-passcode').value;
+        const hash = CryptoJS.SHA256(pass).toString();
+        const serverHash = "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b";
+
+        if (hash === serverHash || !serverHash) {
+            document.getElementById('admin-gate').classList.add('d-none');
+            document.getElementById('pin-tool-ui').classList.remove('d-none');
+            document.getElementById('auth-btn').classList.remove('d-none');
+
+            // Load Initial Data
+            await Promise.all([loadData('photos'), loadData('albums')]);
+            switchMode('photos'); // Init view
+        } else {
+            document.getElementById('auth-error').classList.remove('d-none');
+        }
     }
-</script>
 
-<div class="container" id="album-container">
-    
-            <div class="row" data-masonry='{"percentPosition": true }'>
-                
-                    <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
-                        <div class="photo-card" onclick="openLightbox(0)" style="cursor: pointer; position: relative;"
-    data-view-id="tam-biet-2025-chao-2026__goodbye-2025-2_jpg">
-    <img src="../thumbnails/tam-biet-2025-chao-2026/goodbye-2025-2.jpg" alt="goodbye-2025-2" loading="lazy">
-    
-        <div class="view-overlay"
-            style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 4px; color: white; font-size: 0.75rem; display: flex; align-items: center; gap: 4px; pointer-events: none;">
-            <ion-icon name="eye-outline"></ion-icon>
-            <span class="view-count-text">...</span>
-        </div>
-        
-</div>
-                    </div>
-                    
-                    <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
-                        <div class="photo-card" onclick="openLightbox(1)" style="cursor: pointer; position: relative;"
-    data-view-id="tam-biet-2025-chao-2026__goodbye-2025_jpg">
-    <img src="../thumbnails/tam-biet-2025-chao-2026/goodbye-2025.jpg" alt="goodbye-2025" loading="lazy">
-    
-        <div class="view-overlay"
-            style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 4px; color: white; font-size: 0.75rem; display: flex; align-items: center; gap: 4px; pointer-events: none;">
-            <ion-icon name="eye-outline"></ion-icon>
-            <span class="view-count-text">...</span>
-        </div>
-        
-</div>
-                    </div>
-                    
-                    <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
-                        <div class="photo-card" onclick="openLightbox(2)" style="cursor: pointer; position: relative;"
-    data-view-id="tam-biet-2025-chao-2026__welcome-2026 (1)_jpg">
-    <img src="../thumbnails/tam-biet-2025-chao-2026/welcome-2026 (1).jpg" alt="welcome-2026 (1)" loading="lazy">
-    
-        <div class="view-overlay"
-            style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 4px; color: white; font-size: 0.75rem; display: flex; align-items: center; gap: 4px; pointer-events: none;">
-            <ion-icon name="eye-outline"></ion-icon>
-            <span class="view-count-text">...</span>
-        </div>
-        
-</div>
-                    </div>
-                    
-                    <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
-                        <div class="photo-card" onclick="openLightbox(3)" style="cursor: pointer; position: relative;"
-    data-view-id="tam-biet-2025-chao-2026__welcome-2026 (2)_jpg">
-    <img src="../thumbnails/tam-biet-2025-chao-2026/welcome-2026 (2).jpg" alt="welcome-2026 (2)" loading="lazy">
-    
-        <div class="view-overlay"
-            style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 4px; color: white; font-size: 0.75rem; display: flex; align-items: center; gap: 4px; pointer-events: none;">
-            <ion-icon name="eye-outline"></ion-icon>
-            <span class="view-count-text">...</span>
-        </div>
-        
-</div>
-                    </div>
-                    
-                    <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
-                        <div class="photo-card" onclick="openLightbox(4)" style="cursor: pointer; position: relative;"
-    data-view-id="tam-biet-2025-chao-2026__welcome-2026 (3)_jpg">
-    <img src="../thumbnails/tam-biet-2025-chao-2026/welcome-2026 (3).jpg" alt="welcome-2026 (3)" loading="lazy">
-    
-        <div class="view-overlay"
-            style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 4px; color: white; font-size: 0.75rem; display: flex; align-items: center; gap: 4px; pointer-events: none;">
-            <ion-icon name="eye-outline"></ion-icon>
-            <span class="view-count-text">...</span>
-        </div>
-        
-</div>
-                    </div>
-                    
-                    <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
-                        <div class="photo-card" onclick="openLightbox(5)" style="cursor: pointer; position: relative;"
-    data-view-id="tam-biet-2025-chao-2026__welcome-2026 (4)_jpg">
-    <img src="../thumbnails/tam-biet-2025-chao-2026/welcome-2026 (4).jpg" alt="welcome-2026 (4)" loading="lazy">
-    
-        <div class="view-overlay"
-            style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 4px; color: white; font-size: 0.75rem; display: flex; align-items: center; gap: 4px; pointer-events: none;">
-            <ion-icon name="eye-outline"></ion-icon>
-            <span class="view-count-text">...</span>
-        </div>
-        
-</div>
-                    </div>
-                    
-                    <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
-                        <div class="photo-card" onclick="openLightbox(6)" style="cursor: pointer; position: relative;"
-    data-view-id="tam-biet-2025-chao-2026__welcome-2026 (5)_jpg">
-    <img src="../thumbnails/tam-biet-2025-chao-2026/welcome-2026 (5).jpg" alt="welcome-2026 (5)" loading="lazy">
-    
-        <div class="view-overlay"
-            style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 4px; color: white; font-size: 0.75rem; display: flex; align-items: center; gap: 4px; pointer-events: none;">
-            <ion-icon name="eye-outline"></ion-icon>
-            <span class="view-count-text">...</span>
-        </div>
-        
-</div>
-                    </div>
-                    
-                    <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
-                        <div class="photo-card" onclick="openLightbox(7)" style="cursor: pointer; position: relative;"
-    data-view-id="tam-biet-2025-chao-2026__welcome-2026 (6)_jpg">
-    <img src="../thumbnails/tam-biet-2025-chao-2026/welcome-2026 (6).jpg" alt="welcome-2026 (6)" loading="lazy">
-    
-        <div class="view-overlay"
-            style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 4px; color: white; font-size: 0.75rem; display: flex; align-items: center; gap: 4px; pointer-events: none;">
-            <ion-icon name="eye-outline"></ion-icon>
-            <span class="view-count-text">...</span>
-        </div>
-        
-</div>
-                    </div>
-                    
-            </div>
+    async function loadData(type) {
+        try {
+            const res = await fetch(MODE_CONFIG[type].dataUrl);
+            if (res.ok) STATE[type] = await res.json();
+        } catch (e) { console.error("Load Error", type, e); }
+    }
 
-            <!-- Safe Data Injection -->
-            <script id="gallery-model" type="application/json">
-                [{"type":"split","src":"../thumbnails/tam-biet-2025-chao-2026/goodbye-2025-2.jpg","src_a":"../split/tam-biet-2025-chao-2026/goodbye-2025-2-a.jpg","src_b":"../split/tam-biet-2025-chao-2026/goodbye-2025-2-b.jpg","name":"goodbye-2025-2","metadata":{"title":"Tạm biệt 2025 - Chào 2026","description":"Cung chúc tân xuân Bính Ngọ","variant":"fashion","attributes":{"outfit":["áo dài"],"colors":["hồng"]},"tags":["bính ngọ","new year","couple","Tạo ảnh AI"]},"content":"\r\na full body shot of a slender young woman with black hair and fair skin, wearing a pink and white traditional Vietnamese ao dai, standing on a sandy beach with the turquoise sea in the background, large letters spelling \"GOODBYE 2025\" behind her, clear blue sky, soft natural lighting, photo taken in Vietnam, high resolution, beautiful scenery","id":"b6cc7f1864e8fe27","filename":"goodbye-2025-2.jpg","albumSlug":"tam-biet-2025-chao-2026"},{"type":"split","src":"../thumbnails/tam-biet-2025-chao-2026/goodbye-2025.jpg","src_a":"../split/tam-biet-2025-chao-2026/goodbye-2025-a.jpg","src_b":"../split/tam-biet-2025-chao-2026/goodbye-2025-b.jpg","name":"goodbye-2025","metadata":{"title":"Tạm biệt 2025 - Chào 2026","description":"Cung chúc tân xuân Bính Ngọ","variant":"fashion","attributes":{"outfit":["áo dài","áo sơ mi"],"colors":["hồng","trắng"]},"tags":["bính ngọ","new year","couple","Tạo ảnh AI"]},"content":"\r\nGiữ nguyên 2 gương mặt của 2 ảnh tham chiếu hãy tạo Poster studio quảng cáo siêu sáng. Ảnh toàn thân của một cô gái trẻ da trắng, mặc ÁO DÀI truyền thống màu hồng phối trắng của Việt Nam và chàng trai mặc trang phục áo sơ mi trắng quần xám trắng , đứng trong phòng studio Bảng màu pastel kẹo ngọt, ánh sáng studio cao cấp, ánh sáng mềm mại, tâm trạng vui vẻ chụp ảnh thương mại chuyên nghiệp, siêu thực, dòng chữ lớn \"GOODBYE \" phía sau ,cả 2 đang vui vẻ ngồi trên một con số 3D màu pastel bóng loáng (20) trong khi nghiêng mình nghịch ngợm vào một con số 3D (25) , độ phân giải cao,chất lượng 4K, chi tiết sắc nét cao cấp, làn da mịn tự nhiên, tỷ lệ 9:16. \r\nGóc chụp rõ mặt cả hai chủ thể.","id":"6fe27e6dbe704e9d","filename":"goodbye-2025.jpg","albumSlug":"tam-biet-2025-chao-2026"},{"type":"split","src":"../thumbnails/tam-biet-2025-chao-2026/welcome-2026 (1).jpg","src_a":"../split/tam-biet-2025-chao-2026/welcome-2026 (1)-a.jpg","src_b":"../split/tam-biet-2025-chao-2026/welcome-2026 (1)-b.jpg","name":"welcome-2026 (1)","metadata":{"title":"Tạm biệt 2025 - Chào 2026","description":"Cung chúc tân xuân Bính Ngọ","variant":"fashion","attributes":{"outfit":["áo dài"],"colors":["vàng","hồng"]},"tags":["bính ngọ","new year","couple","Tạo ảnh AI"]},"content":"\r\nGiữ nguyên 2 gương mặt của 2 ảnh tham chiếu hãy tạo Poster studio quảng cáo siêu sáng. Ảnh toàn thân của một cô gái trẻ da trắng, mặc ÁO DÀI truyền thống màu vàng pastel quần trắng của Việt Nam và chàng trai mặc trang phục áo sơ mi hồng pastel quần trắng , đứng trong phòng studio Bảng màu pastel kẹo ngọt, ánh sáng studio cao cấp, ánh sáng mềm mại, tâm trạng thoải mái chụp ảnh thương mại chuyên nghiệp, siêu thực, dòng chữ lớn \"WELCOME \" phía sau ,cả 2 đang vui vẻ ngồi trên một con số 3D màu pastel bóng loáng (20) trong khi nghiêng mình nghịch ngợm vào một con số 3D màu pastel bóng loáng (26) , độ phân giải cao,chất lượng 8K, chi tiết sắc nét cao cấp, làn da mịn tự nhiên, tỷ lệ 9:16. \r\nGóc chụp rõ mặt cả hai chủ thể.","id":"9148db92f7cdb68f","filename":"welcome-2026 (1).jpg","albumSlug":"tam-biet-2025-chao-2026"},{"type":"split","src":"../thumbnails/tam-biet-2025-chao-2026/welcome-2026 (2).jpg","src_a":"../split/tam-biet-2025-chao-2026/welcome-2026 (2)-a.jpg","src_b":"../split/tam-biet-2025-chao-2026/welcome-2026 (2)-b.jpg","name":"welcome-2026 (2)","metadata":{"title":"Tạm biệt 2025 - Chào 2026","description":"Cung chúc tân xuân Bính Ngọ","variant":"fashion","attributes":{"outfit":["áo dài"],"colors":["xanh ngọc","cam"]},"tags":["bính ngọ","new year","couple","Tạo ảnh AI"]},"content":"\r\nGiữ nguyên 2 gương mặt của 2 ảnh tham chiếu hãy tạo Poster studio quảng cáo siêu sáng. Ảnh toàn thân của một cô gái trẻ da trắng, mặc ÁO DÀI truyền thống màu pastel sky quần trắng của Việt Nam và chàng trai mặc trang phục áo sơ mi màu cam pastel quần tây trắng , đứng tạo dáng trong phòng studio Bảng màu pastel kẹo ngọt, ánh sáng studio cao cấp, ánh sáng mềm mại, tâm trạng thoải mái chụp ảnh thương mại chuyên nghiệp, siêu thực, dòng chữ lớn \"WELCOME \" phía sau ,cả 2 đang cười nhẹ nhàng ngồi trên một con số 3D màu pastel bóng loáng (20) trong khi nghiêng mình nghịch ngợm vào một con số 3D màu pastel bóng loáng (26) , độ phân giải cao,chất lượng 8K, chi tiết sắc nét cao cấp, làn da mịn tự nhiên, tỷ lệ 9:16. \r\nGóc chụp rõ mặt cả hai chủ thể.","id":"934bc8c05c7adb6a","filename":"welcome-2026 (2).jpg","albumSlug":"tam-biet-2025-chao-2026"},{"type":"split","src":"../thumbnails/tam-biet-2025-chao-2026/welcome-2026 (3).jpg","src_a":"../split/tam-biet-2025-chao-2026/welcome-2026 (3)-a.jpg","src_b":"../split/tam-biet-2025-chao-2026/welcome-2026 (3)-b.jpg","name":"welcome-2026 (3)","metadata":{"title":"Tạm biệt 2025 - Chào 2026","description":"Cung chúc tân xuân Bính Ngọ","variant":"fashion","attributes":{"outfit":["áo sơ mi"],"colors":["vàng","hồng","xanh ngọc"]},"tags":["bính ngọ","new year","gia đình","Tạo ảnh AI"]},"content":"\r\nUltra-bright cute advertising studio poster featuring a cheerful, playful family or couple of any age and ethnicity, all based on the provided uploaded image(s) maintaining their original faces and hairstyles. They are smiling and laughing joyfully, sitting happily on glossy pastel 3D numbers while playfully interacting with each other and leaning against oversized rounded pastel 3D numbers \"2\", \"0\", \"2\", and \"6\" which form the year 2026. Each person wears soft pastel-colored oversized shirts over white tank tops, paired with light blue jeans, embodying pastel casual outfits. The background is a high-key studio lighting setup with a soft glow, color palette in candy pastel shades, creating a bubbly, joyful, cute, and playful mood. The composition is ultra-realistic, high-end advertising quality, with an aspect ratio of 5:4, no text included. The subjects interact naturally with the glossy pastel 3D numbers and among themselves, all placed in a clean studio environment. Use the uploaded image(s) as the base or reference for the subjects' appearances, faces, and poses, replicating and varying their positions to create a lively, warm, and joyful group or couple scene.","id":"cb8f9311ce059d68","filename":"welcome-2026 (3).jpg","albumSlug":"tam-biet-2025-chao-2026"},{"type":"split","src":"../thumbnails/tam-biet-2025-chao-2026/welcome-2026 (4).jpg","src_a":"../split/tam-biet-2025-chao-2026/welcome-2026 (4)-a.jpg","src_b":"../split/tam-biet-2025-chao-2026/welcome-2026 (4)-b.jpg","name":"welcome-2026 (4)","metadata":{"title":"Tạm biệt 2025 - Chào 2026","description":"Cung chúc tân xuân Bính Ngọ","variant":"fashion","attributes":{"outfit":["áo sơ mi"],"colors":["hồng"]},"tags":["bính ngọ","new year","Tạo ảnh AI"]},"content":"\r\nUltra-bright cute advertising studio poster featuring a cheerful, playful young Thai woman. She is smiling and laughing joyfully, sitting happily on a glossy pastel 3D number \"0\" while leaning playfully against an oversized rounded pastel 3D number \"2\", which is the first digit of \"2026\" and significantly larger than the others. Her long, soft wavy hair has natural bounce, and her makeup is fresh dewy style with rosy cheeks and glossy lips. She wears a soft pink oversized shirt over a white tank top, paired with light blue jeans, embodying a pastel casual outfit. The background is a high-key studio lighting setup with a soft glow, color palette in candy pastel shades, creating a bubbly, joyful, cute, and playful mood. The composition is ultra-realistic, high-end advertising quality, with an aspect ratio of 5:4, no text included. The subject interacts naturally with the glossy pastel 3D numbers \"2\", \"0\", and the other digits \"2\" and \"6\" forming the year 2026, all placed in a clean studio environment.","id":"d63853a906e23b8f","filename":"welcome-2026 (4).jpg","albumSlug":"tam-biet-2025-chao-2026"},{"type":"split","src":"../thumbnails/tam-biet-2025-chao-2026/welcome-2026 (5).jpg","src_a":"../split/tam-biet-2025-chao-2026/welcome-2026 (5)-a.jpg","src_b":"../split/tam-biet-2025-chao-2026/welcome-2026 (5)-b.jpg","name":"welcome-2026 (5)","metadata":{"title":"Tạm biệt 2025 - Chào 2026","description":"Cung chúc tân xuân Bính Ngọ","variant":"fashion","attributes":{"outfit":["áo sơ mi","quần bò"]},"tags":["bính ngọ","new year","Tạo ảnh AI"]},"content":"\r\nUltra-bright cute advertising studio poster featuring a cheerful, playful man of any age and ethnicity, based on the provided uploaded image. He is smiling and laughing joyfully, sitting happily on a glossy pastel 3D number \"0\" while leaning playfully against an oversized rounded pastel 3D number \"2\", which is the first digit of \"2026\" and significantly larger than the others. His hair style varies but appears natural with soft waves or texture and a lively bounce. He wears a soft pastel-colored oversized shirt over a white tank top, paired with light blue jeans, embodying a pastel casual outfit. The background is a high-key studio lighting setup with a soft glow, color palette in candy pastel shades, creating a bubbly, joyful, cute, and playful mood. The composition is ultra-realistic, high-end advertising quality, with an aspect ratio of 5:4, no text included. The subject interacts naturally with the glossy pastel 3D numbers \"2\", \"0\", and the other digits \"2\" and \"6\" forming the year 2026, all placed in a clean studio environment. Use the uploaded image as the base or reference for the subject's appearance and pose.","id":"967d81c15dd7865b","filename":"welcome-2026 (5).jpg","albumSlug":"tam-biet-2025-chao-2026"},{"type":"split","src":"../thumbnails/tam-biet-2025-chao-2026/welcome-2026 (6).jpg","src_a":"../split/tam-biet-2025-chao-2026/welcome-2026 (6)-a.jpg","src_b":"../split/tam-biet-2025-chao-2026/welcome-2026 (6)-b.jpg","name":"welcome-2026 (6)","metadata":{"title":"Tạm biệt 2025 - Chào 2026","description":"Cung chúc tân xuân Bính Ngọ","variant":"fashion","attributes":{"outfit":["áo sơ mi"],"colors":["xanh ngọc","hồng"]},"tags":["bính ngọ","new year","couple","Tạo ảnh AI"]},"content":"\r\nUltra-bright cute advertising studio poster featuring a cheerful, playful family or couple of any age and ethnicity, all based on the provided uploaded image(s) maintaining their original faces and hairstyles. They are smiling and laughing joyfully, sitting happily on glossy pastel 3D numbers while playfully interacting with each other and leaning against oversized rounded pastel 3D numbers \"2\", \"0\", \"2\", and \"6\" which form the year 2026. Each person wears soft pastel-colored oversized shirts over white tank tops, paired with light blue jeans, embodying pastel casual outfits. The background is a high-key studio lighting setup with a soft glow, color palette in candy pastel shades, creating a bubbly, joyful, cute, and playful mood. The composition is ultra-realistic, high-end advertising quality, with an aspect ratio of 5:4, no text included. The subjects interact naturally with the glossy pastel 3D numbers and among themselves, all placed in a clean studio environment. Use the uploaded image(s) as the base or reference for the subjects' appearances, faces, and poses, replicating and varying their positions to create a lively, warm, and joyful group or couple scene.","id":"577e3a3f897f8c54","filename":"welcome-2026 (6).jpg","albumSlug":"tam-biet-2025-chao-2026"}]
-            </script>
+    // --- 2. Switching Modes ---
+    window.switchMode = function (mode) {
+        // Warning if unsaved?
+        if (STATE.isModified && !confirm("Unsaved changes will be lost. Switch anyway?")) {
+            // Revert tab UI if needed, for now just simple confirm
+            return;
+        }
 
-            <script>
-                console.log("Parsing Gallery Data...");
-                try {
-                    const rawData = document.getElementById('gallery-model').textContent;
-                    if (rawData && rawData.trim().length > 0) {
-                        currentPhotos = JSON.parse(rawData);
-                        console.log("Album Data Populated Successfully:", currentPhotos.length, "items");
-                    } else {
-                        console.error("Gallery Model Data is empty!");
-                        currentPhotos = [];
-                    }
-                } catch (e) {
-                    console.error("Failed to parse gallery data:", e);
-                    currentPhotos = [];
-                }
-            </script>
-            
-</div>
+        STATE.mode = mode;
+        STATE.fileHandle = null; // Reset file handle
+        STATE.isModified = false;
 
+        // Reset UI State for new mode
+        document.getElementById('target-filename').innerText = MODE_CONFIG[mode].filename;
+        document.getElementById('open-file-btn').classList.replace('btn-outline-secondary', 'btn-info');
+        document.getElementById('open-file-btn').innerText = "Open File";
 
-<!-- Scripts (Local) -->
-<script src="../assets/vendor/jquery.min.js"></script>
-<script src="../assets/vendor/imagesloaded.pkgd.min.js"></script>
-<script src="../assets/vendor/masonry.pkgd.min.js"></script>
+        // Clear pinned list until file loaded to prevent confusion
+        // actually we can keep rendered view but disable toggling? 
+        // Better: Clear "Pinned" list in memory to require a reload from file
+        if (mode === 'photos') STATE.pinnedPhotos = [];
+        else STATE.pinnedAlbums = [];
 
-<script>
-    // Init Masonry after images load
-    var $grid = $('.row').masonry({
-        itemSelector: '.col-sm-6',
-        percentPosition: true
-    });
+        renderGrid();
+        updateStatus(false);
+    }
 
-    // layout Masonry after each image loads
-    $grid.imagesLoaded().progress(function () {
-        $grid.masonry('layout');
-    });
+    // --- 3. File System ---
+    async function openLocalFile() {
+        try {
+            const [handle] = await window.showOpenFilePicker({
+                types: [{
+                    description: 'JSON Config',
+                    accept: { 'application/json': ['.json'] }
+                }],
+                multiple: false
+            });
+
+            const file = await handle.getFile();
+            // Validate Filename
+            const expected = MODE_CONFIG[STATE.mode].filename;
+            if (file.name !== expected) {
+                alert(`Wrong file! Please select '${expected}'`);
+                return;
+            }
+
+            const text = await file.text();
+
+            try {
+                const data = JSON.parse(text);
+                if (STATE.mode === 'photos') STATE.pinnedPhotos = data;
+                else STATE.pinnedAlbums = data;
+
+                STATE.fileHandle = handle;
+
+                // UI Fixes
+                document.getElementById('open-file-btn').classList.replace('btn-info', 'btn-outline-secondary');
+                document.getElementById('open-file-btn').innerText = "Linked: " + file.name;
+
+                renderGrid();
+                updateStatus(false);
+
+            } catch (jsonErr) {
+                alert("Invalid JSON content!");
+            }
+
+        } catch (err) {
+            console.warn("Cancelled", err);
+        }
+    }
+
+    async function saveLocalFile() {
+        if (!STATE.fileHandle) return;
+        try {
+            const writable = await STATE.fileHandle.createWritable();
+            const data = STATE.mode === 'photos' ? STATE.pinnedPhotos : STATE.pinnedAlbums;
+            await writable.write(JSON.stringify(data, null, 2));
+            await writable.close();
+            updateStatus(false);
+            alert("✅ Saved!");
+        } catch (err) {
+            alert("❌ Error: " + err.message);
+        }
+    }
+
+    // --- 4. Logic ---
+    window.toggleItem = function (id) {
+        if (!STATE.fileHandle) { alert("⚠️ Please open the source file first!"); return; }
+
+        let list = STATE.mode === 'photos' ? STATE.pinnedPhotos : STATE.pinnedAlbums;
+
+        if (list.includes(id)) {
+            list = list.filter(pid => pid !== id);
+        } else {
+            list.unshift(id);
+        }
+
+        // Write back
+        if (STATE.mode === 'photos') STATE.pinnedPhotos = list;
+        else STATE.pinnedAlbums = list;
+
+        renderGrid();
+        updateStatus(true);
+    }
+
+    function updateStatus(modified) {
+        STATE.isModified = modified;
+        const list = STATE.mode === 'photos' ? STATE.pinnedPhotos : STATE.pinnedAlbums;
+        document.getElementById('pinned-count').innerText = list.length;
+
+        const saveBtn = document.getElementById('save-btn');
+        const badge = document.getElementById('pending-indicator');
+
+        if (modified) {
+            saveBtn.disabled = false;
+            badge.classList.remove('d-none');
+            window.onbeforeunload = () => "Unsaved";
+        } else {
+            saveBtn.disabled = true;
+            badge.classList.add('d-none');
+            window.onbeforeunload = null;
+        }
+    }
+
+    // --- 5. Render ---
+    window.filterGrid = renderGrid;
+
+    function renderGrid() {
+        const grid = document.getElementById('admin-grid');
+        const term = document.getElementById('search-box').value.toLowerCase();
+
+        const sourceData = STATE.mode === 'photos' ? STATE.photos : STATE.albums;
+        const pinnedList = STATE.mode === 'photos' ? STATE.pinnedPhotos : STATE.pinnedAlbums;
+        const idKey = MODE_CONFIG[STATE.mode].idKey;
+
+        // Filter
+        const filtered = sourceData.filter(item => {
+            const str = `${item.name} ${item.slug || ''} ${item[idKey]}`.toLowerCase();
+            return str.includes(term);
+        });
+
+        if (filtered.length === 0) {
+            grid.innerHTML = '<div class="col-12 text-center text-muted">No items found/loaded.</div>';
+            return;
+        }
+
+        grid.innerHTML = filtered.map(item => {
+            const id = item[idKey];
+            const isPinned = pinnedList.includes(id);
+            const thumb = "../" + (item.thumb || item.coverImage); // Handle path diffs?
+            // Albums might just have coverImage name, ensure path is correct. 
+            // data-gen for albums adds 'thumb': 'thumbnails/Cover.jpg'
+
+            return `
+                <div class="col-6 col-md-4 col-lg-3">
+                    <div class="card bg-dark border-secondary h-100 position-relative group-hover ${isPinned ? 'border-warning' : ''}">
+                        
+                        <!-- Image -->
+                        <div class="ratio ratio-1x1 overflow-hidden card-img-top">
+                            <img src="${thumb}" 
+                                 class="w-100 h-100 object-fit-cover" 
+                                 style="opacity: ${item.locked ? 0.6 : 1}; filter: ${item.locked ? 'grayscale(1)' : 'none'};" 
+                                 loading="lazy"
+                                 onerror="this.src='../assets/gallery-icon-100x100.png'">
+                        </div>
+
+                        <!-- Action Button -->
+                        <div class="position-absolute top-0 end-0 p-2">
+                            <button class="btn btn-sm ${isPinned ? 'btn-warning' : 'btn-light opacity-50'} rounded-circle shadow"
+                                    style="width: 40px; height: 40px;"
+                                    onclick="toggleItem('${id}')">
+                                <ion-icon name="${isPinned ? 'star' : 'star-outline'}" style="font-size: 1.2rem;"></ion-icon>
+                            </button>
+                        </div>
+                        
+                        ${item.locked ? '<div class="position-absolute top-0 start-0 p-2"><span class="badge bg-danger"><ion-icon name="lock-closed"></ion-icon> Locked</span></div>' : ''}
+
+                        <!-- Metadata -->
+                        <div class="card-body p-2 bg-black bg-opacity-75">
+                            <div class="text-truncate fw-bold text-white fs-6">${item.name}</div>
+                            <small class="text-secondary d-block text-truncate">
+                                ${STATE.mode === 'photos' ? item.albumSlug : (item.photoCount + ' photos')}
+                            </small>
+                             ${isPinned ? '<div class="mt-1"><span class="badge bg-warning text-dark">PINNED</span></div>' : ''}
+                             <div class="d-none small text-muted">${id}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
 </script>
         </main>
 

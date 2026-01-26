@@ -416,29 +416,149 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', async () => {
-        const grid = document.querySelector('#masonry-grid');
+        const gridEl = document.querySelector('#masonry-grid');
         const sentinel = document.getElementById('loading-sentinel');
+        // Pinned IDs from Build System (Base64 Encoded to avoid EJS issues)
+        // If photos page is used as global feed, it logic is slightly different than Index's pinned section
+        // But for "All Photos", we might not need pinning logic, just Date Desc?
+        // Let's assume Pinned is for Index only usually. But feed/page_1.json has pinned items first implicitly.
 
         // State
         let currentPage = 1;
         let isLoading = false;
         let hasMore = true;
         let $grid = null; // Masonry instance
+        let currentFilterFile = null; // If set, we are in Filter Mode (no infinite scroll)
 
         // Setup Lightbox Global
         window.currentPhotos = [];
 
-        // 1. Init Masonry (Empty)
+        // 1. Init Masonry
         if (typeof $ !== 'undefined') {
-            $grid = $('#masonry-grid').masonry({
+            $grid = $(gridEl).masonry({
                 itemSelector: '.gallery-item',
                 percentPosition: true
             });
         }
 
+        // --- FILTER LOGIC (SPRINT 7) ---
+        // Fetch Facets
+        try {
+            const fRes = await fetch('data/facets.json');
+            if (fRes.ok) {
+                const facets = await fRes.json();
+                renderFilters(facets);
+            }
+        } catch (e) { console.error("Facets load error", e); }
+
+        function renderFilters(facets) {
+            const userPanel = document.createElement('div');
+            userPanel.className = 'offcanvas offcanvas-start bg-dark text-white';
+            userPanel.id = 'filterSidebar';
+            userPanel.innerHTML = `
+                <div class="offcanvas-header">
+                    <h5 class="offcanvas-title">Filter Photos</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+                </div>
+                <div class="offcanvas-body">
+                    <div class="d-grid gap-2 mb-3">
+                         <button class="btn btn-outline-light" onclick="clearFilter()">Show All Photos</button>
+                    </div>
+                    ${facets.map(variant => `
+                        <div class="mb-4">
+                            <h6 class="text-primary text-uppercase border-bottom border-secondary pb-1">${variant.label}</h6>
+                            ${variant.filters.map(filter => `
+                                <div class="mb-3">
+                                    <div class="text-info fw-bold mb-1" style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                                        ${filter.label}
+                                    </div>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        ${filter.values.map(val => `
+                                            <span class="badge bg-secondary filter-chip" 
+                                                  style="cursor:pointer;"
+                                                  onclick="applyFilter('${val.filename}', this)">
+                                                ${val.value} (${val.count})
+                                            </span>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            document.body.appendChild(userPanel);
+
+            // Add Toggle Button to Header
+            const header = document.querySelector('.display-4').parentElement;
+            const btn = document.createElement('button');
+            btn.className = 'btn btn-outline-dark mt-3';
+            btn.innerHTML = '<ion-icon name="filter-outline"></ion-icon> Filter';
+            btn.setAttribute('data-bs-toggle', 'offcanvas');
+            btn.setAttribute('data-bs-target', '#filterSidebar');
+            header.appendChild(btn);
+        }
+
+        window.clearFilter = function () {
+            currentFilterFile = null;
+            hasMore = true;
+            currentPage = 1;
+            window.currentPhotos = [];
+
+            // Clear Grid
+            $grid.masonry('remove', $grid.find('.gallery-item')).masonry('layout');
+
+            // Reset Sentinel
+            sentinel.style.display = 'block';
+            sentinel.innerHTML = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>';
+
+            loadPage(1);
+
+            // Close sidebar
+            const bsOffcanvas = bootstrap.Offcanvas.getInstance(document.getElementById('filterSidebar'));
+            if (bsOffcanvas) bsOffcanvas.hide();
+        };
+
+        window.applyFilter = async function (filename, el) {
+            console.log("Applying filter:", filename);
+            currentFilterFile = filename;
+
+            // Highlight UI
+            document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('bg-primary'));
+            if (el) el.classList.add('bg-primary');
+
+            // Close sidebar
+            const bsOffcanvas = bootstrap.Offcanvas.getInstance(document.getElementById('filterSidebar'));
+            if (bsOffcanvas) bsOffcanvas.hide();
+
+            // Clear Grid
+            $grid.masonry('remove', $grid.find('.gallery-item')).masonry('layout');
+            window.currentPhotos = [];
+
+            // Show Loading
+            sentinel.style.display = 'block';
+            sentinel.innerHTML = '<div class="spinner-border text-primary"></div>';
+
+            try {
+                const res = await fetch(`data/facets/${filename}`);
+                if (!res.ok) throw new Error("Filter load failed");
+                const photos = await res.json();
+
+                renderPhotos(photos);
+
+                // Hide Sentinel (No pagination in filter mode currently)
+                sentinel.style.display = 'none';
+                hasMore = false; // Disable infinite scroll
+
+            } catch (err) {
+                console.error(err);
+                sentinel.innerHTML = '<div class="text-danger">Failed to load filter.</div>';
+            }
+        };
+
         // 2. Fetch Function
         const loadPage = async (page) => {
-            if (isLoading || !hasMore) return;
+            if (isLoading || !hasMore || currentFilterFile) return;
             isLoading = true;
 
             try {
@@ -461,42 +581,7 @@
                     return;
                 }
 
-                // Append to Global Photos (for Lightbox navigation)
-                const startIndex = window.currentPhotos.length;
-                window.currentPhotos.push(...photos);
-
-                // Check Global Pinned Logic ? 
-                // The feed pages are already pre-sorted by build.js (Pinned > Date)
-
-                // Render HTML
-                const itemsHtml = photos.map((photo, i) => {
-                    const globalIndex = startIndex + i;
-                    // ID Generation must match data-gen: AlbumSlug__Filename
-                    const viewId = photo.id;
-                    return `
-                    <div class="col-6 col-md-4 col-lg-3 mb-4 gallery-item">
-                        <div class="photo-card" onclick="openLightbox(${globalIndex})" style="cursor: pointer; position: relative;" data-view-id="${viewId}">
-                            <img src="${photo.thumb}" 
-                                 alt="${photo.name}"
-                                 loading="lazy">
-                            <div class="view-overlay" style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 4px; color: white; font-size: 0.75rem; display: flex; align-items: center; gap: 4px; pointer-events: none;">
-                                <ion-icon name="eye-outline"></ion-icon>
-                                <span class="view-count-text">...</span>
-                            </div>
-                        </div>
-                    </div>`;
-                }).join('');
-
-                // Append to Grid
-                const $items = $(itemsHtml);
-                $grid.append($items).masonry('appended', $items);
-
-                // Reflow Masonry after images load
-                $grid.imagesLoaded().progress(function () {
-                    $grid.masonry('layout');
-                    if (window.refreshViewCounts) window.refreshViewCounts();
-                });
-
+                renderPhotos(photos);
                 currentPage++;
 
             } catch (err) {
@@ -506,6 +591,41 @@
                 isLoading = false;
             }
         };
+
+        // Shared Render
+        function renderPhotos(photos) {
+            // Append to Global Photos (for Lightbox navigation)
+            const startIndex = window.currentPhotos.length;
+            window.currentPhotos.push(...photos);
+
+            // Render HTML
+            const itemsHtml = photos.map((photo, i) => {
+                const globalIndex = startIndex + i;
+                const viewId = photo.id;
+                return `
+                <div class="col-6 col-md-4 col-lg-3 mb-4 gallery-item">
+                    <div class="photo-card" onclick="openLightbox(${globalIndex})" style="cursor: pointer; position: relative;" data-view-id="${viewId}">
+                        <img src="${photo.thumb}" 
+                                alt="${photo.name}"
+                                loading="lazy">
+                        <div class="view-overlay" style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 4px; color: white; font-size: 0.75rem; display: flex; align-items: center; gap: 4px; pointer-events: none;">
+                            <ion-icon name="eye-outline"></ion-icon>
+                            <span class="view-count-text">...</span>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+
+            // Append to Grid
+            const $items = $(itemsHtml);
+            $grid.append($items).masonry('appended', $items);
+
+            // Reflow Masonry after images load
+            $grid.imagesLoaded().progress(function () {
+                $grid.masonry('layout');
+                if (window.refreshViewCounts) window.refreshViewCounts();
+            });
+        }
 
         // 3. Initial Load
         await loadPage(1);
@@ -518,9 +638,6 @@
         }, { rootMargin: '200px' });
 
         observer.observe(sentinel);
-
-        // Sync Lightbox Payload (For first page at least, dynamic later)
-        // Note: layout.ejs uses `window.currentPhotos`. We update it in real-time.
     });
 </script>
         </main>

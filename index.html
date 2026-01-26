@@ -498,7 +498,7 @@
     document.addEventListener('DOMContentLoaded', async () => {
         const feedGrid = document.getElementById('feed-grid');
         // Pinned IDs from Build System (Base64 Encoded to avoid EJS issues)
-        const pinnedIds = JSON.parse(atob("WyJEYS1MYXQtMjAyNV9faW1nXzA1X2pwZyIsIkhhbm9pLTIwMjRfX2ltZ19zdW5zZXRfcG5nIiwiY2h1cC1hbmgtY3VuZy1uZ3VhX19jaHVwLWN1bmctbmd1YSAoMSlfanBnIiwiY2h1cC1hbmgtY3VuZy1uZ3VhX19jaHVwLWN1bmctbmd1YSAoMilfanBnIiwiY2h1cC1hbmgtY3VuZy1uZ3VhX19jaHVwLWN1bmctbmd1YSAoMylfanBnIiwiY2h1cC1hbmgtY3VuZy1uZ3VhX19jaHVwLWN1bmctbmd1YSAoNClfanBnIiwiY2h1cC1hbmgtY3VuZy1uZ3VhX19jaHVwLWN1bmctbmd1YSAoNSlfanBnIiwiY2h1cC1hbmgtY3VuZy1uZ3VhX19jaHVwLWN1bmctbmd1YSAoNilfanBnIiwiY2h1cC1hbmgtY3VuZy1uZ3VhX19jaHVwLWN1bmctbmd1YSAoNylfanBnIiwiY2h1cC1hbmgtY3VuZy1uZ3VhX19jaHVwLWN1bmctbmd1YSAoOClfanBnIiwiY2h1cC1hbmgtY3VuZy1uZ3VhX19jaHVwLWN1bmctbmd1YSAoOSlfanBnIl0="));
+        const pinnedIds = JSON.parse(atob("WyIwYmFkMGMxODAwMWNmYThkIiwiY2I4ZjkzMTFjZTA1OWQ2OCIsImQ2Mzg1M2E5MDZlMjNiOGYiLCI2ZmUyN2U2ZGJlNzA0ZTlkIiwiYjdhOTE0MDEzMmUwOGI3NCIsIjJhYmM0YjM5NGJkMzUwNzEiLCJhOWVkNWVmODQ0YTNlODk3IiwiMjIwMTRiNmFjZmJmOTE4NyJd"));
 
         // Initialize Masonry
         let $grid = null;
@@ -524,8 +524,9 @@
                 if (pinnedIds.includes(p.id)) pinnedCount++;
             });
 
-            // If pinned count exceeds 8, show all pinned. Otherwise default to 8.
-            const limit = Math.max(8, pinnedCount);
+            // If pinned count exceeds limit, show all pinned. Otherwise default to limit.
+            const configLimit = 20;
+            const limit = Math.max(configLimit, pinnedCount);
 
             // Take Photos
             const displayPhotos = photos.slice(0, limit);
