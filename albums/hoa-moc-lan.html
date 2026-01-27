@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        Thu Nhiên Gallery
+    </title>
+    <link rel="icon" href="../assets/gallery icon 32x32.png">
+
+    <!-- SEO Meta Tags -->
+    <meta name="description"
+        content="Album: Hoa mộc lan
+#indoor #Hoa mộc lan
+Thu Nhiên Gallery">
+    <meta property="og:title" content="Hoa mộc lan">
+    <meta property="og:description"
+        content="Album: Hoa mộc lan
+#indoor #Hoa mộc lan
+Thu Nhiên Gallery">
+    <meta property="og:image"
+        content="https://thunhien.edu.vn/gallery/thumbnails/hoa-moc-lan-thumbnail.jpg">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:width" content="300">
+    <meta property="og:type" content="article">
+    <meta property="og:url"
+        content="https://thunhien.edu.vn/gallery/albums/hoa-moc-lan.html">
+    <!-- <meta property="fb:app_id" content="YOUR_APP_ID"> -->
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="../assets/vendor/bootstrap.min.css">
+    <!-- Ionicons -->
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-dark: #121212;
+            --bg-card: #1e1e1e;
+            --accent-color: #0d6efd;
+            --text-primary: #e0e0e0;
+        }
+
+        /* body selector removed to fix Light Mode */
+        /* Navbar */
+        .navbar {
+            background: rgba(30, 30, 30, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #333;
+        }
+
+        .navbar-brand img {
+            height: 40px;
+        }
+
+        /* Lightbox - Advanced Split Layout */
+        #lightbox-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        #lightbox-modal.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .lightbox-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* Left: Stage */
+        .lightbox-stage {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+            /* Clean black stage */
+            overflow: hidden;
+        }
+
+        .lightbox-close-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            color: white;
+            font-size: 2rem;
+            z-index: 30;
+            cursor: pointer;
+        }
+
+        /* Sidebar */
+        /* Sidebar (Overlay Mode) */
+        .lightbox-sidebar {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 33vw;
+            /* 1/3 Screen */
+            min-width: 320px;
+            max-width: 90vw;
+            /* Mobile safe */
+
+            background: rgba(30, 30, 30, 0.5);
+            /* Semi-transparent */
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: -5px 0 20px rgba(0, 0, 0, 0.5);
+
+            z-index: 2001;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateX(0);
+        }
+
+        .lightbox-sidebar.hidden {
+            transform: translateX(100%);
+            /* Slide out to right */
+        }
+
+        @media (max-width: 768px) {
+            .lightbox-sidebar {
+                width: 85vw;
+                max-width: none;
+            }
+        }
+
+        /* Stage Toggle Button (Visible when sidebar hidden) */
+        .stage-toggle-btn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            z-index: 20;
+            transition: all 0.2s;
+            opacity: 0;
+            /* Hidden by default if sidebar is open */
+            pointer-events: none;
+        }
+
+        .stage-toggle-btn:hover {
+            background: rgba(0, 0, 0, 0.8);
+            border-color: #fff;
+        }
+
+        /* Show toggle button when sidebar is hidden */
+        .lightbox-container.sidebar-closed .stage-toggle-btn {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Toolbar */
+        .sidebar-toolbar {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            border-bottom: 1px solid #333;
+            background: #252525;
+        }
+
+        .icon-btn {
+            background: transparent;
+            border: none;
+            color: #aaa;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .icon-btn:hover {
+            color: #fff;
+            background: #333;
+        }
+
+        .icon-btn.close-btn:hover {
+            color: #f44;
+        }
+
+        /* Content */
+        .sidebar-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        #lightbox-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        .tags-container {
+            margin-bottom: 15px;
+        }
+
+        .tag-chip {
+            display: inline-block;
+            background: #333;
+            color: #ccc;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .tag-chip:hover {
+            background: #0d6efd;
+            color: #fff;
+        }
+
+        .description-text {
+            font-size: 0.9rem;
+            color: #ccc;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+
+        /* Footer / Zoom */
+        .sidebar-footer {
+            padding: 15px;
+            border-top: 1px solid #333;
+            background: #252525;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .zoom-controls button {
+            background: #333;
+            border: none;
+            color: #fff;
+            padding: 5px 10px;
+            margin-right: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .zoom-controls button:hover {
+            background: #555;
+        }
+
+        .counter-text {
+            font-size: 0.8rem;
+            color: #777;
+        }
+
+        /* Navigation Overlays */
+        .nav-overlay {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 15%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 3rem;
+        }
+
+        .nav-overlay:hover {
+            opacity: 1;
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-left {
+            left: 0;
+        }
+
+        .nav-right {
+            right: 0;
+        }
+
+        /* Mobile Tweaks */
+        @media (max-width: 768px) {
+            .lightbox-container {
+                flex-direction: column;
+            }
+
+            .lightbox-sidebar {
+                width: 100%;
+                max-width: none;
+                height: 100% !important;
+                /* Full screen height */
+                top: 0;
+                bottom: 0;
+                margin-right: 0 !important;
+
+                /* Transform for Slide Up/Down */
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                transform: translateY(0);
+                /* Visible state */
+
+                /* Darker background for full screen overlay */
+                background: rgba(10, 10, 10, 0.95);
+                z-index: 2002;
+                /* Above everything */
+            }
+
+            .lightbox-sidebar.hidden {
+                transform: translateY(100%);
+                /* Slide down out of view */
+                margin-bottom: 0;
+                /* Reset previous logic */
+            }
+
+            .lightbox-stage {
+                flex: 1;
+                width: 100%;
+                height: 100%;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="../index.html">
+            <img src="../assets/gallery icon 100x100.png" alt="Thu Nhiên Gallery" height="40"
+                class="d-inline-block align-text-top">
+            Thu Nhiên Gallery
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="../index.html">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="../variants/AIPhotography">AI Photography</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="../categories">Categories</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="../photos.html">Photos</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="../albums.html">Albums</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="../tags.html">Tags</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+        <main>
+            <div class="bg-white border-bottom py-3 mb-4">
+    <div class="container">
+        <div class="d-flex align-items-center">
+            <a id="smart-back-link" href="../index.html"
+                class="text-decoration-none text-primary">Home</a>
+            <span class="text-muted mx-2">/</span>
+            <h4 class="fw-bold mb-0 text-dark text-truncate" title="Hoa mộc lan" style="max-width: 70%;">
+                Hoa mộc lan
+            </h4>
+
+            <button class="btn btn-sm btn-outline-primary rounded-pill px-3 ms-auto"
+                onclick="shareUrl('Hoa mộc lan', 'Check out this album', window.location.href)">
+                <ion-icon name="share-social-outline" style="vertical-align: -1px; margin-right: 4px;"></ion-icon>
+                Share
+            </button>
+        </div>
+        <div class="text-muted small mt-2">
+            <ion-icon name="images-outline" style="vertical-align: -2px;"></ion-icon>
+            9 photos
+        </div>
+    </div>
+</div>
+
+<script>
+    // Smart Back Link Logic
+    document.addEventListener("DOMContentLoaded", function () {
+        const backLink = document.getElementById('smart-back-link');
+        if (document.referrer && document.referrer.includes('albums')) {
+            backLink.textContent = 'Albums';
+            backLink.href = '../albums.html';
+        }
+    });
+
+    function copyCurrentUrl() {
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            alert('Album link copied to clipboard!');
+        }).catch(err => {
+            console.error('Failed to copy', err);
+        });
+    }
+</script>
+
+<div class="container" id="album-container">
+    
+            <!-- Public UI -->
+            <div class="row" id="masonry-grid"></div>
+
+            <!-- Sentinel -->
+            <div id="sentinel" class="py-5 text-center text-muted">
+                <div class="spinner-border text-primary" role="status"></div>
+            </div>
+            
+</div>
+
+<!-- Scripts (Local) -->
+<script src="../assets/vendor/jquery.min.js"></script>
+<script src="../assets/vendor/imagesloaded.pkgd.min.js"></script>
+<script src="../assets/vendor/masonry.pkgd.min.js"></script>
+
+<script>
+    // --- SHARED INFINITE SCROLL LOGIC ---
+    let masonryInstance = null;
+    let renderedCount = 0;
+    const CHUNK_SIZE = 48;
+
+    function initInfiniteScroll(photos) {
+        window.currentPhotos = photos;
+        renderedCount = 0;
+
+        const grid = document.querySelector('#masonry-grid');
+        const sentinel = document.getElementById('sentinel');
+
+        if (!grid || !sentinel) return;
+
+        // Show sentinel
+        sentinel.style.display = 'block';
+
+        // Init Masonry
+        masonryInstance = new Masonry(grid, {
+            itemSelector: '.gallery-item',
+            percentPosition: true
+        });
+
+        // Render Function
+        window.renderNextChunk = function () {
+            if (renderedCount >= photos.length) {
+                sentinel.style.display = 'none'; // distinct from "End of text"
+                return;
+            }
+
+            const nextBatch = photos.slice(renderedCount, renderedCount + CHUNK_SIZE);
+            const html = nextBatch.map((photo, i) => {
+                const index = renderedCount + i;
+                const safeName = photo.filename.replace(/\./g, '_');
+                const viewId = photo.id || `${photo.albumSlug}__${safeName}`;
+
+                return `
+                    <div class="col-sm-6 col-md-4 col-lg-3 mb-4 gallery-item">
+                        <div class="photo-card" onclick="openLightbox(${index})" style="cursor: pointer; position: relative;" data-view-id="${viewId}">
+                            <img src="${photo.src}" alt="${photo.name}" loading="lazy">
+                            <div class="view-overlay" style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 4px; color: white; font-size: 0.75rem; display: flex; align-items: center; gap: 4px; pointer-events: none;">
+                                <ion-icon name="eye-outline"></ion-icon>
+                                <span class="view-count-text">...</span>
+                            </div>
+                        </div>
+                    </div>
+                 `;
+            }).join('');
+
+            // Append
+            grid.insertAdjacentHTML('beforeend', html);
+
+            imagesLoaded(grid, function () {
+                masonryInstance.reloadItems();
+                masonryInstance.layout();
+                if (window.refreshViewCounts) window.refreshViewCounts();
+            });
+
+            renderedCount += nextBatch.length;
+        };
+
+        // Observer
+        const observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting) {
+                window.renderNextChunk();
+            }
+        }, { rootMargin: '400px' });
+        observer.observe(sentinel);
+
+        // First Load
+        window.renderNextChunk();
+    }
+</script>
+
+
+        <!-- PUBLIC LOGIC -->
+        <script id="gallery-model" type="application/json">
+        [{"type":"split","src":"../thumbnails/hoa-moc-lan/Image_1zm7ro1zm7ro1zm7.jpg","src_a":"../split/hoa-moc-lan/Image_1zm7ro1zm7ro1zm7-a.jpg","src_b":"../split/hoa-moc-lan/Image_1zm7ro1zm7ro1zm7-b.jpg","name":"Image_1zm7ro1zm7ro1zm7","metadata":{},"content":"","id":"82c45a1dc01a6964","filename":"Image_1zm7ro1zm7ro1zm7.png","albumSlug":"hoa-moc-lan"},{"type":"split","src":"../thumbnails/hoa-moc-lan/Image_2s9syd2s9syd2s9s.jpg","src_a":"../split/hoa-moc-lan/Image_2s9syd2s9syd2s9s-a.jpg","src_b":"../split/hoa-moc-lan/Image_2s9syd2s9syd2s9s-b.jpg","name":"Image_2s9syd2s9syd2s9s","metadata":{"title":"Áo dài bên hoa mộc lan","description":"Concept đẹp xỉu cùng hoa Mộc lan","variant":"AIPhotography","attributes":{"outfit":["áo dài"],"colors":["hồng"],"model":"Nguyễn Mai Trang","location":"indoor"},"tags":["indoor","Hoa mộc lan"]},"content":"\r\nA medium shot studio portrait of a young East Asian woman, seated on a light brown woven mat floor, leaning gently against a round woven natural fiber stool on the right, looking slightly to the right with a soft, serene smile, her oval face featuring fair skin, light brown eyes, subtle pink blush on her cheeks, delicate eyeliner, long curled lashes, and natural pink lips, her hair same picture uploaded, with light pink magnolia flowers tucked behind her right ear, wearing a traditional Vietnamese Ao Dai style top in a dark pink pastel hue 200 billions VND with a subtle tone-on-tone floral damask pattern, featuring a high mandarin collar and long sleeves, adorned with a long strand of white pearl beads around her neck, holding a round traditional silk fan with a delicate cherry blossom branch painting in warm orange and yellow tones, a small pink tassel hanging from the fan handle, her hands showing long, pointed, light pink manicured nails, the woven stool on the right supporting a dark brown, textured ceramic vase with a narrow neck, holding a branch of light pink magnolia blossoms with green buds, the background a seamless light peach-beige studio wall, captured with a shallow depth of field, sharp focus on the subject and foreground elements, soft bokeh in the background, illuminated by soft, diffused, even studio lighting from the front-left, creating gentle highlights and minimal, soft shadows, resulting in a bright and airy feel, with a warm, pastel color palette predominantly featuring pinks, peaches, and natural browns, creating a harmonious and serene aesthetic, ultra-photorealistic, cinematic fashion photography, hyper-detailed, 8K, professional photography, masterpiece, sharp focus, high dynamic range (HDR).","id":"5aefadd995849e8c","filename":"Image_2s9syd2s9syd2s9s.png","albumSlug":"hoa-moc-lan"},{"type":"split","src":"../thumbnails/hoa-moc-lan/Image_30xujo30xujo30xu.jpg","src_a":"../split/hoa-moc-lan/Image_30xujo30xujo30xu-a.jpg","src_b":"../split/hoa-moc-lan/Image_30xujo30xujo30xu-b.jpg","name":"Image_30xujo30xujo30xu","metadata":{"title":"Áo dài bên hoa mộc lan","description":"Concept đẹp xỉu cùng hoa Mộc lan","variant":"AIPhotography","attributes":{"outfit":["áo dài"],"colors":["hồng"],"model":"Nguyễn Mai Trang","location":"indoor"},"tags":["indoor","Hoa mộc lan"]},"content":"\r\nA medium shot studio portrait of a young East Asian woman, seated on a light brown woven mat floor, leaning gently against a round woven natural fiber stool on the right, looking slightly to the right with a soft, serene smile, her oval face featuring fair skin, light brown eyes, subtle pink blush on her cheeks, delicate eyeliner, long curled lashes, and natural pink lips, her hair same picture uploaded, with light pink magnolia flowers tucked behind her right ear, wearing a traditional Vietnamese Ao Dai style top in a dark pink pastel hue 200 billions VND with a subtle tone-on-tone floral damask pattern, featuring a high mandarin collar and long sleeves, adorned with a long strand of white pearl beads around her neck, holding a round traditional silk fan with a delicate cherry blossom branch painting in warm orange and yellow tones, a small pink tassel hanging from the fan handle, her hands showing long, pointed, light pink manicured nails, the woven stool on the right supporting a dark brown, textured ceramic vase with a narrow neck, holding a branch of light pink magnolia blossoms with green buds, the background a seamless light peach-beige studio wall, captured with a shallow depth of field, sharp focus on the subject and foreground elements, soft bokeh in the background, illuminated by soft, diffused, even studio lighting from the front-left, creating gentle highlights and minimal, soft shadows, resulting in a bright and airy feel, with a warm, pastel color palette predominantly featuring pinks, peaches, and natural browns, creating a harmonious and serene aesthetic, ultra-photorealistic, cinematic fashion photography, hyper-detailed, 8K, professional photography, masterpiece, sharp focus, high dynamic range (HDR).","id":"216db24fbe7263a1","filename":"Image_30xujo30xujo30xu.png","albumSlug":"hoa-moc-lan"},{"type":"split","src":"../thumbnails/hoa-moc-lan/Image_a9vrtra9vrtra9vr.jpg","src_a":"../split/hoa-moc-lan/Image_a9vrtra9vrtra9vr-a.jpg","src_b":"../split/hoa-moc-lan/Image_a9vrtra9vrtra9vr-b.jpg","name":"Image_a9vrtra9vrtra9vr","metadata":{"title":"Áo dài bên hoa mộc lan","description":"Concept đẹp xỉu cùng hoa Mộc lan","variant":"AIPhotography","attributes":{"outfit":["áo dài"],"colors":["hồng"],"model":"Nguyễn Mai Trang","location":"indoor"},"tags":["indoor","Hoa mộc lan"]},"content":"\r\nA serene young East Asian woman, appearing in her early twenties, with an oval face, fair skin, large almond-shaped dark brown eyes, delicate nose, and full lips tinted with a soft pink-orange hue, displays a gentle, serene smile, her cheeks adorned with a rosy blush, subtle winged eyeliner enhancing her long curled eyelashes, and perfectly shaped eyebrows, \r\nher hair same picture uploaded, with a large,  \r\ntwo large, light pink magnolia blossoms are tucked behind her right ear, she wears a traditional Vietnamese Ao Dai top in a soft, dark pink pastel hue 200 billions VND silk fabric featuring a subtle, tone-on-tone floral or brocade pattern, with long sleeves and a high collar, a string of white pearls hangs from her left ear, a thin silver bracelet adorns her left wrist, and her long, manicured nails are painted with a subtle iridescent nude polish, she leans gracefully on a dark, almost black, lacquered wooden stand or small table, intricately carved with traditional East Asian patterns on its sides, which supports a tall, slender, dark bronze or brown ceramic vase with a distinct vertical ribbed texture, holding a branch of light pink magnolia blossoms, featuring several open flowers with delicate petals and dark centers, along with closed buds, all set against a plain, smooth, gradient background transitioning from a soft cream at the top to a warm, light peach or pale yellow at the bottom, captured in a medium shot with an eye-level camera angle, the woman positioned slightly to the right of center, looking directly at the viewer, with a shallow depth of field, sharp focus on her face and the foreground flowers, and a soft bokeh effect in the background, illuminated by soft, diffused, even studio lighting from the front-right, creating gentle highlights and minimal, soft shadows, resulting in a warm, soft, pastel color palette dominated by light pinks, creams, and soft yellows, conveying an elegant, serene, and traditional fashion portrait aesthetic, hyper-detailed, 8K, professional photography, masterpiece, sharp focus, high dynamic range (HDR), studio lighting, soft light.\r\n\r\nKiểu tóc gốc:\r\nher long, straight, dark brown hair is center-parted and pulled back into a low ponytail or bun, with a few delicate strands framing her face","id":"1aba6140495f997e","filename":"Image_a9vrtra9vrtra9vr.png","albumSlug":"hoa-moc-lan"},{"type":"split","src":"../thumbnails/hoa-moc-lan/Image_ey8x7key8x7key8x.jpg","src_a":"../split/hoa-moc-lan/Image_ey8x7key8x7key8x-a.jpg","src_b":"../split/hoa-moc-lan/Image_ey8x7key8x7key8x-b.jpg","name":"Image_ey8x7key8x7key8x","metadata":{"title":"Áo dài bên hoa mộc lan","description":"Concept đẹp xỉu cùng hoa Mộc lan","variant":"AIPhotography","attributes":{"outfit":["áo dài"],"colors":["hồng"],"model":"Nguyễn Mai Trang","location":"indoor"},"tags":["indoor","Hoa mộc lan"]},"content":"\r\nA serene young East Asian woman, appearing in her early twenties, with an oval face, fair skin, large almond-shaped dark brown eyes, delicate nose, and full lips tinted with a soft pink-orange hue, displays a gentle, serene smile, her cheeks adorned with a rosy blush, subtle winged eyeliner enhancing her long curled eyelashes, and perfectly shaped eyebrows, \r\nher hair same picture uploaded, two large, light pink magnolia blossoms are tucked behind her right ear, she wears a traditional Vietnamese Ao Dai top in a soft, dark pink pastel hue 200 billions VND silk fabric featuring a subtle, tone-on-tone floral or brocade pattern, with long sleeves and a high collar, a string of white pearls hangs from her left ear, a thin silver bracelet adorns her left wrist, and her long, manicured nails are painted with a subtle iridescent nude polish, she leans gracefully on a dark, almost black, lacquered wooden stand or small table, intricately carved with traditional East Asian patterns on its sides, which supports a tall, slender, dark bronze or brown ceramic vase with a distinct vertical ribbed texture, holding a branch of light pink magnolia blossoms, featuring several open flowers with delicate petals and dark centers, along with closed buds, all set against a plain, smooth, gradient background transitioning from a soft cream at the top to a warm, light peach or pale yellow at the bottom, captured in a medium shot with an eye-level camera angle, the woman positioned slightly to the right of center, looking directly at the viewer, with a shallow depth of field, sharp focus on her face and the foreground flowers, and a soft bokeh effect in the background, illuminated by soft, diffused, even studio lighting from the front-right, creating gentle highlights and minimal, soft shadows, resulting in a warm, soft, pastel color palette dominated by light pinks, creams, and soft yellows, conveying an elegant, serene, and traditional fashion portrait aesthetic, hyper-detailed, 8K, professional photography, masterpiece, sharp focus, high dynamic range (HDR), studio lighting, soft light.\r\n\r\nKiểu tóc gốc:\r\nher long, straight, dark brown hair is center-parted and pulled back into a low ponytail or bun, with a few delicate strands framing her face","id":"e3eabff015e84230","filename":"Image_ey8x7key8x7key8x.png","albumSlug":"hoa-moc-lan"},{"type":"split","src":"../thumbnails/hoa-moc-lan/Image_krnu4pkrnu4pkrnu.jpg","src_a":"../split/hoa-moc-lan/Image_krnu4pkrnu4pkrnu-a.jpg","src_b":"../split/hoa-moc-lan/Image_krnu4pkrnu4pkrnu-b.jpg","name":"Image_krnu4pkrnu4pkrnu","metadata":{"title":"Áo dài bên hoa mộc lan","description":"Concept đẹp xỉu cùng hoa Mộc lan","variant":"AIPhotography","attributes":{"outfit":["áo dài"],"colors":["hồng"],"model":"Nguyễn Mai Trang","location":"indoor"},"tags":["indoor","Hoa mộc lan"]},"content":"\r\nFull-length portrait of a young East Asian woman, early 20s, with an oval face, fair skin, rosy blush on cheeks, light brown eyes, delicate eyebrows, subtle pink eyeshadow, winged eyeliner, long curled eyelashes, soft pink lips with a slight gloss, and a gentle, sweet smile, exuding demure elegance, \r\nher hair same picture uploaded,\r\nadorned with a large, soft pink fabric flower resembling a peony or magnolia tucked behind her right ear, wearing a traditional Vietnamese Ao Dai, dark pink pastel hue 200 billions VND a long-sleeved, high-necked tunic in a soft, dusty pink color with a subtle, tone-on-tone floral damask pattern woven into the fabric, featuring wide, flowy bell-shaped sleeves and side slits revealing matching pink trousers, accessorized with a long strand of small, white pearls draped loosely around her neck and a small, round pearl earring in her right ear, her long, almond-shaped fingernails painted with a natural, light pink or nude polish, her right hand delicately raised to her chin with fingers gently spread, and her left hand extended slightly downwards and to the right with gracefully posed fingers, standing upright in a minimalist studio setting with a background composed of two vertical panels, the left a lighter creamy beige and the right a slightly warmer peach-beige, with a subtle vertical seam between them, in the lower left foreground a dark brown, intricately carved wooden pedestal or small table with a square top, upon which rests a tall, slender, cylindrical vase with vertical ridges, appearing to be dark textured metal or wood with subtle gold or bronze highlights, holding two branches of artificial pale pink magnolia or cherry blossoms with several open flowers and closed buds, captured with a full-length, slightly off-center composition, eye-level camera angle, shallow depth of field with a softly blurred background, bright, soft, diffused, even studio lighting from the front-right creating gentle highlights and almost imperceptible shadows, resulting in a warm, soft pastel color palette, high key lighting, an elegant, serene, traditional fashion photography aesthetic, ultra-photorealistic, hyper-detailed, 8K, professional studio photography, masterpiece, sharp focus, high dynamic range (HDR), soft light, clean background.\r\n\r\nKiểu tóc gốc:\r\nher long, straight, glossy dark brown hair parted on the side and pulled back loosely, ","id":"28a618236d97af17","filename":"Image_krnu4pkrnu4pkrnu.png","albumSlug":"hoa-moc-lan"},{"type":"split","src":"../thumbnails/hoa-moc-lan/Image_oqg8sioqg8sioqg8.jpg","src_a":"../split/hoa-moc-lan/Image_oqg8sioqg8sioqg8-a.jpg","src_b":"../split/hoa-moc-lan/Image_oqg8sioqg8sioqg8-b.jpg","name":"Image_oqg8sioqg8sioqg8","metadata":{"title":"Áo dài bên hoa mộc lan","description":"Concept đẹp xỉu cùng hoa Mộc lan","variant":"AIPhotography","attributes":{"outfit":["áo dài"],"colors":["hồng"],"model":"Nguyễn Mai Trang","location":"indoor"},"tags":["indoor","Hoa mộc lan"]},"content":"\r\nA medium shot portrait of a young East Asian woman, seated, looking directly at the viewer with a soft, serene smile, her oval face featuring fair, smooth skin, large dark eyes with precise black eyeliner and long, curled lashes, soft pink blush on her cheeks, and subtle pink lip tint, \r\nher hair same picture uploaded, with a large, \r\ndelicate light pink fabric flower tucked behind her right ear \r\n\r\nTrang phục: She wears a traditional dark pink pastel hue 200 billions VND or ao dai style dress with long, loose sleeves, made of a soft fabric featuring a subtle, lighter pink floral or abstract pattern woven throughout, a long strand of small white pearls draped around her neck and extending down her chest, she holds a round, sheer white silk fan with a light wooden handle, adorned with delicate painted cherry blossom branches in orange and yellow hues, the fan's edge outlined with a string of small white pearls, her long, pointed fingernails are iridescent or pearl-colored, a decorative tassel with beads hangs from her waist on the right side, she leans her right arm gently on a cylindrical, woven natural fiber stool or table, which holds a tall, dark brown ceramic vase with vertical textured grooves, containing a branch of large, light pink magnolia or cherry blossom flowers and buds, the setting is a clean studio with a plain, warm beige or light peach background, the floor covered with a light brown woven mat, likely bamboo or straw, the composition is eye-level with the subject slightly off-center to the left, utilizing a shallow depth of field with sharp focus on the woman and foreground elements, and a soft bokeh in the background, illuminated by soft, diffused, even studio lighting from the front-left, creating gentle highlights and minimal, soft shadows, the overall color palette is warm and pastel, dominated by soft pinks, light beige, and natural browns, conveying an elegant, serene, and traditional Asian aesthetic, hyper-detailed, 8K, professional photography, masterpiece, sharp focus, high dynamic range (HDR).\r\n\r\nKiểu tóc gốc: her long, straight, glossy dark brown hair parted on the side and styled into a low ponytail or half-updo","id":"8ece4882ef224e25","filename":"Image_oqg8sioqg8sioqg8.png","albumSlug":"hoa-moc-lan"},{"type":"split","src":"../thumbnails/hoa-moc-lan/Image_svyik1svyik1svyi.jpg","src_a":"../split/hoa-moc-lan/Image_svyik1svyik1svyi-a.jpg","src_b":"../split/hoa-moc-lan/Image_svyik1svyik1svyi-b.jpg","name":"Image_svyik1svyik1svyi","metadata":{"title":"Áo dài bên hoa mộc lan","description":"Concept đẹp xỉu cùng hoa Mộc lan","variant":"AIPhotography","attributes":{"outfit":["áo dài"],"colors":["hồng"],"model":"Nguyễn Mai Trang","location":"indoor"},"tags":["indoor","Hoa mộc lan"]},"content":"\r\nHalf-length portrait of a young East Asian woman in traditional attire, positioned slightly right of center, looking directly at the viewer with a serene and gentle expression, her face is oval-shaped with fair, warm-toned skin, large dark brown eyes with subtle winged eyeliner and long, defined lashes, natural dark eyebrows, prominent soft pink blush across her cheeks and nose bridge, and soft pink lips with a glossy finish, \r\nher hair same picture uploaded,\r\n, adorned with a large, delicate light pink fabric flower behind her right ear, with a few wispy strands framing her face, she wears a traditional light pink Ao Dai dark pink pastel hue 200 billions VND, made of silk or satin fabric with a subtle tone-on-tone floral brocade pattern, featuring a high mandarin collar and long, wide bell sleeves, a long, multi-strand pearl necklace is draped elegantly around her neck, extending down to her waist, her hands are clasped gently in front of her, holding a round, traditional silk or paper fan with a light wooden handle, the fan features a delicate hand-painted branch with yellow-orange blossoms, and a pink tassel with small beads hangs from its handle, her fingernails are long, pointed, and painted with a clear or very light nude polish, the background is a plain, warm peach-beige gradient, with a soft, sheer white curtain or fabric drape visible on the far left, and a decorative branch with large, soft pink magnolia-like blossoms and green leaves arranged in a dark vase partially visible at the bottom right, the composition is an eye-level shot with a shallow depth of field, creating a sharp focus on the subject and a soft, pleasing bokeh in the background, illuminated by soft, diffused studio lighting from the front-left, resulting in gentle highlights and minimal, soft shadows, giving a bright and airy feel, the overall color palette is warm and soft pastel, dominated by pinks, peaches, and creams, creating an elegant and traditional aesthetic, ultra-photorealistic, hyper-detailed, 8K, professional photography, masterpiece, sharp focus, high dynamic range (HDR), studio lighting, soft glow.\r\n\r\nKiểu tóc gốc: \r\nher long, straight, glossy dark brown hair is parted on the left and pulled back into a low ponytail or half-up style,","id":"ea90acb3be4f930f","filename":"Image_svyik1svyik1svyi.png","albumSlug":"hoa-moc-lan"},{"type":"split","src":"../thumbnails/hoa-moc-lan/Image_xw25qlxw25qlxw25.jpg","src_a":"../split/hoa-moc-lan/Image_xw25qlxw25qlxw25-a.jpg","src_b":"../split/hoa-moc-lan/Image_xw25qlxw25qlxw25-b.jpg","name":"Image_xw25qlxw25qlxw25","metadata":{"title":"Áo dài bên hoa mộc lan","description":"Concept đẹp xỉu cùng hoa Mộc lan","variant":"AIPhotography","attributes":{"outfit":["áo dài"],"colors":["hồng"],"model":"Nguyễn Mai Trang","location":"indoor"},"tags":["indoor","Hoa mộc lan"]},"content":"\r\nFull-length portrait of a young East Asian woman in traditional Vietnamese Ao Dai, seated elegantly in a warm, minimalist studio setting, she is in her early 20s with an oval face, fair skin, subtle rosy blush, delicate features, dark brown almond-shaped eyes with a gentle upward flick of eyeliner, natural eyebrows, soft pink lips with a slight sheen, and a sweet, serene smile looking directly at the viewer, \r\nher hair same picture uploaded,\r\nwith a light pink artificial magnolia flower tucked behind her right ear, she wears a soft, dark pink pastel hue 200 billions VND Ao Dai tunic made of lightweight fabric with a subtle, intricate tone-on-tone floral damask pattern, featuring a mandarin collar and long sleeves, paired with matching dusty rose pink wide-leg trousers, a long strand of small, lustrous white pearls is draped around her neck, she holds a round, traditional silk fan in her right hand, featuring a delicate hand-painted design of a blossoming branch with yellow flowers and brown branches against a light background, with a light wooden handle and a pink tassel, her fingernails are long and painted with a natural, light pink polish, she wears black open-toed sandals with a wooden platform sole and small silver studs on the black strap, the background consists of two vertical panels, the left panel a very light beige and the right panel a slightly darker, warm peach-beige, with a subtle vertical seam, the floor is covered with a light beige woven mat with a distinct horizontal grid pattern, to her right, a low, dark brown wooden stool with a square top and carved apron serves as her seat, and her left arm rests on a taller, matching dark brown wooden pedestal table with a square top and intricate carved apron and legs, on the pedestal table, a tall, dark brown ceramic vase with vertical ridges holds a branch of artificial light pink magnolia blossoms with green leaves and buds, the composition is a full-length shot with an eye-level camera angle, the woman positioned slightly to the left of center, balanced by the furniture and vase on the right, medium depth of field with the subject in sharp focus and a slightly softer background, soft, diffused, even studio lighting from the front-left creates gentle highlights and very soft, subtle shadows, enhancing the bright and airy atmosphere, the overall color palette is warm and inviting, dominated by soft pinks, light beiges, and warm browns, creating an elegant, traditional, and serene aesthetic, hyper-detailed, 8K, professional photography, masterpiece, sharp focus, high dynamic range (HDR), studio lighting, soft shadows, vibrant colors, intricate details.\r\n\r\nKiểu tóc cũ:\r\nher long, straight, glossy dark brown hair is parted slightly off-center and pulled back into a low ponytail resting over her left shoulder, ","id":"d91a7a6c81143aaa","filename":"Image_xw25qlxw25qlxw25.png","albumSlug":"hoa-moc-lan"}]
+    </script>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const txt = document.getElementById('gallery-model').textContent;
+                if (txt && txt.trim()) {
+                    try {
+                        const photos = JSON.parse(txt);
+                        initInfiniteScroll(photos);
+                    } catch (e) { console.error("Data parse error", e); }
+                }
+            });
+        </script>
+        
+        </main>
+
+        <!-- Custom Lightbox CSS (Pulse/Hint) -->
+        <style>
+            /* Pulsing Hint Animation */
+            @keyframes pulse-ring {
+                0% {
+                    box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.7);
+                }
+
+                70% {
+                    box-shadow: 0 0 0 10px rgba(13, 110, 253, 0);
+                }
+
+                100% {
+                    box-shadow: 0 0 0 0 rgba(13, 110, 253, 0);
+                }
+            }
+
+            .pulse-btn {
+                animation: pulse-ring 2s infinite;
+                color: #fff !important;
+                background: rgba(13, 110, 253, 0.3) !important;
+                border-color: #0d6efd !important;
+            }
+
+            /* Hint Tooltip */
+            .hint-tooltip {
+                position: absolute;
+                background: #0d6efd;
+                color: white;
+                padding: 5px 10px;
+                border-radius: 4px;
+                font-size: 0.8rem;
+                pointer-events: none;
+                opacity: 0;
+                transition: opacity 0.3s;
+                z-index: 3000;
+                white-space: nowrap;
+            }
+
+            /* Positioning tooltip for desktop sidebar button */
+            .sidebar-toolbar .hint-tooltip {
+                top: 100%;
+                left: 10px;
+                margin-top: 5px;
+            }
+
+            /* Positioning tooltip for floating toggle button */
+            .stage-toggle-btn .hint-tooltip {
+                bottom: 100%;
+                right: 0;
+                margin-bottom: 10px;
+            }
+
+            /* Show tooltip logic class */
+            .hint-visible {
+                opacity: 1;
+            }
+
+            /* Ensure Floating Button is Clickable */
+            .stage-toggle-btn {
+                position: absolute;
+                bottom: 20px;
+                right: 20px;
+                z-index: 2050;
+                /* Higher than image stage (1000) but lower than tooltip */
+                background: rgba(0, 0, 0, 0.6);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                color: white;
+                border-radius: 50%;
+                width: 40px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+            .stage-toggle-btn:hover {
+                background: rgba(255, 255, 255, 0.2);
+            }
+
+            /* Only show when sidebar is hidden (handled by JS logic mostly, or CSS if parent has class) */
+            .lightbox-container.sidebar-closed .stage-toggle-btn {
+                display: flex;
+            }
+
+            /* Start hidden if sidebar is open, if that is the design? */
+            /* Actually, the button is inside lightbox-stage. */
+        </style>
+
+        <!-- Lightbox Modal (Advanced UI) -->
+        <div id="lightbox-modal">
+            <!-- Main Container: Flex Row -->
+            <div class="lightbox-container">
+
+                <!-- Left: Image Stage -->
+                <div class="lightbox-stage">
+                    <!-- Close Button (Mobile/Tablet or when sidebar hidden) -->
+                    <button class="lightbox-close-btn d-md-none" onclick="closeLightbox()">&times;</button>
+
+                    <div id="lightbox-image-container"></div>
+
+                    <!-- Floating Info Toggle (New) -->
+                    <button class="stage-toggle-btn" onclick="toggleSidebar()" title="Show Info (i)">
+                        <ion-icon name="information-circle-outline"></ion-icon>
+                    </button>
+
+                    <!-- Navigation Overlays -->
+                    <div class="nav-overlay nav-left" onclick="prevPhoto()">
+                        <ion-icon name="chevron-back-outline"></ion-icon>
+                    </div>
+                    <div class="nav-overlay nav-right" onclick="nextPhoto()">
+                        <ion-icon name="chevron-forward-outline"></ion-icon>
+                    </div>
+                </div>
+
+                <!-- Right: Sidebar (Info Panel) -->
+                <div id="lightbox-sidebar" class="lightbox-sidebar">
+                    <!-- Toolbar -->
+                    <div class="sidebar-toolbar">
+                        <div class="left-tools d-flex align-items-center gap-2">
+                            <div class="position-relative">
+                                <button id="sidebar-info-btn" class="icon-btn" onclick="toggleSidebar()"
+                                    title="Toggle Info (i)">
+                                    <ion-icon name="information-circle-outline"></ion-icon>
+                                </button>
+                                <div id="sidebar-hint" class="hint-tooltip">Close Info</div>
+                            </div>
+
+                            <!-- Counter (Moved Up) -->
+                            <div id="lightbox-counter" class="counter-text fw-bold text-white ms-2">1 / 1</div>
+
+                            <!-- View Count -->
+                            <div class="d-flex align-items-center gap-1 ms-3" title="Total Views"
+                                style="font-size: 0.9rem; color: rgba(255,255,255,0.8);">
+                                <ion-icon name="eye-outline"></ion-icon>
+                                <span id="lightbox-view-count-val">...</span>
+                            </div>
+                        </div>
+                        <div class="right-tools">
+                            <button class="icon-btn" onclick="copyMeta()" title="Copy Metadata (c)">
+                                <ion-icon name="copy-outline"></ion-icon>
+                            </button>
+                            <button class="icon-btn" onclick="sharePhoto()" title="Share (s)">
+                                <ion-icon name="share-social-outline"></ion-icon>
+                            </button>
+                            <button class="icon-btn close-btn" onclick="closeLightbox()" title="Close (Escape)">
+                                <ion-icon name="close-outline"></ion-icon>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="sidebar-content">
+                        <h3 id="lightbox-title">Photo Title</h3>
+
+                        <div id="lightbox-desc" class="description-text" style="margin-bottom: 15px;">
+                            <!-- Description injected here -->
+                        </div>
+
+                        <div id="lightbox-tags" class="tags-container">
+                            <!-- Tags injected here -->
+                        </div>
+
+                        <div id="lightbox-content" class="description-text"
+                            style="white-space: pre-wrap; margin-top: 15px; border-top: 1px solid #444; padding-top: 15px;">
+                            <!-- Body content injected here -->
+                        </div>
+                    </div>
+
+                    <div class="sidebar-footer justify-content-end">
+                        <!-- Zoom Controls REMOVED -->
+                        <small class="text-muted">Press 'F' to Reset Zoom</small>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <footer class="bg-dark text-white text-center py-4 mt-5">
+    <div class="container">
+        <p class="mb-0">&copy; 2026
+                Thu Nhiên Gallery. Built with Gallery AI.</p>
+    </div>
+</footer>
+
+            <!-- Custom Lightbox Logic -->
+            <script>
+                // Lightbox Global State
+                let hintTimer = null;
+                let panzoomInstance = null;
+                let currentIndex = 0;
+
+                function openLightbox(index, skipHistory = false) {
+                    try {
+                        // Safety checks
+                        if (!currentPhotos || currentPhotos.length === 0) return;
+                        currentIndex = index;
+                        const photo = currentPhotos[index];
+
+                        // 1. Deep Link
+                        if (!skipHistory) {
+                            const safeName = photo.name.replace(/\s+/g, '-').toLowerCase();
+                            history.pushState(null, null, `#${safeName}`);
+                        }
+
+                        const modal = document.getElementById('lightbox-modal');
+                        const container = document.getElementById('lightbox-image-container');
+                        const sidebar = document.getElementById('lightbox-sidebar');
+                        const mainContainer = document.querySelector('.lightbox-container');
+
+                        if (!modal || !container || !sidebar) throw new Error("Elements missing");
+
+                        // Mobile Optimization: Auto-hide sidebar by default
+                        if (window.innerWidth <= 768) {
+                            sidebar.classList.add('hidden');
+                            mainContainer.classList.add('sidebar-closed');
+                        } else {
+                            // Desktop: Ensure open by default
+                            sidebar.classList.remove('hidden');
+                            mainContainer.classList.remove('sidebar-closed');
+                        }
+
+                        // 2. Render Sidebar Info
+                        document.getElementById('lightbox-title').innerText = photo.metadata?.title || photo.name;
+                        document.getElementById('lightbox-counter').innerText = `${currentIndex + 1} / ${currentPhotos.length}`;
+                        document.getElementById('lightbox-desc').innerText = photo.metadata?.description || '';
+                        document.getElementById('lightbox-content').innerText = photo.content || '';
+
+                        // Render Tags
+                        const tagSelect = document.getElementById('lightbox-tags');
+                        const rootPath = ".." || ".";
+                        tagSelect.innerHTML = (photo.metadata?.tags || []).map(tag =>
+                            `<a href="${rootPath}/tag?id=${encodeURIComponent(tag)}" class="tag-chip">${tag}</a>`
+                        ).join('');
+
+                        // 3. Render Image Stage
+                        if (panzoomInstance) { try { panzoomInstance.dispose(); } catch (e) { } }
+                        panzoomInstance = null;
+                        container.innerHTML = '';
+
+                        // Split vs Single Logic
+                        if ((photo.type === 'split' || (photo.src_a && photo.src_b)) && photo.src_a && photo.src_b) {
+                            container.innerHTML = `<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#000;"><canvas id="stitchCanvas" style="max-width:100%; max-height:100%; cursor: grab; display:block;"></canvas></div>`;
+                            const canvas = document.getElementById('stitchCanvas');
+
+                            if (typeof CanvasStitchViewer !== 'undefined') {
+                                if (window.canvasViewer) { /* clean */ }
+                                window.canvasViewer = new CanvasStitchViewer(canvas, photo.src_a, photo.src_b);
+                                panzoomInstance = null;
+                                addDecoyOverlay(container, canvas);
+                            } else {
+                                container.innerHTML = "<p style='color:white'>Error: Viewer component missing.</p>";
+                            }
+                        } else {
+                            if (window.canvasViewer) window.canvasViewer = null;
+
+                            const img = document.createElement('img');
+                            img.src = photo.src;
+                            img.style.maxHeight = '90vh';
+                            img.style.maxWidth = '90vw';
+                            img.draggable = false;
+
+                            // Load handler
+                            img.onload = () => {
+                                initPanzoom(img);
+                                addDecoyOverlay(container, img);
+                            };
+
+                            container.appendChild(img);
+                        }
+
+                        if (typeof window.trackView === 'function') {
+                            window.trackView(photo);
+                        }
+
+                        // Activate Modal
+                        modal.classList.add('active');
+                        // Clean up any forced inline styles from previous debug steps
+                        modal.style.removeProperty('display');
+                        modal.style.removeProperty('opacity');
+
+                        // Reset Hint Timer
+                        if (typeof resetHintTimer === 'function') resetHintTimer();
+
+                    } catch (e) {
+                        console.error("Lightbox Error:", e);
+                    }
+                }
+
+                // --- Panzoom Helper ---
+                function initPanzoom(elem) {
+                    // Clean up previous instance
+                    if (panzoomInstance) {
+                        try { panzoomInstance.dispose(); } catch (e) { }
+                        panzoomInstance = null;
+                    }
+
+                    // Initialize new instance
+                    try {
+                        panzoomInstance = panzoom(elem, {
+                            maxZoom: 5,
+                            minZoom: 1,
+                            bounds: true,
+                            boundsPadding: 0.1,
+                            zoomDoubleClickSpeed: 1 // Disable zoom on double click if needed, or keep default
+                        });
+                    } catch (e) {
+                        console.error("Panzoom Init Failed:", e);
+                    }
+                }
+
+                // --- Sidebar & Tools ---
+                function toggleSidebar() {
+                    const sidebar = document.getElementById('lightbox-sidebar');
+                    const container = document.querySelector('.lightbox-container');
+                    const isClosed = sidebar.classList.toggle('hidden');
+                    container.classList.toggle('sidebar-closed');
+
+                    // Reset Hint Timer on Toggle
+                    resetHintTimer();
+                }
+
+                // --- UX Hint Logic ---
+                function resetHintTimer() {
+                    // Clear existing
+                    clearTimeout(hintTimer);
+                    removePulse();
+
+                    // Set new timer (3 seconds)
+                    hintTimer = setTimeout(() => {
+                        showPulseHint();
+                    }, 3000);
+                }
+
+                function showPulseHint() {
+                    const sidebar = document.getElementById('lightbox-sidebar');
+                    const isHidden = sidebar.classList.contains('hidden');
+
+                    let targetBtn, tooltip, msg;
+
+                    if (isHidden) {
+                        // Target the floating button
+                        targetBtn = document.querySelector('.stage-toggle-btn');
+                        // We need to inject tooltip if not exists or select it
+                        // Simplified: Assume we added tooltip html structure dynamically or statically?
+                        // Let's add tooltip structure in HTML above for both buttons
+
+                        // For floating button (needs dynamic tooltip insertion since it's simple button)
+                        if (!targetBtn.querySelector('.hint-tooltip')) {
+                            const tt = document.createElement('div');
+                            tt.className = 'hint-tooltip';
+                            targetBtn.appendChild(tt);
+                        }
+                        tooltip = targetBtn.querySelector('.hint-tooltip');
+                        msg = "Open Info";
+                    } else {
+                        // Target the sidebar button
+                        targetBtn = document.getElementById('sidebar-info-btn');
+                        tooltip = document.getElementById('sidebar-hint');
+                        msg = "Hide Info";
+                    }
+
+                    if (targetBtn && tooltip) {
+                        targetBtn.classList.add('pulse-btn');
+                        tooltip.innerText = msg;
+                        tooltip.classList.add('hint-visible');
+
+                        // Auto hide after 5s or click?
+                        // Let's hide on next interaction (click handles it via toggle -> resetHintTimer)
+                        // But also auto-hide pulse after 4s to not annoy
+                        setTimeout(() => removePulse(), 4000);
+                    }
+                }
+
+                function removePulse() {
+                    document.querySelectorAll('.pulse-btn').forEach(el => el.classList.remove('pulse-btn'));
+                    document.querySelectorAll('.hint-visible').forEach(el => el.classList.remove('hint-visible'));
+                }
+
+                function copyMeta() {
+                    if (!currentPhotos[currentIndex]) return;
+                    const p = currentPhotos[currentIndex];
+                    // Copy ONLY body content
+                    const content = p.content || '';
+                    if (content) {
+                        navigator.clipboard.writeText(content).catch(err => console.error("Copy failed:", err));
+                    }
+                }
+
+                // --- Unified Share Helper ---
+                window.shareUrl = async function (title, text, url) {
+                    if (navigator.share) {
+                        try {
+                            await navigator.share({ title, text, url });
+                        } catch (err) {
+                            console.error("Share failed:", err);
+                        }
+                    } else {
+                        try {
+                            await navigator.clipboard.writeText(url);
+                            alert('Link copied to clipboard!');
+                        } catch (err) {
+                            console.error("Clipboard failed:", err);
+                            prompt("Copy this link:", url);
+                        }
+                    }
+                };
+
+                function sharePhoto() {
+                    const url = window.location.href;
+                    window.shareUrl(document.title, 'Check out this photo!', url);
+                }
+
+                // --- Zoom Controls (Global) ---
+                window.zoomIn = function () {
+                    if (window.canvasViewer) window.canvasViewer.zoomIn();
+                    else if (panzoomInstance) panzoomInstance.zoomIn();
+                };
+
+                window.zoomOut = function () {
+                    if (window.canvasViewer) window.canvasViewer.zoomOut();
+                    else if (panzoomInstance) panzoomInstance.zoomOut();
+                };
+
+                // --- Zoom Controls (Global) ---
+                window.zoomIn = function () {
+                    if (window.canvasViewer) window.canvasViewer.zoomIn();
+                    else if (panzoomInstance) panzoomInstance.zoomIn();
+                };
+
+                window.zoomOut = function () {
+                    if (window.canvasViewer) window.canvasViewer.zoomOut();
+                    else if (panzoomInstance) panzoomInstance.zoomOut();
+                };
+
+                // --- Decoy Overlay Helper ---
+                function addDecoyOverlay(container, targetElement) {
+                    const decoy = document.createElement('img');
+                    decoy.src = "../assets/cest-la-vie.png";
+                    decoy.style.position = "absolute";
+                    decoy.style.top = "0";
+                    decoy.style.left = "0";
+                    decoy.style.width = "100%";
+                    decoy.style.height = "100%";
+                    decoy.style.zIndex = "50";
+                    decoy.style.opacity = "0.01"; // Invisible but clickable
+                    decoy.style.objectFit = "fill"; // Cover full area
+                    decoy.style.cursor = "inherit"; // Keep cursor style
+                    decoy.alt = "Copyright";
+
+                    // Prevent Dragging the Decoy itself
+                    decoy.draggable = false;
+
+                    // Message on Right Click (Optional, or just let them save)
+                    // decoy.oncontextmenu = (e) => { /* Default browser menu opens on this image */ };
+
+                    // --- Event Forwarding ---
+                    // We must manually forward interaction events to the underlying target
+                    // because the overlay blocks them.
+
+                    const forwardEvent = (e) => {
+                        // Create a new event based on the original
+                        // We can't re-dispatch the exact same event object.
+                        // We construct a new one.
+                        let newEvent;
+
+                        // FIX: Check WheelEvent FIRST because it inherits from MouseEvent
+                        if (e instanceof WheelEvent) {
+                            newEvent = new WheelEvent(e.type, {
+                                bubbles: true, cancelable: true, view: window,
+                                deltaX: e.deltaX, deltaY: e.deltaY, deltaZ: e.deltaZ,
+                                deltaMode: e.deltaMode,
+                                clientX: e.clientX, clientY: e.clientY // Important for zoom center
+                            });
+                        } else if (e instanceof MouseEvent) {
+                            newEvent = new MouseEvent(e.type, {
+                                bubbles: true, cancelable: true, view: window,
+                                detail: e.detail, screenX: e.screenX, screenY: e.screenY,
+                                clientX: e.clientX, clientY: e.clientY,
+                                ctrlKey: e.ctrlKey, altKey: e.altKey, shiftKey: e.shiftKey, metaKey: e.metaKey,
+                                button: e.button, buttons: e.buttons, relatedTarget: e.relatedTarget
+                            });
+                        } else if (typeof TouchEvent !== 'undefined' && e instanceof TouchEvent) {
+                            // Touch events are hard to synthesize perfectly due to TouchList.
+                            // But Panzoom often attaches to 'touchstart' on the element.
+                            // Forwarding Touch is complex. 
+                            // Easier strategy for Touch: 
+                            // Mobile usually doesn't have "Right Click Save As" easily on overlays?
+                            // Actually long press calls context menu.
+                            // If we set pointer-events: none on mobile?
+                        }
+
+                        if (newEvent && targetElement) {
+                            targetElement.dispatchEvent(newEvent);
+                        }
+                    };
+
+                    // Forward Mouse & Wheel
+                    ['mousedown', 'wheel'].forEach(evt => {
+                        decoy.addEventListener(evt, (e) => {
+                            // Do NOT prevent default here, or context menu (right click) might fail?
+                            // Right click is 'contextmenu' event.
+                            // mousedown is left/middle/right.
+                            if (e.type === 'mousedown' && e.button === 2) {
+                                // Right click -> Let browser handle it (Context Menu on Decoy)
+                                return;
+                            }
+                            // Forward others
+                            // e.preventDefault(); // Maybe?
+                            forwardEvent(e);
+                        });
+                    });
+
+                    // Touch: Just pass through?
+                    // If we set pointer-events: none for touch?
+                    // Mobile "Save Image" via Long Press.
+                    // If we forward touchstart, we might double trigger?
+                    // For now, let's keep touch simple. Most users hold-to-save.
+                    // If we want to allow Zoom on mobile, we need touch events to go through.
+                    // Let's try setting pointer-events: none ONLY for touch devices? 
+                    // No, hybrid devices exist.
+
+                    // Simple hack for Touch: Use pointer-events: none;
+                    // Because "Save Image" is less a concern on mobile vs PC right-click.
+                    // OR, forward touchstart/move/end.
+
+                    container.appendChild(decoy);
+                }
+
+                window.resetZoom = function () {
+                    if (window.canvasViewer) window.canvasViewer.reset();
+                    else if (panzoomInstance) panzoomInstance.reset();
+                };
+
+                // --- Navigation ---
+                function closeLightbox(skipHistory = false) {
+                    document.getElementById('lightbox-modal').classList.remove('active');
+                    if (!skipHistory) {
+                        history.pushState(null, null, ' ');
+                    }
+                    if (panzoomInstance) { try { panzoomInstance.dispose(); } catch (e) { } panzoomInstance = null; }
+                }
+                function nextPhoto() { if (currentIndex < currentPhotos.length - 1) openLightbox(currentIndex + 1); }
+                function prevPhoto() { if (currentIndex > 0) openLightbox(currentIndex - 1); }
+
+                // --- Event Listeners ---
+                // --- Event Listeners ---
+                document.addEventListener('keydown', (e) => {
+                    const modal = document.getElementById('lightbox-modal');
+                    if (!modal || !modal.classList.contains('active')) return;
+
+                    switch (e.key.toLowerCase()) {
+                        case 'escape': closeLightbox(); break;
+                        case 'arrowright': nextPhoto(); break;
+                        case 'arrowleft': prevPhoto(); break;
+                        case 'i': toggleSidebar(); break;
+                        case 'c': copyMeta(); break;
+                        case 's': sharePhoto(); break;
+
+                        // Zoom Keys
+                        case '+':
+                        case '=': // Plus without shift on some layouts
+                            zoomIn();
+                            break;
+
+                        case '-':
+                        case '_': // Minus with shift
+                            zoomOut();
+                            break;
+
+                        case 'f':
+                        case '0': // Ctrl+0 style reset
+                            resetZoom();
+                            break;
+                    }
+                });
+
+                // Wheel Navigation (on Stage background only)
+                document.addEventListener('wheel', (e) => {
+                    const modal = document.getElementById('lightbox-modal');
+                    if (!modal || !modal.classList.contains('active')) return;
+
+                    // If target is the stage (black background) or nav overlay, navigate
+                    if (e.target.classList.contains('lightbox-stage') || e.target.classList.contains('nav-overlay')) {
+                        if (e.deltaY > 0) nextPhoto();
+                        else prevPhoto();
+                    }
+                });
+
+                // --- Global Exports ---
+                window.openLightbox = openLightbox;
+                window.closeLightbox = closeLightbox;
+                window.nextPhoto = nextPhoto;
+                window.prevPhoto = prevPhoto;
+                window.toggleSidebar = toggleSidebar;
+                window.copyMeta = copyMeta;
+                window.sharePhoto = sharePhoto;
+                // zoom functions are already on window (defined as window.zoomIn, etc.)
+
+                // Deep Link Check on Load
+                window.addEventListener('DOMContentLoaded', () => {
+                    const hash = window.location.hash.substring(1); // Remove #
+                    if (hash && typeof currentPhotos !== 'undefined' && currentPhotos.length > 0) {
+                        // Find photo by loosely matching name
+                        const idx = currentPhotos.findIndex(p =>
+                            p.name.replace(/\s+/g, '-').toLowerCase() === hash.toLowerCase()
+                        );
+                        if (idx !== -1) {
+                            console.log("Deep link found:", hash, "Opening index:", idx);
+                            // Wait a bit for masonry/ui to settle? No, just open.
+                            openLightbox(idx);
+                        }
+                    }
+                });
+
+                // History Navigation Handler
+                window.addEventListener('popstate', (event) => {
+                    const hash = window.location.hash.substring(1);
+                    if (hash && currentPhotos && currentPhotos.length > 0) {
+                        // Find photo by hash
+                        const idx = currentPhotos.findIndex(p =>
+                            p.name.replace(/\s+/g, '-').toLowerCase() === hash.toLowerCase()
+                        );
+                        if (idx !== -1) {
+                            openLightbox(idx, true); // skipHistory = true
+                        }
+                    } else {
+                        // No hash -> Close lightbox
+                        closeLightbox(true); // skipHistory = true
+                    }
+                });
+
+                console.log("✅ Lightbox functions attached to window.");
+            </script>
+
+            <!-- Canvas Viewer (SRCIS) -->
+            <script src="../assets/js/canvas-viewer.js"></script>
+
+            <!-- Bootstrap JS (Local) -->
+            <script src="../assets/vendor/bootstrap.bundle.min.js"></script>
+
+            <!-- Panzoom (Local) -->
+            <script src="../assets/vendor/panzoom.min.js"></script>
+            <!-- CryptoJS (Local) -->
+            <script src="../assets/vendor/crypto-js.min.js"></script>
+
+            <!-- Firebase SDK -->
+            <!-- Firebase Config (Generated) -->
+            <script src="../assets/js/firebase-init-config.js"></script>
+
+            <script type="module">
+                import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+                import { getDatabase, ref, increment, onValue, get, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+                const firebaseConfig = window.FIREBASE_CONFIG || {};
+                // Removed duplicate declaration
+
+                let db = null;
+
+                if (true && firebaseConfig.apiKey) {
+                    try {
+                        const app = initializeApp(firebaseConfig);
+                        db = getDatabase(app);
+                        console.log("🔥 Firebase Initialized");
+
+                        // 1. Initial Sync (Get all views once for Grid)
+                        syncGlobalViews();
+
+                    } catch (e) {
+                        console.error("Firebase Init Error:", e);
+                    }
+                }
+
+                // --- Global View Functions ---
+
+                // A. Sync all views for Grid Items
+                async function syncGlobalViews() {
+                    if (!db) return;
+                    const viewNodes = document.querySelectorAll('[data-view-id]');
+                    if (viewNodes.length === 0) return;
+
+                    // Optimization: Fetch ALL views once (assuming lightweight dataset < 1MB)
+                    // If dataset grows > 10k items, we might need batched gets, but for now this is fastest/cheapest.
+                    const dbRef = ref(db, 'views');
+                    try {
+                        const snapshot = await get(dbRef);
+                        if (snapshot.exists()) {
+                            const allViews = snapshot.val();
+                            updateDomCounts(allViews);
+                        }
+
+                        // Optional: Listen for changes? 
+                        // For cost savings, we usually don't listen to the WHOLE list. 
+                        // Just fetching once on load is enough for grid.
+                        // Lightbox handles real-time single updates.
+                    } catch (e) {
+                        console.error("View Sync Error:", e);
+                    }
+                }
+
+                function updateDomCounts(allViews) {
+                    const viewNodes = document.querySelectorAll('[data-view-id]');
+                    viewNodes.forEach(node => {
+                        const id = node.getAttribute('data-view-id');
+                        if (allViews[id]) {
+                            const countParams = node.querySelectorAll('.view-count-text');
+                            countParams.forEach(el => el.innerText = allViews[id]);
+                        } else {
+                            const countParams = node.querySelectorAll('.view-count-text');
+                            countParams.forEach(el => el.innerText = '0');
+                        }
+                    });
+                }
+
+                // B. Track View (triggered by Lightbox)
+                window.trackView = function (photo) {
+                    if (!db) { console.error("❌ Firebase DB not initialized."); return; }
+                    if (!photo) { console.warn("❌ TrackView called with null photo."); return; }
+
+                    // const viewId = `${photo.albumSlug}__${photo.filename.replace(/\./g, '_')}`; 
+                    // Wait, `photo.id` in feed/album JSONs is ALREADY generated correctly.
+                    const viewId = photo.id;
+                    console.log("👀 Tracking View for:", viewId);
+
+                    if (!viewId) { console.warn("No viewId for photo", photo); return; }
+
+                    // Real-time Listener for Lightbox Sidebar
+                    const viewRef = ref(db, `views/${viewId}`);
+
+                    // 1. Listen (Realtime UI Update)
+                    // Unsubscribe previous if exists? (Simple way: just new listener, it overwrites context if clean)
+                    // Better: Store unsubscribe fn if needed. For now, onValue returns unsubscribe.
+                    const unsub = onValue(viewRef, (snapshot) => {
+                        const count = snapshot.val() || 0;
+                        // Update Lightbox Sidebar
+                        const lbCount = document.getElementById('lightbox-view-count-val');
+                        if (lbCount) lbCount.innerText = count;
+                    });
+                    // Store unsub to cleanup on close? (Valid optimization for SPA users)
+                    window.currentViewUnsub = unsub;
+
+
+                    // 2. Increment Transaction (Spam Control: localStorage)
+                    const storageKey = `viewed_${viewId}`;
+                    const hasViewed = localStorage.getItem(storageKey);
+
+                    if (!hasViewed) {
+                        console.log("🚀 Incrementing view count...");
+                        update(ref(db), {
+                            [`views/${viewId}`]: increment(1)
+                        }).then(() => {
+                            console.log("✅ View Count Incremented:", viewId);
+                            localStorage.setItem(storageKey, 'true');
+                        }).catch(e => {
+                            console.error("❌ Firebase Update Error:", e);
+                            if (e.code === 'PERMISSION_DENIED') console.warn("💡 Check Firebase Rules test mode.");
+                        });
+                    } else {
+                        console.log("Duplicate view ignored (localStorage check).");
+                    }
+                };
+
+                // Cleanup listener helper
+                window.cleanupViewListener = function () {
+                    if (window.currentViewUnsub) {
+                        window.currentViewUnsub();
+                        window.currentViewUnsub = null;
+                    }
+                }
+
+                // Global Debug Helper
+                window.debugFirebase = {
+                    checkConnection: () => {
+                        if (db) console.log("✅ Firebase DB Instance exists.");
+                        else console.error("❌ Firebase DB is NULL.");
+                    },
+                    forceTrack: (id) => {
+                        if (!db) return;
+                        update(ref(db), { [`views/${id}`]: increment(1) })
+                            .then(() => console.log("Forced update success"))
+                            .catch(e => console.error(e));
+                    },
+                    clearHistory: () => {
+                        localStorage.clear();
+                        console.log("Cleared localStorage history.");
+                    }
+                };
+
+                // Expose sync for infinite scrollMasonry to call after append
+                window.refreshViewCounts = syncGlobalViews;
+
+            </script>
+</body>
+
+</html>

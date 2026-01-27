@@ -12,12 +12,12 @@
     <!-- SEO Meta Tags -->
     <meta name="description"
         content="Album: Test Album 2024
-#bính ngọ #new year #couple #Testing
+#test
 Thu Nhiên Gallery">
     <meta property="og:title" content="Test Album 2024">
     <meta property="og:description"
         content="Album: Test Album 2024
-#bính ngọ #new year #couple #Testing
+#test
 Thu Nhiên Gallery">
     <meta property="og:image"
         content="https://thunhien.edu.vn/gallery/thumbnails/test-album-2024-thumbnail.jpg">
@@ -377,6 +377,12 @@ Thu Nhiên Gallery">
                     <a class="nav-link" href="../index.html">Home</a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link" href="../variants/AIPhotography">AI Photography</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="../categories">Categories</a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" href="../photos.html">Photos</a>
                 </li>
                 <li class="nav-item">
@@ -435,162 +441,32 @@ Thu Nhiên Gallery">
 
 <div class="container" id="album-container">
     
-        <div class="text-center py-5">
+        <!-- Locked UI -->
+        <div class="text-center py-5" id="lock-ui">
             <ion-icon name="lock-closed-outline" size="large" class="text-muted mb-3"></ion-icon>
             <h4>This album is locked.</h4>
             <div class="row justify-content-center mt-3">
                 <div class="col-md-6">
                     <div class="input-group has-validation">
-                        <input type="password" id="passcode-input" class="form-control" placeholder="Enter Passcode"
-                            oninput="this.classList.remove('is-invalid')">
+                        <input type="password" id="passcode-input" class="form-control" placeholder="Enter Passcode">
                         <button class="btn btn-primary" onclick="unlockAlbum()">Unlock</button>
-                        <div id="passcode-feedback" class="invalid-feedback">
-                            Incorrect Passcode
-                        </div>
+                        <div id="passcode-feedback" class="invalid-feedback">Incorrect Passcode</div>
                     </div>
                 </div>
             </div>
             <div id="unlock-loading" class="text-muted mt-2 d-none">Decrypting...</div>
         </div>
 
-        <script>
-            async function unlockAlbum() {
-                const input = document.getElementById('passcode-input');
-                const feedback = document.getElementById('passcode-feedback');
-                const loadingDiv = document.getElementById('unlock-loading');
-                const albumSlug = "test-album-2024";
-                const passcode = input.value;
+        <!-- Container for photos (Empty initially) -->
+        <div class="row" id="masonry-grid"></div>
 
-                // Reset State
-                input.classList.remove('is-invalid');
-                if (!passcode) return;
+        <!-- Sentinel (Hidden initially) -->
+        <div id="sentinel" class="py-5 text-center text-muted" style="display:none">
+            <div class="spinner-border text-primary" role="status"></div>
+        </div>
 
-                loadingDiv.classList.remove('d-none');
-
-                try {
-                    // 1. Hash Passcode (SHA256)
-                    const passHash = CryptoJS.SHA256(passcode).toString(CryptoJS.enc.Hex);
-                    console.log("Checking hash:", passHash);
-
-                    // 2. Fetch Keys (Cache Busting)
-                    const keyUrl = `../secure-data/${albumSlug}.keys.json?v=` + Date.now();
-                    console.log("Fetching keys from:", keyUrl);
-
-                    const keysResp = await fetch(keyUrl);
-                    if (!keysResp.ok) {
-                        throw new Error(`Key file not found (Status: ${keysResp.status})`);
-                    }
-                    const keysData = await keysResp.json();
-                    console.log("Keys loaded:", keysData);
-
-                    // 3. Find Key
-                    const match = keysData.find(k => k.passcode_hash === passHash);
-
-                    if (match) {
-                        console.log("Passcode match found. Decrypting Master Key...");
-                        // 4. Decrypt Master Key
-                        const key = CryptoJS.SHA256(passcode);
-                        const iv = CryptoJS.enc.Hex.parse(match.encrypted_master.iv);
-                        const ciphertext = CryptoJS.enc.Hex.parse(match.encrypted_master.content);
-
-                        const decryptedMaster = CryptoJS.AES.decrypt(
-                            { ciphertext: ciphertext },
-                            key,
-                            { iv: iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 }
-                        );
-
-                        const masterKeyStr = decryptedMaster.toString(CryptoJS.enc.Utf8);
-                        if (!masterKeyStr) throw new Error("Master Key Decryption Failed (Empty Result)");
-                        console.log("Master Key Decrypted.");
-
-                        // 5. Fetch Encrypted Payload (Cache Busting)
-                        const dataUrl = `../secure-data/${albumSlug}.enc?v=` + Date.now();
-                        console.log("Fetching payload from:", dataUrl);
-                        const dataResp = await fetch(dataUrl);
-                        if (!dataResp.ok) throw new Error("Encrypted data file not found");
-                        const encryptedPayload = await dataResp.json();
-
-                        // 6. Decrypt Payload
-                        console.log("Decrypting Payload...");
-                        const payloadKey = CryptoJS.SHA256(masterKeyStr);
-                        const payloadIv = CryptoJS.enc.Hex.parse(encryptedPayload.iv);
-                        const payloadCipher = CryptoJS.enc.Hex.parse(encryptedPayload.content);
-
-                        const decryptedPayload = CryptoJS.AES.decrypt(
-                            { ciphertext: payloadCipher },
-                            payloadKey,
-                            { iv: payloadIv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 }
-                        );
-
-                        const jsonStr = decryptedPayload.toString(CryptoJS.enc.Utf8);
-                        if (!jsonStr) throw new Error("Payload Decryption Failed (UTF8 Parse Error)");
-
-                        const photos = JSON.parse(jsonStr);
-                        console.log("Payload Decrypted. Photos:", photos.length);
-
-                        renderUnlockedPhotos(photos);
-
-                    } else {
-                        console.warn("No matching hash found for input.");
-                        feedback.textContent = 'Incorrect Passcode';
-                        input.classList.add('is-invalid');
-                    }
-                } catch (e) {
-                    console.error("Unlock Error:", e);
-                    feedback.textContent = 'Error: ' + e.message;
-                    input.classList.add('is-invalid');
-                } finally {
-                    loadingDiv.classList.add('d-none');
-                }
-            }
-
-            function renderUnlockedPhotos(photos) {
-                // Hide Lock UI
-                document.querySelector('.text-center.py-5').style.display = 'none';
-
-                // Construct Grid HTML
-                const gridHtml = `
-                    <div class="row" id="masonry-grid">
-                        ${photos.map((photo, index) => {
-                    // Fix: Generate ID for view tracking
-                    const viewId = photo.id || (photo.albumSlug + '__' + photo.filename.replace(/\./g, '_'));
-                    return `
-                        <div class="col-sm-6 col-md-4 col-lg-3 mb-4 gallery-item">
-                            <div class="photo-card" onclick="openLightbox(${index})" style="cursor: pointer; position: relative;" data-view-id="${viewId}">
-                                <img src="${photo.src}" alt="${photo.name}" loading="lazy">
-                                <div class="view-overlay" style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 4px; color: white; font-size: 0.75rem; display: flex; align-items: center; gap: 4px; pointer-events: none;">
-                                    <ion-icon name="eye-outline"></ion-icon>
-                                    <span class="view-count-text">...</span>
-                                </div>
-                            </div>
-                        </div>
-                        `}).join('')}
-                    </div>
-                `;
-
-                // Inject
-                const container = document.getElementById('album-container');
-                container.innerHTML += gridHtml;
-
-                // Update Global Data for Lightbox
-                // The encrypted payload already has 'src' with '../' prefix from build.js
-                // So we just use it directly.
-                currentPhotos = photos; // Payload structure matches Lightbox needs exacty now
-
-                // Init Masonry
-                var $grid = $('#masonry-grid').masonry({
-                    itemSelector: '.col-sm-6',
-                    percentPosition: true
-                });
-                $grid.imagesLoaded().progress(function () {
-                    $grid.masonry('layout');
-                    if (window.refreshViewCounts) window.refreshViewCounts();
-                });
-            }
-        </script>
         
 </div>
-
 
 <!-- Scripts (Local) -->
 <script src="../assets/vendor/jquery.min.js"></script>
@@ -598,18 +474,240 @@ Thu Nhiên Gallery">
 <script src="../assets/vendor/masonry.pkgd.min.js"></script>
 
 <script>
-    // Init Masonry after images load
-    var $grid = $('.row').masonry({
-        itemSelector: '.col-sm-6',
-        percentPosition: true
-    });
+    // --- SHARED INFINITE SCROLL LOGIC ---
+    let masonryInstance = null;
+    let renderedCount = 0;
+    const CHUNK_SIZE = 48;
 
-    // layout Masonry after each image loads
-    $grid.imagesLoaded().progress(function () {
-        $grid.masonry('layout');
-    });
+    function initInfiniteScroll(photos) {
+        window.currentPhotos = photos;
+        renderedCount = 0;
+
+        const grid = document.querySelector('#masonry-grid');
+        const sentinel = document.getElementById('sentinel');
+
+        if (!grid || !sentinel) return;
+
+        // Show sentinel
+        sentinel.style.display = 'block';
+
+        // Init Masonry
+        masonryInstance = new Masonry(grid, {
+            itemSelector: '.gallery-item',
+            percentPosition: true
+        });
+
+        // Render Function
+        window.renderNextChunk = function () {
+            if (renderedCount >= photos.length) {
+                sentinel.style.display = 'none'; // distinct from "End of text"
+                return;
+            }
+
+            const nextBatch = photos.slice(renderedCount, renderedCount + CHUNK_SIZE);
+            const html = nextBatch.map((photo, i) => {
+                const index = renderedCount + i;
+                const safeName = photo.filename.replace(/\./g, '_');
+                const viewId = photo.id || `${photo.albumSlug}__${safeName}`;
+
+                return `
+                    <div class="col-sm-6 col-md-4 col-lg-3 mb-4 gallery-item">
+                        <div class="photo-card" onclick="openLightbox(${index})" style="cursor: pointer; position: relative;" data-view-id="${viewId}">
+                            <img src="${photo.src}" alt="${photo.name}" loading="lazy">
+                            <div class="view-overlay" style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 4px; color: white; font-size: 0.75rem; display: flex; align-items: center; gap: 4px; pointer-events: none;">
+                                <ion-icon name="eye-outline"></ion-icon>
+                                <span class="view-count-text">...</span>
+                            </div>
+                        </div>
+                    </div>
+                 `;
+            }).join('');
+
+            // Append
+            grid.insertAdjacentHTML('beforeend', html);
+
+            imagesLoaded(grid, function () {
+                masonryInstance.reloadItems();
+                masonryInstance.layout();
+                if (window.refreshViewCounts) window.refreshViewCounts();
+            });
+
+            renderedCount += nextBatch.length;
+        };
+
+        // Observer
+        const observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting) {
+                window.renderNextChunk();
+            }
+        }, { rootMargin: '400px' });
+        observer.observe(sentinel);
+
+        // First Load
+        window.renderNextChunk();
+    }
 </script>
+
+
+    <!-- LOCKED LOGIC -->
+    <script>
+        async function unlockAlbum() {
+            const input = document.getElementById('passcode-input');
+            const feedback = document.getElementById('passcode-feedback');
+            const loadingDiv = document.getElementById('unlock-loading');
+            const lockUI = document.getElementById('lock-ui');
+            const albumSlug = "test-album-2024";
+            const passcode = input.value;
+
+            // Reset
+            input.classList.remove('is-invalid');
+            if (!passcode) return;
+            loadingDiv.classList.remove('d-none');
+
+            try {
+                // ... Crypto Logic ...
+                const passHash = CryptoJS.SHA256(passcode).toString(CryptoJS.enc.Hex);
+                const keyUrl = `../secure-data/${albumSlug}.keys.json?v=` + Date.now();
+
+                const keysData = await fetch(keyUrl).then(r => {
+                    if (!r.ok) throw new Error('Key file missing');
+                    return r.json();
+                });
+
+                const match = keysData.find(k => k.passcode_hash === passHash);
+
+                if (match) {
+                    // Decrypt Master
+                    const key = CryptoJS.SHA256(passcode);
+                    const iv = CryptoJS.enc.Hex.parse(match.encrypted_master.iv);
+                    const content = CryptoJS.enc.Hex.parse(match.encrypted_master.content);
+                    const masterHex = CryptoJS.AES.decrypt({ ciphertext: content }, key, { iv: iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 });
+                    const masterKeyStr = masterHex.toString(CryptoJS.enc.Utf8);
+
+                    if (!masterKeyStr) throw new Error("Invalid Passcode (Key Check Failed)");
+
+                    // Fetch Data
+                    const dataUrl = `../secure-data/${albumSlug}.enc?v=` + Date.now();
+                    const encryptedPayload = await fetch(dataUrl).then(r => r.json());
+
+                    // Decrypt Payload
+                    const pKey = CryptoJS.SHA256(masterKeyStr);
+                    const pIv = CryptoJS.enc.Hex.parse(encryptedPayload.iv);
+                    const pContent = CryptoJS.enc.Hex.parse(encryptedPayload.content);
+                    const pDec = CryptoJS.AES.decrypt({ ciphertext: pContent }, pKey, { iv: pIv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 });
+
+                    const photos = JSON.parse(pDec.toString(CryptoJS.enc.Utf8));
+
+                    // Success
+                    lockUI.style.display = 'none';
+                    initInfiniteScroll(photos);
+
+                } else {
+                    feedback.textContent = 'Incorrect Passcode';
+                    input.classList.add('is-invalid');
+                }
+            } catch (e) {
+                console.error(e);
+                feedback.textContent = 'Error: ' + e.message;
+                input.classList.add('is-invalid');
+            } finally {
+                loadingDiv.classList.add('d-none');
+            }
+        }
+    </script>
+    
         </main>
+
+        <!-- Custom Lightbox CSS (Pulse/Hint) -->
+        <style>
+            /* Pulsing Hint Animation */
+            @keyframes pulse-ring {
+                0% {
+                    box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.7);
+                }
+
+                70% {
+                    box-shadow: 0 0 0 10px rgba(13, 110, 253, 0);
+                }
+
+                100% {
+                    box-shadow: 0 0 0 0 rgba(13, 110, 253, 0);
+                }
+            }
+
+            .pulse-btn {
+                animation: pulse-ring 2s infinite;
+                color: #fff !important;
+                background: rgba(13, 110, 253, 0.3) !important;
+                border-color: #0d6efd !important;
+            }
+
+            /* Hint Tooltip */
+            .hint-tooltip {
+                position: absolute;
+                background: #0d6efd;
+                color: white;
+                padding: 5px 10px;
+                border-radius: 4px;
+                font-size: 0.8rem;
+                pointer-events: none;
+                opacity: 0;
+                transition: opacity 0.3s;
+                z-index: 3000;
+                white-space: nowrap;
+            }
+
+            /* Positioning tooltip for desktop sidebar button */
+            .sidebar-toolbar .hint-tooltip {
+                top: 100%;
+                left: 10px;
+                margin-top: 5px;
+            }
+
+            /* Positioning tooltip for floating toggle button */
+            .stage-toggle-btn .hint-tooltip {
+                bottom: 100%;
+                right: 0;
+                margin-bottom: 10px;
+            }
+
+            /* Show tooltip logic class */
+            .hint-visible {
+                opacity: 1;
+            }
+
+            /* Ensure Floating Button is Clickable */
+            .stage-toggle-btn {
+                position: absolute;
+                bottom: 20px;
+                right: 20px;
+                z-index: 2050;
+                /* Higher than image stage (1000) but lower than tooltip */
+                background: rgba(0, 0, 0, 0.6);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                color: white;
+                border-radius: 50%;
+                width: 40px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+            .stage-toggle-btn:hover {
+                background: rgba(255, 255, 255, 0.2);
+            }
+
+            /* Only show when sidebar is hidden (handled by JS logic mostly, or CSS if parent has class) */
+            .lightbox-container.sidebar-closed .stage-toggle-btn {
+                display: flex;
+            }
+
+            /* Start hidden if sidebar is open, if that is the design? */
+            /* Actually, the button is inside lightbox-stage. */
+        </style>
 
         <!-- Lightbox Modal (Advanced UI) -->
         <div id="lightbox-modal">
@@ -642,10 +740,18 @@ Thu Nhiên Gallery">
                     <!-- Toolbar -->
                     <div class="sidebar-toolbar">
                         <div class="left-tools d-flex align-items-center gap-2">
-                            <button class="icon-btn" onclick="toggleSidebar()" title="Toggle Info (i)">
-                                <ion-icon name="information-circle-outline"></ion-icon>
-                            </button>
-                            <!-- View Count (New Location) -->
+                            <div class="position-relative">
+                                <button id="sidebar-info-btn" class="icon-btn" onclick="toggleSidebar()"
+                                    title="Toggle Info (i)">
+                                    <ion-icon name="information-circle-outline"></ion-icon>
+                                </button>
+                                <div id="sidebar-hint" class="hint-tooltip">Close Info</div>
+                            </div>
+
+                            <!-- Counter (Moved Up) -->
+                            <div id="lightbox-counter" class="counter-text fw-bold text-white ms-2">1 / 1</div>
+
+                            <!-- View Count -->
                             <div class="d-flex align-items-center gap-1 ms-3" title="Total Views"
                                 style="font-size: 0.9rem; color: rgba(255,255,255,0.8);">
                                 <ion-icon name="eye-outline"></ion-icon>
@@ -683,13 +789,9 @@ Thu Nhiên Gallery">
                         </div>
                     </div>
 
-                    <div class="sidebar-footer">
-                        <div class="zoom-controls">
-                            <button onclick="zoomOut()" title="Zoom Out (-)">-</button>
-                            <button onclick="resetZoom()" title="Reset (F)">1:1</button>
-                            <button onclick="zoomIn()" title="Zoom In (+)">+</button>
-                        </div>
-                        <div id="lightbox-counter" class="counter-text">1 / 1</div>
+                    <div class="sidebar-footer justify-content-end">
+                        <!-- Zoom Controls REMOVED -->
+                        <small class="text-muted">Press 'F' to Reset Zoom</small>
                     </div>
                 </div>
 
@@ -703,137 +805,198 @@ Thu Nhiên Gallery">
     </div>
 </footer>
 
-            <!-- Custom Lightbox Logic (Moved up to load before libraries verify dependencies dynamically) -->
+            <!-- Custom Lightbox Logic -->
             <script>
-                console.log("🚀 INLINED LIGHTBOX SCRIPT ACTIVE 🚀 TS: " + Date.now());
-
-                // Ensure global array exists
-                if (typeof currentPhotos === 'undefined') {
-                    console.warn("currentPhotos is undefined initially");
-                    window.currentPhotos = [];
-                } else {
-                    console.log("currentPhotos found:", currentPhotos.length, "items");
-                }
-
-                let currentIndex = 0;
+                // Lightbox Global State
+                let hintTimer = null;
                 let panzoomInstance = null;
+                let currentIndex = 0;
 
-                function openLightbox(index) {
-                    // Safety checks
-                    if (!currentPhotos || currentPhotos.length === 0) return;
-                    currentIndex = index;
-                    const photo = currentPhotos[index];
+                function openLightbox(index, skipHistory = false) {
+                    try {
+                        // Safety checks
+                        if (!currentPhotos || currentPhotos.length === 0) return;
+                        currentIndex = index;
+                        const photo = currentPhotos[index];
 
-                    // 1. Deep Link
-                    const safeName = photo.name.replace(/\s+/g, '-').toLowerCase();
-                    history.pushState(null, null, `#${safeName}`);
+                        // 1. Deep Link
+                        if (!skipHistory) {
+                            const safeName = photo.name.replace(/\s+/g, '-').toLowerCase();
+                            history.pushState(null, null, `#${safeName}`);
+                        }
 
-                    const modal = document.getElementById('lightbox-modal');
-                    const container = document.getElementById('lightbox-image-container');
-                    const sidebar = document.getElementById('lightbox-sidebar');
-                    const mainContainer = document.querySelector('.lightbox-container');
+                        const modal = document.getElementById('lightbox-modal');
+                        const container = document.getElementById('lightbox-image-container');
+                        const sidebar = document.getElementById('lightbox-sidebar');
+                        const mainContainer = document.querySelector('.lightbox-container');
 
-                    // Mobile Optimization: Auto-hide sidebar by default
-                    if (window.innerWidth <= 768) {
-                        sidebar.classList.add('hidden');
-                        mainContainer.classList.add('sidebar-closed');
-                    } else {
-                        // Desktop: Ensure open by default
-                        sidebar.classList.remove('hidden');
-                        mainContainer.classList.remove('sidebar-closed');
-                    }
+                        if (!modal || !container || !sidebar) throw new Error("Elements missing");
 
-                    // 2. Render Sidebar Info
-                    document.getElementById('lightbox-title').innerText = photo.metadata?.title || photo.name;
-                    document.getElementById('lightbox-counter').innerText = `${currentIndex + 1} / ${currentPhotos.length}`;
-                    document.getElementById('lightbox-desc').innerText = photo.metadata?.description || '';
-                    document.getElementById('lightbox-content').innerText = photo.content || ''; // Render body content
-
-                    // Render Tags
-                    const tagSelect = document.getElementById('lightbox-tags');
-                    const rootPath = ".." || ".";
-                    tagSelect.innerHTML = (photo.metadata?.tags || []).map(tag =>
-                        `<a href="${rootPath}/tag?id=${encodeURIComponent(tag)}" class="tag-chip">${tag}</a>`
-                    ).join('');
-
-                    // 3. Render Image Stage
-                    if (panzoomInstance) { try { panzoomInstance.dispose(); } catch (e) { } }
-                    panzoomInstance = null;
-                    container.innerHTML = '';
-
-                    // Split vs Single Logic
-                    if ((photo.type === 'split' || (photo.src_a && photo.src_b)) && photo.src_a && photo.src_b) {
-                        // V4: Canvas Stitching (SRCIS) - Secure Runtime
-                        console.log("Rendering SPLIT mode via CANVAS (SRCIS)");
-
-                        // 1. Setup Canvas Element
-                        container.innerHTML = `<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#000;"><canvas id="stitchCanvas" style="max-width:100%; max-height:100%; cursor: grab; display:block;"></canvas></div>`;
-
-                        const canvas = document.getElementById('stitchCanvas');
-
-                        // 2. Initialize Viewer
-                        if (typeof CanvasStitchViewer !== 'undefined') {
-                            if (window.canvasViewer) {
-                                // Clean up old viewer
-                                // window.canvasViewer.dispose(); 
-                            }
-
-                            // Initialize
-                            window.canvasViewer = new CanvasStitchViewer(canvas, photo.src_a, photo.src_b);
-
-                            // 3. Disable standard Panzoom for this mode
-                            panzoomInstance = null;
-
-                            // 4. Decoy Overlay (Canvas Mode)
-                            addDecoyOverlay(container, canvas);
-
+                        // Mobile Optimization: Auto-hide sidebar by default
+                        if (window.innerWidth <= 768) {
+                            sidebar.classList.add('hidden');
+                            mainContainer.classList.add('sidebar-closed');
                         } else {
-                            console.error("CanvasStitchViewer script not loaded!");
-                            container.innerHTML = "<p style='color:white'>Error: Viewer component missing.</p>";
-                        }
-                    } else {
-                        // Clear canvas viewer if exists
-                        if (window.canvasViewer) {
-                            window.canvasViewer = null;
+                            // Desktop: Ensure open by default
+                            sidebar.classList.remove('hidden');
+                            mainContainer.classList.remove('sidebar-closed');
                         }
 
-                        const img = document.createElement('img');
-                        img.src = photo.src;
-                        img.style.maxHeight = '90vh';
-                        img.style.maxWidth = '90vw';
-                        img.draggable = false;
-                        img.onload = () => {
-                            initPanzoom(img);
-                            // Decoy Overlay (Single Image Mode)
-                            addDecoyOverlay(container, img);
-                        };
-                        container.appendChild(img);
-                    }
+                        // 2. Render Sidebar Info
+                        document.getElementById('lightbox-title').innerText = photo.metadata?.title || photo.name;
+                        document.getElementById('lightbox-counter').innerText = `${currentIndex + 1} / ${currentPhotos.length}`;
+                        document.getElementById('lightbox-desc').innerText = photo.metadata?.description || '';
+                        document.getElementById('lightbox-content').innerText = photo.content || '';
 
-                    if (typeof window.trackView === 'function') {
-                        window.trackView(photo);
-                    } else {
-                        console.warn("trackView function missing");
-                    }
+                        // Render Tags
+                        const tagSelect = document.getElementById('lightbox-tags');
+                        const rootPath = ".." || ".";
+                        tagSelect.innerHTML = (photo.metadata?.tags || []).map(tag =>
+                            `<a href="${rootPath}/tag?id=${encodeURIComponent(tag)}" class="tag-chip">${tag}</a>`
+                        ).join('');
 
-                    modal.classList.add('active');
+                        // 3. Render Image Stage
+                        if (panzoomInstance) { try { panzoomInstance.dispose(); } catch (e) { } }
+                        panzoomInstance = null;
+                        container.innerHTML = '';
+
+                        // Split vs Single Logic
+                        if ((photo.type === 'split' || (photo.src_a && photo.src_b)) && photo.src_a && photo.src_b) {
+                            container.innerHTML = `<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#000;"><canvas id="stitchCanvas" style="max-width:100%; max-height:100%; cursor: grab; display:block;"></canvas></div>`;
+                            const canvas = document.getElementById('stitchCanvas');
+
+                            if (typeof CanvasStitchViewer !== 'undefined') {
+                                if (window.canvasViewer) { /* clean */ }
+                                window.canvasViewer = new CanvasStitchViewer(canvas, photo.src_a, photo.src_b);
+                                panzoomInstance = null;
+                                addDecoyOverlay(container, canvas);
+                            } else {
+                                container.innerHTML = "<p style='color:white'>Error: Viewer component missing.</p>";
+                            }
+                        } else {
+                            if (window.canvasViewer) window.canvasViewer = null;
+
+                            const img = document.createElement('img');
+                            img.src = photo.src;
+                            img.style.maxHeight = '90vh';
+                            img.style.maxWidth = '90vw';
+                            img.draggable = false;
+
+                            // Load handler
+                            img.onload = () => {
+                                initPanzoom(img);
+                                addDecoyOverlay(container, img);
+                            };
+
+                            container.appendChild(img);
+                        }
+
+                        if (typeof window.trackView === 'function') {
+                            window.trackView(photo);
+                        }
+
+                        // Activate Modal
+                        modal.classList.add('active');
+                        // Clean up any forced inline styles from previous debug steps
+                        modal.style.removeProperty('display');
+                        modal.style.removeProperty('opacity');
+
+                        // Reset Hint Timer
+                        if (typeof resetHintTimer === 'function') resetHintTimer();
+
+                    } catch (e) {
+                        console.error("Lightbox Error:", e);
+                    }
                 }
 
-                function initPanzoom(target) {
-                    if (typeof Panzoom === 'undefined' || !target) return;
-                    panzoomInstance = Panzoom(target, {
-                        maxScale: 10, minScale: 0.1, startScale: 1,
-                        contain: null // Free movement
-                    });
-                    target.parentElement.addEventListener('wheel', panzoomInstance.zoomWithWheel);
+                // --- Panzoom Helper ---
+                function initPanzoom(elem) {
+                    // Clean up previous instance
+                    if (panzoomInstance) {
+                        try { panzoomInstance.dispose(); } catch (e) { }
+                        panzoomInstance = null;
+                    }
+
+                    // Initialize new instance
+                    try {
+                        panzoomInstance = panzoom(elem, {
+                            maxZoom: 5,
+                            minZoom: 1,
+                            bounds: true,
+                            boundsPadding: 0.1,
+                            zoomDoubleClickSpeed: 1 // Disable zoom on double click if needed, or keep default
+                        });
+                    } catch (e) {
+                        console.error("Panzoom Init Failed:", e);
+                    }
                 }
 
                 // --- Sidebar & Tools ---
                 function toggleSidebar() {
                     const sidebar = document.getElementById('lightbox-sidebar');
                     const container = document.querySelector('.lightbox-container');
-                    sidebar.classList.toggle('hidden');
+                    const isClosed = sidebar.classList.toggle('hidden');
                     container.classList.toggle('sidebar-closed');
+
+                    // Reset Hint Timer on Toggle
+                    resetHintTimer();
+                }
+
+                // --- UX Hint Logic ---
+                function resetHintTimer() {
+                    // Clear existing
+                    clearTimeout(hintTimer);
+                    removePulse();
+
+                    // Set new timer (3 seconds)
+                    hintTimer = setTimeout(() => {
+                        showPulseHint();
+                    }, 3000);
+                }
+
+                function showPulseHint() {
+                    const sidebar = document.getElementById('lightbox-sidebar');
+                    const isHidden = sidebar.classList.contains('hidden');
+
+                    let targetBtn, tooltip, msg;
+
+                    if (isHidden) {
+                        // Target the floating button
+                        targetBtn = document.querySelector('.stage-toggle-btn');
+                        // We need to inject tooltip if not exists or select it
+                        // Simplified: Assume we added tooltip html structure dynamically or statically?
+                        // Let's add tooltip structure in HTML above for both buttons
+
+                        // For floating button (needs dynamic tooltip insertion since it's simple button)
+                        if (!targetBtn.querySelector('.hint-tooltip')) {
+                            const tt = document.createElement('div');
+                            tt.className = 'hint-tooltip';
+                            targetBtn.appendChild(tt);
+                        }
+                        tooltip = targetBtn.querySelector('.hint-tooltip');
+                        msg = "Open Info";
+                    } else {
+                        // Target the sidebar button
+                        targetBtn = document.getElementById('sidebar-info-btn');
+                        tooltip = document.getElementById('sidebar-hint');
+                        msg = "Hide Info";
+                    }
+
+                    if (targetBtn && tooltip) {
+                        targetBtn.classList.add('pulse-btn');
+                        tooltip.innerText = msg;
+                        tooltip.classList.add('hint-visible');
+
+                        // Auto hide after 5s or click?
+                        // Let's hide on next interaction (click handles it via toggle -> resetHintTimer)
+                        // But also auto-hide pulse after 4s to not annoy
+                        setTimeout(() => removePulse(), 4000);
+                    }
+                }
+
+                function removePulse() {
+                    document.querySelectorAll('.pulse-btn').forEach(el => el.classList.remove('pulse-btn'));
+                    document.querySelectorAll('.hint-visible').forEach(el => el.classList.remove('hint-visible'));
                 }
 
                 function copyMeta() {
@@ -869,6 +1032,17 @@ Thu Nhiên Gallery">
                     const url = window.location.href;
                     window.shareUrl(document.title, 'Check out this photo!', url);
                 }
+
+                // --- Zoom Controls (Global) ---
+                window.zoomIn = function () {
+                    if (window.canvasViewer) window.canvasViewer.zoomIn();
+                    else if (panzoomInstance) panzoomInstance.zoomIn();
+                };
+
+                window.zoomOut = function () {
+                    if (window.canvasViewer) window.canvasViewer.zoomOut();
+                    else if (panzoomInstance) panzoomInstance.zoomOut();
+                };
 
                 // --- Zoom Controls (Global) ---
                 window.zoomIn = function () {
@@ -981,9 +1155,11 @@ Thu Nhiên Gallery">
                 };
 
                 // --- Navigation ---
-                function closeLightbox() {
+                function closeLightbox(skipHistory = false) {
                     document.getElementById('lightbox-modal').classList.remove('active');
-                    history.pushState(null, null, ' ');
+                    if (!skipHistory) {
+                        history.pushState(null, null, ' ');
+                    }
                     if (panzoomInstance) { try { panzoomInstance.dispose(); } catch (e) { } panzoomInstance = null; }
                 }
                 function nextPhoto() { if (currentIndex < currentPhotos.length - 1) openLightbox(currentIndex + 1); }
@@ -1056,6 +1232,23 @@ Thu Nhiên Gallery">
                             // Wait a bit for masonry/ui to settle? No, just open.
                             openLightbox(idx);
                         }
+                    }
+                });
+
+                // History Navigation Handler
+                window.addEventListener('popstate', (event) => {
+                    const hash = window.location.hash.substring(1);
+                    if (hash && currentPhotos && currentPhotos.length > 0) {
+                        // Find photo by hash
+                        const idx = currentPhotos.findIndex(p =>
+                            p.name.replace(/\s+/g, '-').toLowerCase() === hash.toLowerCase()
+                        );
+                        if (idx !== -1) {
+                            openLightbox(idx, true); // skipHistory = true
+                        }
+                    } else {
+                        // No hash -> Close lightbox
+                        closeLightbox(true); // skipHistory = true
                     }
                 });
 
