@@ -1,0 +1,1720 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        Thu Nhiên Gallery
+    </title>
+    <link rel="icon" href="../assets/gallery icon 32x32.png">
+
+    <!-- SEO Meta Tags -->
+    <meta name="description"
+        content="Browsing 28 photos in Công nghệ AI">
+    <meta property="og:title" content="Công nghệ AI Collection">
+    <meta property="og:description"
+        content="Browsing 28 photos in Công nghệ AI">
+    <meta property="og:image"
+        content="https://thunhien.edu.vn/gallery/assets/gallery icon 100x100.png">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:width" content="300">
+    <meta property="og:type" content="website">
+    <meta property="og:url"
+        content="https://thunhien.edu.vn/gallery/">
+    <!-- <meta property="fb:app_id" content="YOUR_APP_ID"> -->
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="../assets/vendor/bootstrap.min.css">
+    <!-- Ionicons -->
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-dark: #121212;
+            --bg-card: #1e1e1e;
+            --accent-color: #0d6efd;
+            --text-primary: #e0e0e0;
+        }
+
+        /* body selector removed to fix Light Mode */
+        /* Navbar */
+        .navbar {
+            background: rgba(30, 30, 30, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #333;
+        }
+
+        .navbar-brand img {
+            height: 40px;
+        }
+
+        /* Lightbox - Advanced Split Layout */
+        #lightbox-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        #lightbox-modal.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .lightbox-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* Left: Stage */
+        .lightbox-stage {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+            /* Clean black stage */
+            overflow: hidden;
+        }
+
+        .lightbox-close-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            color: white;
+            font-size: 2rem;
+            z-index: 30;
+            cursor: pointer;
+        }
+
+        /* Sidebar */
+        /* Sidebar (Overlay Mode) */
+        .lightbox-sidebar {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 33vw;
+            /* 1/3 Screen */
+            min-width: 320px;
+            max-width: 90vw;
+            /* Mobile safe */
+
+            background: rgba(30, 30, 30, 0.5);
+            /* Semi-transparent */
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: -5px 0 20px rgba(0, 0, 0, 0.5);
+
+            z-index: 2001;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateX(0);
+        }
+
+        .lightbox-sidebar.hidden {
+            transform: translateX(100%);
+            /* Slide out to right */
+        }
+
+        @media (max-width: 768px) {
+            .lightbox-sidebar {
+                width: 85vw;
+                max-width: none;
+            }
+        }
+
+        /* Stage Toggle Button (Visible when sidebar hidden) */
+        .stage-toggle-btn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            z-index: 20;
+            transition: all 0.2s;
+            opacity: 0;
+            /* Hidden by default if sidebar is open */
+            pointer-events: none;
+        }
+
+        .stage-toggle-btn:hover {
+            background: rgba(0, 0, 0, 0.8);
+            border-color: #fff;
+        }
+
+        /* Show toggle button when sidebar is hidden */
+        .lightbox-container.sidebar-closed .stage-toggle-btn {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Toolbar */
+        .sidebar-toolbar {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            border-bottom: 1px solid #333;
+            background: #252525;
+        }
+
+        .icon-btn {
+            background: transparent;
+            border: none;
+            color: #aaa;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .icon-btn:hover {
+            color: #fff;
+            background: #333;
+        }
+
+        .icon-btn.close-btn:hover {
+            color: #f44;
+        }
+
+        /* Content */
+        .sidebar-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        #lightbox-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        .tags-container {
+            margin-bottom: 15px;
+        }
+
+        .tag-chip {
+            display: inline-block;
+            background: #333;
+            color: #ccc;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .tag-chip:hover {
+            background: #0d6efd;
+            color: #fff;
+        }
+
+        .description-text {
+            font-size: 0.9rem;
+            color: #ccc;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+
+        /* Footer / Zoom */
+        .sidebar-footer {
+            padding: 15px;
+            border-top: 1px solid #333;
+            background: #252525;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .zoom-controls button {
+            background: #333;
+            border: none;
+            color: #fff;
+            padding: 5px 10px;
+            margin-right: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .zoom-controls button:hover {
+            background: #555;
+        }
+
+        .counter-text {
+            font-size: 0.8rem;
+            color: #777;
+        }
+
+        /* Navigation Overlays */
+        .nav-overlay {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 15%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 3rem;
+        }
+
+        .nav-overlay:hover {
+            opacity: 1;
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-left {
+            left: 0;
+        }
+
+        .nav-right {
+            right: 0;
+        }
+
+        /* Mobile Tweaks */
+        @media (max-width: 768px) {
+            .lightbox-container {
+                flex-direction: column;
+            }
+
+            .lightbox-sidebar {
+                width: 100%;
+                max-width: none;
+                height: 100% !important;
+                /* Full screen height */
+                top: 0;
+                bottom: 0;
+                margin-right: 0 !important;
+
+                /* Transform for Slide Up/Down */
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                transform: translateY(0);
+                /* Visible state */
+
+                /* Darker background for full screen overlay */
+                background: rgba(10, 10, 10, 0.95);
+                z-index: 2002;
+                /* Above everything */
+            }
+
+            .lightbox-sidebar.hidden {
+                transform: translateY(100%);
+                /* Slide down out of view */
+                margin-bottom: 0;
+                /* Reset previous logic */
+            }
+
+            .lightbox-stage {
+                flex: 1;
+                width: 100%;
+                height: 100%;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="../index.html">
+            <img src="../assets/gallery icon 100x100.png" alt="Thu Nhiên Gallery" height="40"
+                class="d-inline-block align-text-top">
+            Thu Nhiên Gallery
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="../404.html">
+                        4Fun
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="../collections/ai_technology">
+                        AI Technology
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="../collections/ai-photography">
+                        Nhiếp Ảnh AI
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="../categories">
+                        Danh Mục
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="../photos.html">
+                        Hình Ảnh
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="../albums.html">
+                        Albums
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="../tags.html">
+                        Thẻ
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+        <main>
+            <div class="container-fluid">
+    <script>
+        // Global Context for Variant Page
+        window.CURRENT_VARIANT = "ai_technology";
+        // Base64 Decode to avoid EJS escaping issues
+        try {
+            window.currentPhotos = JSON.parse(new TextDecoder().decode(Uint8Array.from(atob("W3siZmlsZW5hbWUiOiJpbmZvZ3JhcGhpYy0wMDEuanBnIiwibmFtZSI6ImluZm9ncmFwaGljLTAwMSIsIm1ldGFkYXRhIjp7InRpdGxlIjoiROG6o2kgbm9uIHPDtG5nIFZp4buHdCBOYW0iLCJkZXNjcmlwdGlvbiI6bnVsbCwidmFyaWFudCI6ImFpX3RlY2hub2xvZ3kiLCJhdHRyaWJ1dGVzIjp7ImNhdGVnb3J5IjoiQUkgdHJhaW5pbmciLCJhcHBsaWNhdGlvbiI6IkluZm9ncmFwaGljIiwibW9kZWxzIjpbIkdlbWluaSJdfSwidGFncyI6WyJnZW1pbmkiXX0sImNvbnRlbnQiOiJcclxuKipQUk9NUFQg4oCTIEThuqJJIE5PTiBTw5RORyBWSeG7hlQgTkFNXHJcbihOSEnhu4BVIEjDjE5IIOKAoiBMScOKTiBL4bq+VCDigKIgQuG7kCBD4bukQyBSw5Ug4oCiIENBTyBD4bqkUCkqKlxyXG5UaGnhur90IGvhur8gbeG7mXQgaW5mb2dyYXBoaWMgY2FvIGPhuqVwIG1hbmcgdMOqbiDigJxE4bqiSSBOT04gU8OUTkcgVknhu4ZUIE5BTeKAnSwgdGjhu4MgaGnhu4duIHbhursgxJHhurlwIMSR4bqldCBuxrDhu5tjIFZp4buHdCBOYW0gYuG6sW5nIG5oaeG7gXUgaMOsbmgg4bqjbmggdGjhuq10LCBi4buRIGPhu6VjIHLDtSByw6BuZywgbGnDqm4ga+G6v3QgY2jhurd0IGNo4bq9IHRyb25nIG3hu5l0IGThuqNpIGjDrG5oIOG6o25oIGxp4buBbiBt4bqhY2ggZHV5IG5o4bqldC4gUGhvbmcgY8OhY2gg4bqjbmggcGjDs25nIHPhu7EgaGnhu4duIMSR4bqhaSDigJMgdHJ1eeG7gW4gdGjDtG5nIHF14buRYyBnaWEsIMSR4bq5cCwgc2FuZywgZOG7hSB4ZW0sIGtow7RuZyBtaW5oIGhv4bqhLCBraMO0bmcgxJHhu5MgaOG7jWEgduG6vS5cclxuS2h1bmcgaMOsbmggMTY6OSBuZ2FuZy4gVG/DoG4gYuG7mSBi4buRIGPhu6VjIGzDoCBt4buZdCBk4bqjaSB0aOG7iyBnacOhYyBjaOG6oXkgbGnDqm4gdOG7pWMgdOG7qyB0csOhaSBzYW5nIHBo4bqjaSwgdMaw4bujbmcgdHLGsG5nIGNobyBjaGnhu4F1IGTDoGkgxJHhuqV0IG7GsOG7m2MuIEPDoWMgaMOsbmgg4bqjbmgga2jDtG5nIHTDoWNoIGtodW5nIGPhu6luZywgbcOgIMSRxrDhu6NjIGfhu5FpIG5o4bq5LCBjaOG7k25nIGzhu5twIHRpbmggdOG6vywga+G6v3QgbuG7kWkgYuG6sW5nIGtow7RuZyBnaWFuLCBtw6B1IHPhuq9jIHbDoCBoxrDhu5tuZyBjaHV54buDbiDEkeG7mW5nLlxyXG7iuLtcclxu8J+fpiBQSOG6pk4gMSDigJMgTUnhu4BOIELhuq5DIChN4bueIMSQ4bqmVSlcclxuSMOsbmgg4bqjbmggdGjhuq10OlxyXG7igKIgTsO6aSBy4burbmcgVMOieSBC4bqvYyAvIHJ14buZbmcgYuG6rWMgdGhhbmdcclxu4oCiIFPDtG5nIG7DumkgaMO5bmcgdsSpLCBtw6J5IHRy4budaVxyXG5Hw7NjIHLhu5luZywgw6FuaCBzw6FuZyB0cm9uZy5cclxuTcOgdSBjaOG7pyDEkeG6oW86IHhhbmggbsO6aSDigJMgdsOgbmcgcnXhu5luZyDigJMgeMOhbSBtw6J5LlxyXG5Iw6xuaCDhuqNuaCBsYW4gbcOgdSB2w6AgxJHhu4thIGjDrG5oIHNhbmcgcGjhuqduIHRp4bq/cCB0aGVvLlxyXG5DaOG7ryBuaOG7jzpcclxuTUnhu4BOIELhuq5DIOKAkyBOw5pJICYgU8OUTkdcclxu4ri7XHJcbvCfn6ggUEjhuqZOIDIg4oCTIE1J4buATiBUUlVORyAoVFLhu6RDIEdJ4buuQSlcclxuSMOsbmgg4bqjbmggdGjhuq10OlxyXG7igKIgROG6o2kgYmnhu4NuIG1p4buBbiBUcnVuZ1xyXG7igKIgTsO6aSDigJMgYmnhu4NuIOKAkyBsw6BuZyBjaMOgaSAvIGRpIHPhuqNuXHJcbkjDrG5oIOG6o25oIGfhu5FpIGzDqm4gcGjhuqduIG1p4buBbiBC4bqvYywgZMO5bmcgxJHGsOG7nW5nIGLhu50gYmnhu4NuIGzDoG0gxJHGsOG7nW5nIGThuqtuIHRo4buLIGdpw6FjIG3huqFuaC5cclxuTcOgdSBjaHV54buDbjogeGFuaCBuw7ppIOKGkiB4YW5oIGJp4buDbiDihpIgdsOgbmcgbuG6r25nLlxyXG5DaOG7rzpcclxuTUnhu4BOIFRSVU5HIOKAkyBCSeG7gk4gJiBHScOTXHJcbuK4u1xyXG7wn5+pIFBI4bqmTiAzIOKAkyBUw4JZIE5HVVnDik4gKENISeG7gFUgU8OCVSlcclxuSMOsbmgg4bqjbmggdGjhuq10OlxyXG7igKIgQ2FvIG5ndXnDqm4sIMSR4bqldCDEkeG7jyBiYXphblxyXG7igKIgTmjDoCByw7RuZyAvIGNvbiBuZ8aw4budaVxyXG5Iw6xuaCDhuqNuaCDEkeG6t3QgaMahaSBsw7lpIHbDoG8gdHJ1bmcgY+G6o25oLCB04bqhbyBjaGnhu4F1IHPDonUgY2hvIGThuqNpIGjDrG5oLlxyXG5Nw6B1IG7DonUgxJHhu48g4oCTIHhhbmggcuG7q25nIGjDsmEgduG7m2kgbWnhu4FuIFRydW5nLlxyXG5DaOG7rzpcclxuVMOCWSBOR1VZw4pOIOKAkyDEkOG6pFQgJiBOR8av4bucSVxyXG7iuLtcclxu8J+fpiBQSOG6pk4gNCDigJMgTkFNIELhu5ggKEvhur5UIEThuqJJKVxyXG5Iw6xuaCDhuqNuaCB0aOG6rXQ6XHJcbuKAoiBTw7RuZyBuxrDhu5tjIG1p4buBbiBUw6J5XHJcbuKAoiDEkOG7k25nIGLhurFuZyDigJMgY2jhu6MgbuG7lWkg4oCTIGN14buZYyBz4buRbmdcclxuxJDGsOG7nW5nIHPDtG5nIHXhu5FuIGNvbmcgdOG6oW8ga+G6v3QgdGjDumMgbeG7gW0gY2hvIGThuqNpIGjDrG5oLlxyXG5Nw6B1IHhhbmggbsaw4bubYyDigJMgeGFuaCBjw6J5IOKAkyDDoW5oIG7huq9uZyDhuqVtLlxyXG5DaOG7rzpcclxuTkFNIELhu5gg4oCTIFPDlE5HICYgU+G7sCBT4buQTkdcclxu4ri7XHJcbvCfjqggTcOAVSBT4bquQyAmIExJw4pOIEvhur5UXHJcbuKAoiBN4buZdCBi4bqjbmcgbcOgdSB0aOG7kW5nIG5o4bqldCBjaG8gdG/DoG4gZOG6o2lcclxu4oCiIE3DoHUgY2h1eeG7g24gdOG7sSBuaGnDqm4gdGhlbyDEkeG7i2EgbMO9OlxyXG5uw7ppIOKGkiBiaeG7g24g4oaSIGNhbyBuZ3V5w6puIOKGkiBzw7RuZyBuxrDhu5tjXHJcbuKAoiBLaMO0bmcg4bqjbmggbsOgbyBi4buLIOKAnGzhuqFjIHTDtG5n4oCdXHJcbuKAoiBDaOG7iW5oIG3DoHUgduG7q2EgcGjhuqNpLCBi4bqvdCBt4bqvdCBuaMawbmcgdGjhuq10XHJcbvCfp7EgQuG7kCBD4bukQ1xyXG7igKIgROG6o2kgaMOsbmggbGnDqm4gdOG7pWNcclxu4oCiIEfhu5FpIOKAkyBjaOG7k25nIGzhu5twIG5o4bq5XHJcbuKAoiBLaMO0bmcgdmnhu4FuIGPhu6luZ1xyXG7igKIgS2jDtG5nIGljb25cclxu4oCiIEtow7RuZyBsb2dvLCBraMO0bmcgd2F0ZXJtYXJrXHJcbuK4u1xyXG7wn5aLIETDkk5HIENI4buQVCAoQ1Xhu5BJIEThuqJJKVxyXG7EkOG6t3Qg4bufIGfDs2MgcGjhuqNpLCBjaOG7ryBzYW5nLCByw7U6XHJcbkThuqJJIE5PTiBTw5RORyBWSeG7hlQgTkFNIiwic291cmNlRm9sZGVyIjoiaW5mb2dyYXBoaWMiLCJ0eXBlIjoic2luZ2xlIiwic3JjIjoic3BsaXQvaW5mb2dyYXBoaWMtc2FtcGxlL2luZm9ncmFwaGljLTAwMS53ZWJwIiwic3JjX3NpbmdsZSI6InNwbGl0L2luZm9ncmFwaGljLXNhbXBsZS9pbmZvZ3JhcGhpYy0wMDEud2VicCIsInRodW1iIjoidGh1bWJuYWlscy9pbmZvZ3JhcGhpYy1zYW1wbGUvaW5mb2dyYXBoaWMtMDAxLmpwZyIsImlkIjoiYjE1NTFhODU1ZDcxOWU3YiIsImFsYnVtU2x1ZyI6ImluZm9ncmFwaGljLXNhbXBsZSIsImZvcm1hdCI6IndlYnAifSx7ImZpbGVuYW1lIjoiaW5mb2dyYXBoaWMtMDAyLmpwZyIsIm5hbWUiOiJpbmZvZ3JhcGhpYy0wMDIiLCJtZXRhZGF0YSI6eyJ0aXRsZSI6IlF1eSB0csOsbmggc+G6o24geHXhuqV0IGfhu5FtIHRo4bunIGPDtG5nIiwiZGVzY3JpcHRpb24iOm51bGwsInZhcmlhbnQiOiJhaV90ZWNobm9sb2d5IiwiYXR0cmlidXRlcyI6eyJjYXRlZ29yeSI6IkFJIHRyYWluaW5nIiwiYXBwbGljYXRpb24iOiJJbmZvZ3JhcGhpYyIsIm1vZGVscyI6WyJHZW1pbmkiXX0sInRhZ3MiOlsiZ2VtaW5pIl19LCJjb250ZW50IjoiXHJcblRoaeG6v3Qga+G6vyBt4buZdCB0w6FjIHBo4bqpbSBpbmZvZ3JhcGhpYyBuZ2jhu4cgdGh14bqtdCBjYW8gY+G6pXAgbcO0IHThuqMgcXV5IHRyw6xuaCBz4bqjbiB4deG6pXQgZ+G7kW0gdGjhu6cgY8O0bmcsIHBob25nIGPDoWNoIGNpbmVtYXRpYyBmaW5lLWFydCBoaeG7h24gxJHhuqFpLiBLaHVuZyBow6xuaCAxNjo5IG5nYW5nLCBi4buRIGPhu6VjIHThu5VuZyB0aOG7gyB14buRbiBjb25nIG3hu4FtIG3huqFpIHRoZW8gZOG6oW5nIMSRxrDhu51uZyBjb25nIGNo4buvIFMgaG/hurdjIHbDsm5nIGN1bmcgbmjhurksIGThuqtuIMOhbmggbmjDrG4gdOG7qyB0csOhaSBzYW5nIHBo4bqjaS4gQ2jhu4kgYuG7kSBj4bulYyB2w6Aga2h1bmcgZOG6q24gaMaw4bubbmcgbMOgIGNvbmcsIGPDsm4gaMOsbmgg4bqjbmggdOG7q25nIGdpYWkgxJFv4bqhbiBwaOG6o2kgcsO1IHLDoG5nLCBz4bqvYyBuw6l0LCB0w6FjaCBi4bqhY2gsIGtow7RuZyBow7JhIHRhbiwga2jDtG5nIG3hu50sIGtow7RuZyB0cuG7q3UgdMaw4bujbmcgcXXDoSBt4bupYy5cclxuVG/DoG4gYuG7mSBpbmZvZ3JhcGhpYyDEkcaw4bujYyBjaGlhIHRow6BuaCBjw6FjIGtodW5nIGjDrG5oIHJpw6puZyBiaeG7h3QgKGZyYW1lKSBuaMawbmcgY8OhYyBmcmFtZSDEkcaw4bujYyBibyBjb25nIG3hu4FtLCBsacOqbiBr4bq/dCB24bubaSBuaGF1IGLhurFuZyDEkcaw4budbmcgZOG6q24gY29uZyBt4bqjbmgsIHThuqFvIGPhuqNtIGdpw6FjIGxp4buBbiBt4bqhY2ggdsOgIG5naOG7hyB0aHXhuq10LiBN4buXaSBmcmFtZSBsw6AgbeG7mXQgY+G6o25oIGhvw6BuIGNo4buJbmgsIHLDtSBu4buZaSBkdW5nLCBk4buFIG5o4bqtbiBiaeG6v3QgbmdheSBs4bqtcCB04bupYy5cclxuRnJhbWUgxJHhuqd1IHRpw6puIGzDoCDEkeG6pXQgc8OpdCBuZ3V5w6puIGxp4buHdSwga2jhu5FpIMSR4bqldCBzw6l0IHRo4bqtdCwga+G6v3QgY+G6pXUgcsO1IHThu6tuZyB2w6JuIMSR4bqldCDhuqltLCDEkeG6t3QgdHLDqm4gYuG7gSBt4bq3dCBn4buXIGhv4bq3YyDEkcOhLiDDgW5oIHPDoW5nIHN0dWRpbyBt4buBbSwgbMOgbSBu4buVaSB0ZXh0dXJlLCBow6xuaCDhuqNuaCBz4bqvYyBuw6l0LCBraMO0bmcgaGnhu4d1IOG7qW5nIHRhbiBjaOG6o3kuXHJcbkZyYW1lIHRp4bq/cCB0aGVvIGzDoCB04bqhbyBow6xuaCB0csOqbiBiw6BuIHhvYXksIGLDoG4gdGF5IG5naOG7hyBuaMOibiDEkWFuZyB04bqhbyBkw6FuZyBn4buRbSwgY2h1eeG7g24gxJHhu5luZyDEkcaw4bujYyDigJzEkcOzbmcgYsSDbmfigJ0g4bufIGtob+G6o25oIGto4bqvYyDEkeG6uXAgbmjhuqV0LiBLaOG7kWkgZ+G7kW0gdHLDsm4gdHLhu4thLCDEkcaw4budbmcgY29uZyByw7UgcsOgbmcsIG7hu4FuIG3hu50gbmjhurkgxJHhu4MgdOG6rXAgdHJ1bmcgdsOgbyBjaOG7pyB0aOG7gy5cclxuRnJhbWUgdGjhu6kgYmEgbMOgIHPhuqNuIHBo4bqpbSBn4buRbSB0aMO0IHNhdSB04bqhbyBow6xuaCwgxJHhurd0IMSR4buZYyBs4bqtcCwgaMOsbmggZMOhbmcgY8OibiDEkeG7kWksIGLhu4EgbeG6t3QgbeG7i24sIMOhbmggc8OhbmcgxJHhu4F1LCBuaMOsbiByw7UgaMOsbmgga2jhu5FpIHbDoCB04bu3IGzhu4cuXHJcbkZyYW1lIHRp4bq/cCB0aGVvIGzDoCBudW5nIGfhu5FtIHRyb25nIGzDsiwgbOG7rWEgdsOgIG5oaeG7h3QgeHXhuqV0IGhp4buHbiByw7UgcsOgbmcgbmjGsG5nIMSRxrDhu6NjIGtp4buDbSBzb8OhdCwgw6FuaCBs4butYSBjYW0gYmFvIHF1YW5oIHPhuqNuIHBo4bqpbSwga2jDtG5nIHF1w6EgZOG7rywga2jDtG5nIGNoZSBraHXhuqV0IGjDrG5oIGTDoW5nIGfhu5FtLiBT4bqjbiBwaOG6qW0gduG6q24gbmjDrG4gcsO1IGPhuqV1IHRyw7pjLlxyXG5GcmFtZSBr4bq/IHRp4bq/cCBsw6AgcGjhu6cgbWVuLCBs4bubcCBtZW4gZ+G7kW0gY2jhuqN5IG3hu4tuIHRyw6puIGLhu4EgbeG6t3QsIGhp4buHdSDhu6luZyBwaOG6o24gY2hp4bq/dSByw7UgcsOgbmcsIGLhu4EgbeG6t3QgZ+G7kW0gc+G6r2MgbsOpdCwga2jDtG5nIG3hu50sIGtow7RuZyBow7JhIGzhuqtuIGJhY2tncm91bmQuXHJcbkZyYW1lIGN14buRaSBjw7luZyBsw6AgdMOhYyBwaOG6qW0gZ+G7kW0gaG/DoG4gY2jhu4luaCwgxJHhurd0IHRyb25nIGtow7RuZyBnaWFuIGdhbGxlcnkgdOG7kWkgZ2nhuqNuLCDDoW5oIHPDoW5nIGNoaeG6v3UgdHLhu7FjIHRp4bq/cCB04burIHRyw6puIHh14buRbmcsIGzDoG0gbuG7lWkgaMOsbmgga2jhu5FpLCBjaOG6pXQgbGnhu4d1IHbDoCBtw6B1IG1lbi4gU+G6o24gcGjhuqltIGzDoCDEkWnhu4NtIGvhur90IHRow7pjIHRo4buLIGdpw6FjIHLDtSByw6BuZy5cclxuQuG6o25nIG3DoHUgdOG7lW5nIHRo4buDIHRpbmggdOG6vyB2w6AgY2FvIGPhuqVwIGfhu5NtIG7DonUgxJHhuqV0LCB0cuG6r25nIG5nw6AsIHhhbmggbmfhu41jLCB4w6FtIHRybyB2w6Agw6FuaCBjYW0gbOG7rWEuIMOBbmggc8OhbmcgxJHhu5NuZyBuaOG6pXQgZ2nhu69hIGPDoWMgZnJhbWUgxJHhu4MgZ2nhu68gc+G7sSBsaeG7gW4gbeG6oWNoLCBuaMawbmcgbeG7l2kgZnJhbWUgduG6q24gY8OzIMSRaeG7g20gbmjhuqVuIHJpw6puZy4gVHlwb2dyYXBoeSBu4bq/dSB4deG6pXQgaGnhu4duIGNo4buJIGzDoCB0ZXh0IG5o4buPLCBn4buNbiwgxJHhurd0IG5nb8OgaSBmcmFtZSBob+G6t2Mgc8OhdCDEkcaw4budbmcgY29uZyBk4bqrbiBoxrDhu5tuZywgZm9udCBzZXJpZiBob+G6t2Mgc2Fucy1zZXJpZiBjYW8gY+G6pXAsIGThu4UgxJHhu41jLlxyXG5LaMO0bmcgbG9nbywga2jDtG5nIHdhdGVybWFyaywga2jDtG5nIGljb24gZMawIHRo4burYS4gVOG7lW5nIHRo4buDIGdp4buRbmcgaW5mb2dyYXBoaWMgbmdo4buHIHRodeG6rXQgY2FvIGPhuqVwLCBuxqFpIGLhu5EgY+G7pWMgY29uZyB04bqhbyBj4bqjbSB4w7pjLCBjw7JuIGjDrG5oIOG6o25oIHLDtSByw6BuZyB04bqhbyBnacOhIHRy4buLIHRow7RuZyB0aW4gdsOgIHRo4bqpbSBt4bu5LiIsInNvdXJjZUZvbGRlciI6ImluZm9ncmFwaGljIiwidHlwZSI6InNpbmdsZSIsInNyYyI6InNwbGl0L2luZm9ncmFwaGljLXNhbXBsZS9pbmZvZ3JhcGhpYy0wMDIud2VicCIsInNyY19zaW5nbGUiOiJzcGxpdC9pbmZvZ3JhcGhpYy1zYW1wbGUvaW5mb2dyYXBoaWMtMDAyLndlYnAiLCJ0aHVtYiI6InRodW1ibmFpbHMvaW5mb2dyYXBoaWMtc2FtcGxlL2luZm9ncmFwaGljLTAwMi5qcGciLCJpZCI6ImI0ZDcxMDc0MzZkNzJlOGEiLCJhbGJ1bVNsdWciOiJpbmZvZ3JhcGhpYy1zYW1wbGUiLCJmb3JtYXQiOiJ3ZWJwIn0seyJmaWxlbmFtZSI6ImluZm9ncmFwaGljLTAwMy5qcGciLCJuYW1lIjoiaW5mb2dyYXBoaWMtMDAzIiwibWV0YWRhdGEiOnsidGl0bGUiOiJT4bqndSByacOqbmcgVmnhu4d0IE5hbSIsImRlc2NyaXB0aW9uIjpudWxsLCJ2YXJpYW50IjoiYWlfdGVjaG5vbG9neSIsImF0dHJpYnV0ZXMiOnsiY2F0ZWdvcnkiOiJBSSB0cmFpbmluZyIsImFwcGxpY2F0aW9uIjoiSW5mb2dyYXBoaWMiLCJtb2RlbHMiOlsiR2VtaW5pIl19LCJ0YWdzIjpbImdlbWluaSJdfSwiY29udGVudCI6IlxyXG5UaGnhur90IGvhur8gbeG7mXQga2V5IHZpc3VhbCBuZ2jhu4cgdGh14bqtdCBzacOqdSB0aOG7sWMgKGh5cGVyLXJlYWxpc3RpYyBhcnQpIG1hbmcgxJHhurNuZyBj4bqlcCB0aMaw4bujbmcgaOG6oW5nLCB0w6FpIGhp4buHbiBow6BuaCB0csOsbmggcGjDoXQgdHJp4buDbiBj4bunYSBjw6J5IHPhuqd1IHJpw6puZyBWaeG7h3QgTmFtIG5oxrAgbeG7mXQgYmnhu4N1IHTGsOG7o25nIGdpw6EgdHLhu4sgbsO0bmcgbmdoaeG7h3AgY2FvIGPhuqVwLiBLaHVuZyBow6xuaCAxNjo5IG5nYW5nLCBwaG9uZyBjw6FjaCBsdXh1cnkgY2luZW1hdGljIGZpbmUtYXJ0LCDEkeG7mSBjaGkgdGnhur90IGPhu7FjIGNhbywgw6FuaCBzw6FuZyDEkWnhu4duIOG6o25oIHRpbmggdOG6vywgY+G6o20gZ2nDoWMgc2FuZyB0cuG7jW5nLCB0cuG6p20gdMSpbmggdsOgIHF1eeG7gW4gdXksIGdp4buRbmcgbeG7mXQgdMOhYyBwaOG6qW0gdHLGsG5nIGLDoHkgZ2FsbGVyeSBoxqFuIGzDoCBpbmZvZ3JhcGhpYyB0aMO0bmcgdGjGsOG7nW5nLlxyXG5Ub8OgbiBi4buZIGLhu5EgY+G7pWMgxJHGsOG7o2MgZOG6q24gZOG6r3QgdGhlbyBt4buZdCDEkcaw4budbmcgY2h1eeG7g24gxJHhu5luZyBuZ2jhu4cgdGh14bqtdCBt4buBbSBt4bqhaSwgw6FuaCBuaMOsbiB0csO0aSB04burIHRyw6FpIHNhbmcgcGjhuqNpIG5oxrAgbeG7mXQgdsOybmcgxJHhu51pIGxp4buBbiBt4bqhY2gsIGtow7RuZyBjaGlhIGtodW5nLCBraMO0bmcgbeG7kWMgY+G7qW5nLCBt4buNaSBnaWFpIMSRb+G6oW4gaMOyYSBxdXnhu4duIHRyb25nIGPDuW5nIG3hu5l0IGtow7RuZyBnaWFuIHRo4buLIGdpw6FjIHRo4buRbmcgbmjhuqV0LlxyXG5N4bufIMSR4bqndSBsw6AgaMOsbmgg4bqjbmggxJHhuqV0IMSR4buPIGJhemFuIFZp4buHdCBOYW0gc2nDqnUgY2jDom4gdGjhu7FjLCBr4bq/dCBj4bqldSDEkeG6pXQgcsO1IHThu6tuZyBo4bqhdCwgw6FuaCBzw6FuZyBz4bubbSBjaGnhur91IHhpw6puIGzDoG0gbuG7lWkgxJHhu5kg4bqpbSB2w6Agc+G7qWMgc+G7kW5nLiBU4burIGzhu5twIMSR4bqldCwgcuG7hSBjw6J5IHPhuqd1IHJpw6puZyBoaeG7h24gbMOqbiBt4bqhbmggbeG6vSwgbGFuIHPDonUgdsOgIGNo4bqvYywgYmnhu4N1IHTGsOG7o25nIGNobyBu4buBbiB04bqjbmcgdsOgIHPhu7EgYuG7gW4gduG7r25nLlxyXG5U4burIGzhu5twIMSR4bqldCDEkcOzIHbGsMahbiBsw6puIHRow6JuIGPDonkgc+G6p3UgcmnDqm5nIHRyxrDhu59uZyB0aMOgbmgsIHTDoW4gbMOhIHhhbmggxJHhuq1tLCB04burbmcgY2hp4bq/YyBsw6EgaGnhu4duIHLDtSBnw6JuIGzDoSwgw6FuaCBzw6FuZyB4dXnDqm4gcXVhIHThuqFvIGhp4buHdSDhu6luZyB2b2x1bWV0cmljIGxpZ2h0IHRpbmggdOG6vy4gVHLDqm4gdGjDom4gY8OieSB4deG6pXQgaGnhu4duIGhvYSBz4bqndSByacOqbmcgbuG7nywgbcOgdSB0cuG6r25nIG5nw6AsIG3hu4FtIG3huqFpIG5oxrBuZyDEkeG6p3kgc+G7qWMgc+G7kW5nLCDEkcaw4bujYyB44butIGzDvSBzacOqdSB0aOG6rXQgbmjGsCBuaGnhur9wIOG6o25oIG1hY3JvIGNhbyBj4bqlcC5cclxuUGjhuqduIHRydW5nIHTDom0gdMOhYyBwaOG6qW0gbMOgIHRyw6FpIHPhuqd1IHJpw6puZyBwaMOhdCB0cmnhu4NuIGhvw6BuIGNo4buJbmgsIGvDrWNoIHRoxrDhu5tjIGzhu5tuLCBnYWkgc+G6r2MgbsOpdCwgYuG7gSBt4bq3dCB24buPIHRo4buDIGhp4buHbiByw7UgdOG7q25nIGNoaSB0aeG6v3Qgw6FuaCBzw6FuZyB2w6AgYsOzbmcgxJHhu5UuIFRyw6FpIHPhuqd1IHJpw6puZyB0cmVvIHRyw6puIHRow6JuIGPDonkgbmjGsCBt4buZdCBiw6F1IHbhuq10IHThu7Egbmhpw6puLCDDoW5oIHPDoW5nIHThuq1wIHRydW5nIG5o4bq5IMSR4buDIHThuqFvIGPhuqNtIGdpw6FjIHTDtG4gdmluaC5cclxuQ+G6o25oIGNodXnhu4NuIG3GsOG7o3Qgc2FuZyBraG/huqNuaCBraOG6r2MgdHLDoWkgc+G6p3UgcmnDqm5nIGNow61uLCBt4buZdCBwaOG6p24gduG7jyBow6kgbeG7nyDEkeG7gyBs4buZIG3Dumkgc+G6p3UgcmnDqm5nIHbDoG5nIMOzbmcgYsOqbiB0cm9uZywga+G6v3QgY+G6pXUgbeG7i24sIMOhbmggc8OhbmcgcGjhuqNuIGNoaeG6v3UgbeG7gW0sIGfhu6NpIGPhuqNtIGdpw6FjIGNhbyBj4bqlcCwgZ2nDoHUgZGluaCBkxrDhu6FuZyB2w6AgZ2nDoSB0cuG7iy4gS2jDtG5nIHThuqFvIGPhuqNtIGdpw6FjIOKAnOG6qW0gdGjhu7FjIMSR4bqhaSB0csOg4oCdLCBtw6AgZ2nhu5FuZyBow6xuaCDhuqNuaCBxdeG6o25nIGLDoSBz4bqjbiBwaOG6qW0geGEgeOG7iS5cclxuQmFja2dyb3VuZCDEkcaw4bujYyB44butIGzDvSB04buRaSBnaeG6o24gdsOgIHPDonUsIGPDsyB0aOG7gyBsw6Aga2jDtG5nIGdpYW4gdsaw4budbiBz4bqndSByacOqbmcgVmnhu4d0IE5hbSBt4budIOG6o28gdHJvbmcgc8awxqFuZyBz4bubbSBob+G6t2MgbuG7gW4gdOG7kWkgY2h1eeG7g24gc+G6r2MgeGFuaCDigJMgbsOidSDigJMgdsOgbmcsIHThuqFvIGNoaeG7gXUgc8OidSB0aOG7iyBnacOhYyB2w6AgbMOgbSBu4buVaSB0b8OgbiBi4buZIGNo4bunIHRo4buDLiBLaMO0bmcgY2hpIHRp4bq/dCB0aOG7q2EsIGtow7RuZyBjb24gbmfGsOG7nWksIGtow7RuZyB24bqtdCB0aOG7gyBnw6J5IG5oaeG7hXUuXHJcbkLhuqNuZyBtw6B1IHThu5VuZyB0aOG7gyBtYW5nIHRpbmggdGjhuqduIHRoxrDhu6NuZyBo4bqhbmc6IHhhbmggbMOhIMSR4bqtbSwgeGFuaCBuZ+G7jWMgdHLhuqdtLCBuw6J1IMSR4bqldCBiYXphbiwgdsOgbmcgc+G6p3UgcmnDqm5nIMOhbmgga2ltLCBr4bq/dCBo4bujcCDDoW5oIHPDoW5nIG3hu4FtLCB0xrDGoW5nIHBo4bqjbiB24burYSBwaOG6o2kuIFRleHR1cmUgY+G7sWMga+G7syBt4buLbiwgxJHhu5kgbsOpdCBjYW8gbmjGsG5nIGtow7RuZyBzaGFycGVuIGfhuq90LCBj4bqjbSBnacOhYyDigJzEkeG6r3QgdGnhu4Fu4oCdIG5nYXkgdOG7qyBjw6FpIG5ow6xuIMSR4bqndSB0acOqbi5cclxuVHlwb2dyYXBoeSB4deG6pXQgaGnhu4duIGPhu7FjIGvhu7MgdGnhur90IGNo4bq/LCBu4bq/dSBjw7MgY2jhu4kgbMOgIG3hu5l0IGTDsm5nIGNo4buvIG3huqNuaCwgxJHhurd0IHhhIGNo4bunIHRo4buDLCBmb250IHNlcmlmIGNhbyBj4bqlcCBob+G6t2MgbW9kZXJuIHNlcmlmIHNhbmcgdHLhu41uZywgbcOgdSB2w6BuZyBuaOG6oXQgaG/hurdjIHRy4bqvbmcgbmfDoDpcclxu4oCcU+G6plUgUknDik5HIFZJ4buGVCBOQU3igJ0uXHJcbktow7RuZyBsb2dvLCBraMO0bmcgd2F0ZXJtYXJrLCBraMO0bmcgaWNvbiwga2jDtG5nIHnhur91IHThu5EgaW5mb2dyYXBoaWMuIFThu5VuZyB0aOG7gyBnaeG7kW5nIG3hu5l0IHTDoWMgcGjhuqltIG5naOG7hyB0aHXhuq10IHNpw6p1IHRo4buxYyBob+G6t2Mga2V5IHZpc3VhbCBsdXh1cnkgbsO0bmcgc+G6o24gY2FvIGPhuqVwIGTDoG5oIGNobyB0aOG7iyB0csaw4budbmcgeHXhuqV0IGto4bqpdSB2w6AgdGjGsMahbmcgaGnhu4d1IGzhu5tuLlxyXG5cclxuIiwic291cmNlRm9sZGVyIjoiaW5mb2dyYXBoaWMiLCJ0eXBlIjoic2luZ2xlIiwic3JjIjoic3BsaXQvaW5mb2dyYXBoaWMtc2FtcGxlL2luZm9ncmFwaGljLTAwMy53ZWJwIiwic3JjX3NpbmdsZSI6InNwbGl0L2luZm9ncmFwaGljLXNhbXBsZS9pbmZvZ3JhcGhpYy0wMDMud2VicCIsInRodW1iIjoidGh1bWJuYWlscy9pbmZvZ3JhcGhpYy1zYW1wbGUvaW5mb2dyYXBoaWMtMDAzLmpwZyIsImlkIjoiMTllMmU3ZDRhNjA0YjE1YyIsImFsYnVtU2x1ZyI6ImluZm9ncmFwaGljLXNhbXBsZSIsImZvcm1hdCI6IndlYnAifSx7ImZpbGVuYW1lIjoiaW5mb2dyYXBoaWMtMDA0LmpwZyIsIm5hbWUiOiJpbmZvZ3JhcGhpYy0wMDQiLCJtZXRhZGF0YSI6eyJ0aXRsZSI6IlF1eSB0csOsbmggc+G6o24geHXhuqV0IGvhurlvIGThu6thIELhur9uIFRyZSIsImRlc2NyaXB0aW9uIjpudWxsLCJ2YXJpYW50IjoiYWlfdGVjaG5vbG9neSIsImF0dHJpYnV0ZXMiOnsiY2F0ZWdvcnkiOiJBSSB0cmFpbmluZyIsImFwcGxpY2F0aW9uIjoiSW5mb2dyYXBoaWMiLCJtb2RlbHMiOlsiR2VtaW5pIl19LCJ0YWdzIjpbImdlbWluaSJdfSwiY29udGVudCI6IlxyXG5UaGnhur90IGvhur8gbeG7mXQgaW5mb2dyYXBoaWMgcGhvbmcgY8OhY2ggbWluaWF0dXJlICh0aOG6vyBnaeG7m2kgdGh1IG5o4buPKSBnaeG7m2kgdGhp4buHdSDEkeG6t2Mgc+G6o24gVmnhu4d0IE5hbSBr4bq5byBk4burYSBC4bq/biBUcmUsIG1hbmcgY+G6o20gZ2nDoWMgZOG7hSB0aMawxqFuZywgdGluaCB04bq/IG5oxrBuZyB24bqrbiBjYW8gY+G6pXAgdsOgIHPhuqFjaCBz4bq9LiBLaHVuZyBow6xuaCAxNjo5IG5nYW5nLCBi4buRIGPhu6VjIHLDtSByw6BuZywgZ+G7jW4gZ8OgbmcsIG3hu41pIGNoaSB0aeG6v3QgxJHGsOG7o2MgdGh1IG5o4buPIG5oxrAgbeG7mXQgbcO0IGjDrG5oIHTDrSBob24sIHThuqFvIGPhuqNtIGdpw6FjIHbhu6thIMSRw6FuZyB5w6p1IHbhu6thIGNodXnDqm4gbmdoaeG7h3AsIGtow7RuZyBob+G6oXQgaMOsbmggcuG6uyB0aeG7gW4uXHJcblRvw6BuIGLhu5kgaW5mb2dyYXBoaWMgxJHGsOG7o2MgeMOieSBk4buxbmcgbmjGsCBt4buZdCBtaW5pIHdvcmxkIHRyw6puIG3hu5l0IG3hurd0IHBo4bqzbmcgc8OhbmcuIFRydW5nIHTDom0gbMOgIHZpw6puIGvhurlvIGThu6thIELhur9uIFRyZSBraOG7lW5nIGzhu5MgKHNvIHbhu5tpIG5ow6JuIHbhuq10KSwgbcOgdSB0cuG6r25nIG5nw6AgaG/hurdjIHbDoG5nIHPhu69hLCBi4buBIG3hurd0IG3hu4tuLCBoxqFpIGLDs25nIG5o4bq5LiBYdW5nIHF1YW5oIHZpw6puIGvhurlvIGzDoCBjw6FjIG5ow6JuIHbhuq10IHTDrSBob24gxJFhbmcgbMOgbSB2aeG7h2MsIHThuqFvIGPhuqNtIGdpw6FjIHNpbmggxJHhu5luZyB2w6AgZOG7hSBoaeG7g3UuXHJcblBo4bqnbiDEkeG6p3UgbWluaSB3b3JsZCBsw6Agdsaw4budbiBk4burYSBC4bq/biBUcmUgdGh1IG5o4buPLCBuaOG7r25nIGPDonkgZOG7q2EgdMOtIGhvbiB4YW5oIG3GsOG7m3QsIHRow6JuIGNvbmcgbmjhurksIHNvaSBiw7NuZyB4deG7kW5nIGTDsm5nIHPDtG5nIG5o4buPIHXhu5FuIGzGsOG7o24uIE5ow6JuIHbhuq10IHTDrSBob24gxJFhbmcgaMOhaSBk4burYSBi4bqxbmcgdGhhbmcgbmjhu48uIFRleHQgbmjhu48sIHLDtSByw6BuZyDEkeG6t3QgcGjDrWEgdHLDqm46XHJcbuKAnEThu6pBIELhur5OIFRSReKAnS5cclxuVGnhur9wIHRoZW8gbMOgIGtodSB0w6FjaCBk4burYSDigJMgbuG6oW8gY8ahbSBk4burYSBk4bqhbmcgbcO0IGjDrG5oIHTDrSBob24sIHRyw6FpIGThu6thIGLhu5UgxJHDtGksIGPGoW0gZOG7q2EgdHLhuq9uZyBt4buLbiwgbsaw4bubYyBj4buRdCBk4burYSBjaOG6o3kgbmjhurkgbmjGsCBkw7JuZyBzdeG7kWkgbmjhu48uIE5ow6JuIHbhuq10IHTDrSBob24gxJFhbmcga2h14bqleSwgbcO6YyBuxrDhu5tjIGPhu5F0LiBUZXh0IMSR4bq3dCBn4buNbjpcclxu4oCcTOG6pFkgQ+G7kFQgROG7qkHigJ0uXHJcbkPhuqNuaCB0aeG6v3AgdGhlbyBsw6Aga2h1IG7huqV1IGvhurlvIHRodSBuaOG7jywgY2jhuqNvIGzhu5tuIG5oxrBuZyDEkeG6t3QgdHJvbmcgdGjhur8gZ2nhu5tpIHTDrSBob24sIG7GsOG7m2MgY+G7kXQgZOG7q2EgxJFhbmcgc8OqbiBzw6FuaCBt4buLbiwgbmjDom4gduG6rXQgbmjhu48ga2h14bqleSDEkeG7gXUsIGjGoWkgbsaw4bubYyBiYXkgbmjhurkuIFRleHQgbmjhu486XHJcbuKAnE7huqRVICYgU8OKTiBL4bq4T+KAnS5cclxuU2F1IMSRw7MgbMOgIGtodSBj4bqvdCBr4bq5byBtaW5pLCBuaOG7r25nIHRoYW5oIGvhurlvIHZ1w7RuZyB24bqvbiwgbmjDom4gduG6rXQgdMOtIGhvbiDEkWFuZyBj4bqvdCB2w6AgeOG6v3Aga+G6uW8gcuG6pXQgbmfEg24gbuG6r3AuIFRleHQgbmfhuq9uOlxyXG7igJxU4bqgTyBIw4xOSOKAnS5cclxuVGnhur9wIHRoZW8gbMOgIGtodSDEkcOzbmcgZ8OzaSB0w60gaG9uLCBo4buZcCBr4bq5byBuaOG7jyB4aW5oLCBuaMOibiB24bqtdCBtaW5pIMSRYW5nIGfDs2kga+G6uW8sIHjhur9wIGjhu5lwIG5nYXkgbmfhuq9uLiBUZXh0IMSR4bq3dCB0aW5oIHThur86XHJcbuKAnMSQw5NORyBHw5NJ4oCdLlxyXG5L4bq/dCB0aMO6YyBtaW5pIHdvcmxkIGzDoCBow6xuaCDhuqNuaCBr4bq5byBk4burYSBC4bq/biBUcmUgaG/DoG4gY2jhu4luaCwgxJHhurd0IG7hu5VpIGLhuq10LCB4dW5nIHF1YW5oIGzDoCBjw6FjIG5ow6JuIHbhuq10IHTDrSBob24gduG6q3kgdGF5LCB04bqhbyBj4bqjbSBnacOhYyB0aMOibiB0aGnhu4duIHbDoCB2dWkgduG6uy4gVGV4dCBjdeG7kWkgxJHhurd0IHLDtSByw6BuZyBuaMawbmcgZOG7hSB0aMawxqFuZzpcclxu4oCcS+G6uE8gROG7qkEgQuG6vk4gVFJF4oCdLlxyXG5C4bqjbmcgbcOgdSB04buVbmcgdGjhu4MgdHJvbmcgdHLhurtvLCBk4buLdSBt4bqvdCB2w6AgY2FvIGPhuqVwOiB0cuG6r25nIGtlbSwgdsOgbmcgc+G7r2EsIHhhbmggbMOhIGThu6thLCB4YW5oIG7GsOG7m2MgbmjhuqF0LCBuw6J1IGfhu5cgbmjhurkuIMOBbmggc8OhbmcgbeG7gW0sIMSR4buBdSwgc2hhZG93IHPhuqFjaCwgY+G6o20gZ2nDoWMgbmjGsCBtw7QgaMOsbmggdHLGsG5nIGLDoHkgY2FvIGPhuqVwLiBQaG9uZyBjw6FjaCAzRCBtaW5pYXR1cmUgY2hpIHRp4bq/dCBjYW8sIGLhu4EgbeG6t3QgbeG7i24sIGtow7RuZyBub2lzZSwga2jDtG5nIHLhu5FpLCBwaMO5IGjhu6NwIGzDoG0gaW5mb2dyYXBoaWMgZ2nDoW8gZOG7pWMsIGR1IGzhu4tjaCwgxJHhurdjIHPhuqNuIFZp4buHdC4gS2jDtG5nIGxvZ28sIGtow7RuZyB3YXRlcm1hcmsuIiwic291cmNlRm9sZGVyIjoiaW5mb2dyYXBoaWMiLCJ0eXBlIjoic2luZ2xlIiwic3JjIjoic3BsaXQvaW5mb2dyYXBoaWMtc2FtcGxlL2luZm9ncmFwaGljLTAwNC53ZWJwIiwic3JjX3NpbmdsZSI6InNwbGl0L2luZm9ncmFwaGljLXNhbXBsZS9pbmZvZ3JhcGhpYy0wMDQud2VicCIsInRodW1iIjoidGh1bWJuYWlscy9pbmZvZ3JhcGhpYy1zYW1wbGUvaW5mb2dyYXBoaWMtMDA0LmpwZyIsImlkIjoiYmVmNzdkOGM3MjFiNDQ3OCIsImFsYnVtU2x1ZyI6ImluZm9ncmFwaGljLXNhbXBsZSIsImZvcm1hdCI6IndlYnAifSx7ImZpbGVuYW1lIjoiaW5mb2dyYXBoaWMtMDA1LmpwZyIsIm5hbWUiOiJpbmZvZ3JhcGhpYy0wMDUiLCJtZXRhZGF0YSI6eyJ0aXRsZSI6IjU4NCBOaGEgVHJhbmcg4oCTIHRpbmggdMO6eSBi4buvYSBjxqFtIFZp4buHdCIsImRlc2NyaXB0aW9uIjpudWxsLCJ2YXJpYW50IjoiYWlfdGVjaG5vbG9neSIsImF0dHJpYnV0ZXMiOnsiY2F0ZWdvcnkiOiJBSSB0cmFpbmluZyIsImFwcGxpY2F0aW9uIjoiSW5mb2dyYXBoaWMiLCJtb2RlbHMiOlsiR2VtaW5pIl19LCJ0YWdzIjpbImdlbWluaSJdfSwiY29udGVudCI6IlxyXG5UaGnhur90IGvhur8gbeG7mXQgaW5mb2dyYXBoaWMgY2FvIGPhuqVwLCB0aGnDqm4gaG/DoG4gdG/DoG4gduG7gSB0aOG7iyBnacOhYywgbcO0IHThuqMgaMOgbmggdHLDrG5oIHThuqFvIHJhIGNoYWkgbsaw4bubYyBt4bqvbSA1ODQgTmhhIFRyYW5nIHThu6sgYmnhu4NuIGPhuqMgxJHhur9uIGLhu69hIGPGoW0gZ2lhIMSRw6xuaCBWaeG7h3QuIEtodW5nIGjDrG5oIDE2OjkgbmdhbmcsIHBob25nIGPDoWNoIGNpbmVtYXRpYyBlZGl0b3JpYWwsIG3DoHUgc+G6r2Mgc8OidSB2w6AgbuG7lWkgYuG6rXQsIGPhuqNtIGdpw6FjIGhp4buHbiDEkeG6oWkgbmjGsG5nIGfhuqduIGfFqWkuIFRvw6BuIGLhu5kgYuG7kSBj4bulYyDEkWkgdGhlbyBt4buZdCDEkcaw4budbmcgY29uZyBuZ2jhu4cgdGh14bqtdCBt4buBbSBt4bqhaSBuaMawIGNvbiBzw7NuZyBiaeG7g24sIGThuqtuIMOhbmggbmjDrG4gdOG7qyB0csOhaSBzYW5nIHBo4bqjaSwga2jDtG5nIGNoaWEgw7QgY+G7qW5nLCBraMO0bmcgYuG7kSBj4bulYyB0aOG6s25nIGjDoG5nLlxyXG5N4bufIMSR4bqndSBsw6AgaMOsbmgg4bqjbmggY+G6rW4gY+G6o25oIG3hurd0IGJp4buDbiBOaGEgVHJhbmcgbMO6YyBiw6xuaCBtaW5oLCBuxrDhu5tjIGJp4buDbiB4YW5oIHRyb25nIHBo4bqjbiBjaGnhur91IGLhuqd1IHRy4budaSwgw6FuaCBu4bqvbmcgc+G7m20gbG9uZyBsYW5oLCDEkcOgbiBjw6EgY8ahbSB0xrDGoWkgYsahaSBn4bqnbiBt4bq3dCBuxrDhu5tjLCBj4bqjbSBnacOhYyB0aW5oIGtoaeG6v3QgdsOgIGThu5NpIGTDoG8uIFRyw6puIGjDrG5oIGNo4buJIMSR4bq3dCBkw7JuZyBjaOG7ryBuaOG7jywgdGluaCB04bq/OiDigJxDw6EgY8ahbSBOaGEgVHJhbmcg4oCTIG5ndeG7k24gZ+G7kWMgdOG7sSBuaGnDqm7igJ0uXHJcblRp4bq/cCB0aGVvLCBj4bqjbmggY2h1eeG7g24gbcaw4bujdCBzYW5nIGjDrG5oIOG6o25oIG5nxrAgZMOibiBWaeG7h3Qga8OpbyBsxrDhu5tpIGPDoSBjxqFtIHRyw6puIHRodXnhu4FuIGfhu5cgdHJ1eeG7gW4gdGjhu5FuZywgbsaw4bubYyBiaeG7g24gdsSDbmcgbmjhurkgdHJvbmcga2jDtG5nIGtow60sIGNodXnhu4NuIMSR4buZbmcgY8OzIG5o4buLcCwgw6FuaCBzw6FuZyBz4bubbSB04bqhbyBj4bqjbSBnacOhYyBjaMOibiB0aOG6rXQgdsOgIGdpw6B1IG7Eg25nIGzGsOG7o25nLiBEw7JuZyBjaOG7ryBu4buVaSBuaOG6uSDhu58gZ8OzYyBow6xuaDog4oCcxJDDoW5oIGLhuq90IOKAkyBjaOG7jW4gbOG7jWPigJ0uXHJcbkPhuqNuaCB0aeG6v3AgdGhlbyBsw6AgaMOsbmgg4bqjbmggY8OhIGPGoW0gdMawxqFpIHRy4buZbiBjw7luZyBtdeG7kWkgYmnhu4NuIHbDoCB44bq/cCBs4bubcCB0cm9uZyB0aMO5bmcgZ+G7lyDhu6cgY2jGsOG7o3AsIGfDs2MgcXVheSBuZ2hpw6puZyDEkeG6uXAsIG3DoHUgZ+G7lyBuw6J1IHRy4bqnbSBr4bq/dCBo4bujcCDDoW5oIHPDoW5nIGThu4t1LCBraMO0bmcga2jDrSB0xKluaCBs4bq3bmcgdsOgIHPDonUsIHRo4buDIGhp4buHbiB2YWkgdHLDsiBj4bunYSB0aOG7nWkgZ2lhbi4gVGV4dCDEkeG6t3QgcuG6pXQgZ+G7jW46IOKAnOG7piBjaMaw4bujcCDigJMgdGhlbyB0aOG7nWkgZ2lhbuKAnS5cclxuU2F1IMSRw7MgbMOgIGPhuqNuaCBj4bqtbiBraG/huqNuaCBraOG6r2Mgbsaw4bubYyBt4bqvbSBuaMSpIG5ndXnDqm4gY2jhuqV0IGNo4bqjeSByYSB04burbmcgZ2nhu410LCBtw6B1IGjhu5UgcGjDoWNoIMOzbmcgw6FuaCwgY2h1eeG7g24gxJHhu5luZyBjaOG6rW0gdsOgIG3GsOG7o3QsIGJhY2tncm91bmQgdOG7kWkgZ2nhuqNuIMSR4buDIGzDoG0gbuG7lWkgY2jhuqV0IGzhu49uZywgY+G6o20gZ2nDoWMgdGluaCB0w7p5IHbDoCBjYW8gY+G6pXAuIETDsm5nIGNo4buvIG5n4bqvbiDEkeG6t3QgZ+G6p24gZMOybmcgY2jhuqN5OiDigJxUaW5oIGNo4bqldCBuaMSp4oCdLlxyXG5D4bqjbmggY2h1eeG7g24gdGnhur9wIG3GsOG7o3Qgc2FuZyBow6xuaCDhuqNuaCBjaGFpIG7GsOG7m2MgbeG6r20gNTg0IHRo4buneSB0aW5oIMSRxrDhu6NjIGNoaeG6v3QgcsOzdCB0cm9uZyBraMO0bmcgZ2lhbiBz4bqhY2ggc+G6vSwgw6FuaCBzw6FuZyBzdHVkaW8gbeG7gW0sIHRow6JuIGNoYWkgdHJvbmcgc3Xhu5F0IGzDoG0gbuG7lWkgbcOgdSBuxrDhu5tjIG3huq9tIGLDqm4gdHJvbmcsIGPhuqNtIGdpw6FjIGNodeG6qW4gbeG7sWMgdsOgIGFuIHTDom0uIFRleHQgbmjhu48gxJHhurd0IGdp4buvYSBraHVuZyBow6xuaDog4oCcQ2hp4bq/dCByw7N0IOKAkyDEkcOzbmcgY2hhaeKAnS5cclxuS+G6v3QgdGjDumMgaMOgbmggdHLDrG5oIGzDoCBow6xuaCDhuqNuaCBjaGFpIG7GsOG7m2MgbeG6r20gNTg0IE5oYSBUcmFuZyDEkeG6t3QgdHLDqm4gbcOibSBjxqFtIGdpYSDEkcOsbmggVmnhu4d0LCB4dW5nIHF1YW5oIGzDoCBjw6FjIG3Ds24gxINuIHF1ZW4gdGh14buZYyDEkcaw4bujYyBz4bqvcCB44bq/cCB0aeG6v3QgY2jhur8sIMOhbmggc8OhbmcgdsOgbmcg4bqlbSwgaMahaSBuxrDhu5tjIG5o4bq5LCBraMO0bmcga2jDrSBzdW0gduG6p3kgdsOgIHRow6JuIHRodeG7mWMuIETDsm5nIGNo4buvIGN14buRaSDEkeG6t3QgbuG7lWkgYuG6rXQgbmjGsG5nIHbhuqtuIHRpbmggdOG6vzog4oCcNTg0IE5oYSBUcmFuZyDigJMgdGluaCB0w7p5IGLhu69hIGPGoW0gVmnhu4d04oCdLlxyXG7hu54gZ8OzYyBwaOG6o2kga2h1bmcgaMOsbmgsIMSR4bq3dCBkw7JuZyBjaOG7ryBjaOG7kXQgbWFuZyB0w61uaCBj4bqjbSB4w7pjOiDigJxUaOG7nWkgZ2lhbiB2w6AgYmnhu4NuIGPhuqMgdOG6oW8gbsOqbiB04burbmcgZ2nhu410IG3huq9t4oCdLiBU4buVbmcgdGjhu4MgaMOsbmgg4bqjbmggc+G6r2MgbsOpdCwgw6FuaCBzw6FuZyDEkeG6uXAsIG3DoHUgeGFuaCBiaeG7g24g4oCTIG7DonUgZ+G7lyDigJMgaOG7lSBwaMOhY2gg4oCTIHbDoG5nIOG6pW0gaMOgaSBow7JhLCBj4bqjbSBnacOhYyB4ZW0gbmjGsCBt4buZdCBwb3N0ZXIgbmdo4buHIHRodeG6rXQgY2FvIGPhuqVwIGjGoW4gbMOgIGluZm9ncmFwaGljIGdpw6FvIGtob2EsIGtow7RuZyBsb2dvIHBo4bulLCBraMO0bmcgd2F0ZXJtYXJrLiIsInNvdXJjZUZvbGRlciI6ImluZm9ncmFwaGljIiwidHlwZSI6InNpbmdsZSIsInNyYyI6InNwbGl0L2luZm9ncmFwaGljLXNhbXBsZS9pbmZvZ3JhcGhpYy0wMDUud2VicCIsInNyY19zaW5nbGUiOiJzcGxpdC9pbmZvZ3JhcGhpYy1zYW1wbGUvaW5mb2dyYXBoaWMtMDA1LndlYnAiLCJ0aHVtYiI6InRodW1ibmFpbHMvaW5mb2dyYXBoaWMtc2FtcGxlL2luZm9ncmFwaGljLTAwNS5qcGciLCJpZCI6IjEwNzIzYWQ4NjY2NDQyMTgiLCJhbGJ1bVNsdWciOiJpbmZvZ3JhcGhpYy1zYW1wbGUiLCJmb3JtYXQiOiJ3ZWJwIn0seyJmaWxlbmFtZSI6ImluZm9ncmFwaGljLTAwNi5qcGciLCJuYW1lIjoiaW5mb2dyYXBoaWMtMDA2IiwibWV0YWRhdGEiOnsidGl0bGUiOiJIw6BuaCB0csOsbmggaOG6oXQgZ+G6oW8gVmnhu4d0IE5hbSIsImRlc2NyaXB0aW9uIjpudWxsLCJ2YXJpYW50IjoiYWlfdGVjaG5vbG9neSIsImF0dHJpYnV0ZXMiOnsiY2F0ZWdvcnkiOiJBSSB0cmFpbmluZyIsImFwcGxpY2F0aW9uIjoiSW5mb2dyYXBoaWMiLCJtb2RlbHMiOlsiR2VtaW5pIl19LCJ0YWdzIjpbImdlbWluaSJdfSwiY29udGVudCI6IlxyXG5UaGnhur90IGvhur8gbeG7mXQgaW5mb2dyYXBoaWMgY2FvIGPhuqVwLCB0aGnDqm4gaG/DoG4gdG/DoG4gduG7gSB0aOG7iyBnacOhYywgbcO0IHThuqMgaMOgbmggdHLDrG5oIGjhuqF0IGfhuqFvIFZp4buHdCBOYW0gdOG7qyBydeG7mW5nIGzDumEgxJHhur9uIGLDoXQgY8ahbSBnaWEgxJHDrG5oLiBLaHVuZyBow6xuaCAxNjo5IG5nYW5nLCBwaG9uZyBjw6FjaCBjaW5lbWF0aWMgZWRpdG9yaWFsLCBtw6B1IHPhuq9jIHTGsMahaSBzw6FuZyB2w6AgbuG7lWkgYuG6rXQsIGPhuqNtIGdpw6FjIGhp4buHbiDEkeG6oWkgbmjGsG5nIGfhuqduIGfFqWkuIFRvw6BuIGLhu5kgYuG7kSBj4bulYyDEkWkgdGhlbyBt4buZdCDEkcaw4budbmcgY29uZyBuZ2jhu4cgdGh14bqtdCBt4buBbSBt4bqhaSBuaMawIGTDsm5nIHPDtG5nLCBk4bqrbiDDoW5oIG5ow6xuIHThu6sgdHLDoWkgc2FuZyBwaOG6o2ksIGtow7RuZyBjaGlhIMO0IGPhu6luZywga2jDtG5nIGLhu5EgY+G7pWMgdGjhurNuZyBow6BuZy5cclxuTeG7nyDEkeG6p3UgbMOgIGjDrG5oIOG6o25oIGPhuq1uIGPhuqNuaCBiw6BuIHRheSBuZ8aw4budaSBuw7RuZyBkw6JuIFZp4buHdCBOYW0gxJFhbmcgY+G6pXkgbeG6oSBub24geHXhu5FuZyBydeG7mW5nIG7GsOG7m2MsIG7GsOG7m2MgcGjhuqNuIGNoaeG6v3UgYuG6p3UgdHLhu51pIHhhbmgsIMOhbmggc8Ohbmcgc+G7m20gbG9uZyBsYW5oLCBtw6B1IHhhbmggbMO6YSB0xrDGoWkgbcOhdC4gVHLDqm4gaMOsbmggY2jhu4kgxJHhurd0IGTDsm5nIGNo4buvIG5o4buPLCB0aW5oIHThur86IOKAnEdpZW8gbeG6oSDigJMgN+KAkzE1IG5nw6B54oCdLlxyXG5UaeG6v3AgdGhlbywgY+G6o25oIGNodXnhu4NuIG3GsOG7o3Qgc2FuZyB0b8OgbiBj4bqjbmggY8OhbmggxJHhu5NuZyBsw7phIHhhbmggbcaw4bubdCB0cuG6o2kgZMOgaSwgZ2nDsyB0aOG7lWkgdOG6oW8gc8OzbmcgbMO6YSBt4buBbSBt4bqhaSwgw6FuaCBu4bqvbmcgbmjhurkgY2hp4bq/dSB04burIHBow61hIHNhdSwgdOG6oW8gY+G6o20gZ2nDoWMgc+G7sSBz4buRbmcgxJFhbmcgbGFuIHThu49hLiBEw7JuZyBjaOG7ryBu4buVaSBuaOG6uSB0csOqbiBu4buBbiB0cuG7nWk6IOKAnFNpbmggdHLGsOG7n25nIOKAkyAzIMSR4bq/biA0IHRow6FuZ+KAnS5cclxuQ+G6o25oIHRp4bq/cCB0aGVvIGzDoCBj4bqtbiBj4bqjbmggYsO0bmcgbMO6YSB0csSpdSBo4bqhdCBjaHV54buDbiBzYW5nIG3DoHUgdsOgbmcgw7NuZywgw6FuaCBzw6FuZyBnb2xkZW4gaG91ciB4dXnDqm4gcXVhIHThu6tuZyBo4bqhdCBsw7phLCBj4bqjbSBnacOhYyDhuqVtIMOhcCB2w6Agbm8gxJHhu6cuIFRleHQgxJHhurd0IHLhuqV0IGfhu41uOiDigJxDaMOtbiB2w6BuZyDigJMgMjDigJMzMCBuZ8OgeeKAnS5cclxuU2F1IMSRw7MgbMOgIGPhuqNuaCB0aHUgaG/huqFjaCBtYW5nIG7Eg25nIGzGsOG7o25nIG3huqFuaCwgbsO0bmcgZMOibiBn4bq3dCBsw7phLCBsw7phIHbDoG5nIHR1bmcgbMOqbiB0cm9uZyBraMO0bmcga2jDrSwgYuG7pWkgbuG6r25nIGzhuqVwIGzDoW5oLCBjaHV54buDbiDEkeG7mW5nIHPhu5FuZyDEkeG7mW5nIHbDoCDEkWnhu4duIOG6o25oLiBEw7JuZyBjaOG7ryBuZ+G6r24gxJHhurd0IOG7nyBnw7NjIGjDrG5oOiDigJxUaHUgaG/huqFjaCDigJMgMeKAkzMgbmfDoHnigJ0uXHJcbkPhuqNuaCBjaHV54buDbiB0aeG6v3Agbcaw4bujdCBzYW5nIGjDrG5oIOG6o25oIGjhuqF0IGfhuqFvIHRy4bqvbmcgc+G6oWNoIHLGoWkgY2jhuq1tIHRyb25nIGtow7RuZyBnaWFuIHPDoW5nLCBu4buBbiB04buRaSBnaeG6o24sIGPhuqNtIGdpw6FjIHRpbmgga2hp4bq/dCB2w6AgY2FvIGPhuqVwLiBUZXh0IG5o4buPIMSR4bq3dCBnaeG7r2Ega2h1bmcgaMOsbmg6IOKAnFjhu60gbMO9IGfhuqFvIOKAkyAz4oCTNyBuZ8OgeeKAnS5cclxuS+G6v3QgdGjDumMgaMOgbmggdHLDrG5oIGzDoCBow6xuaCDhuqNuaCBiw6F0IGPGoW0gdHLhuq9uZyBuw7NuZyBo4buVaSDEkeG6t3QgdHLDqm4gbcOibSBjxqFtIGdpYSDEkcOsbmggVmnhu4d0LCBoxqFpIG7GsOG7m2MgYuG7kWMgbMOqbiBt4buBbSBt4bqhaSwgw6FuaCBzw6FuZyB2w6BuZyDhuqVtLCBraMO0bmcga2jDrSBzdW0gduG6p3kgdsOgIHRow6JuIHRodeG7mWMuIETDsm5nIGNo4buvIGN14buRaSDEkeG6t3QgbuG7lWkgYuG6rXQgbmjGsG5nIHbhuqtuIHRpbmggdOG6vzog4oCcQuG7r2EgY8ahbSBWaeG7h3TigJ0uXHJcbuG7niBnw7NjIHBo4bqjaSBraHVuZyBow6xuaCwgxJHhurd0IGTDsm5nIGNo4buvIGNo4buRdCBtYW5nIHTDrW5oIGPhuqNtIHjDumM6IOKAnDTigJM1IHRow6FuZyDEkeG7gyBjw7MgbeG7mXQgYsOhdCBjxqFtIHRyw7JuIHbhu4vigJ0uIFThu5VuZyB0aOG7gyBow6xuaCDhuqNuaCBz4bqvYyBuw6l0LCDDoW5oIHPDoW5nIMSR4bq5cCwgbcOgdSB4YW5oIOKAkyB2w6BuZyDigJMgdHLhuq9uZyBow6BpIGjDsmEsIGPhuqNtIGdpw6FjIHhlbSBuaMawIG3hu5l0IHBvc3RlciBuZ2jhu4cgdGh14bqtdCBoxqFuIGzDoCBpbmZvZ3JhcGhpYyBnacOhbyBraG9hLCBraMO0bmcgbG9nbywga2jDtG5nIHdhdGVybWFyay4iLCJzb3VyY2VGb2xkZXIiOiJpbmZvZ3JhcGhpYyIsInR5cGUiOiJzaW5nbGUiLCJzcmMiOiJzcGxpdC9pbmZvZ3JhcGhpYy1zYW1wbGUvaW5mb2dyYXBoaWMtMDA2LndlYnAiLCJzcmNfc2luZ2xlIjoic3BsaXQvaW5mb2dyYXBoaWMtc2FtcGxlL2luZm9ncmFwaGljLTAwNi53ZWJwIiwidGh1bWIiOiJ0aHVtYm5haWxzL2luZm9ncmFwaGljLXNhbXBsZS9pbmZvZ3JhcGhpYy0wMDYuanBnIiwiaWQiOiJiM2UxZDg0MGFhOWQ3Nzc5IiwiYWxidW1TbHVnIjoiaW5mb2dyYXBoaWMtc2FtcGxlIiwiZm9ybWF0Ijoid2VicCJ9LHsiZmlsZW5hbWUiOiJpbmZvZ3JhcGhpYy0wMDcuanBnIiwibmFtZSI6ImluZm9ncmFwaGljLTAwNyIsIm1ldGFkYXRhIjp7InRpdGxlIjoiQ29jYS1Db2xhIiwiZGVzY3JpcHRpb24iOm51bGwsInZhcmlhbnQiOiJhaV90ZWNobm9sb2d5IiwiYXR0cmlidXRlcyI6eyJjYXRlZ29yeSI6IkFJIHRyYWluaW5nIiwiYXBwbGljYXRpb24iOiJJbmZvZ3JhcGhpYyIsIm1vZGVscyI6WyJHZW1pbmkiXX0sInRhZ3MiOlsiZ2VtaW5pIl19LCJjb250ZW50IjoiXHJcblF14bqjbmcgY8OhbyBDb2NhLUNvbGEgY2FvIGPhuqVwLCBwaG9uZyBjw6FjaCBwcmVtaXVtIGJldmVyYWdlIGFkdmVydGlzaW5nIOKAkyBzdHVkaW8g4oCTIHVsdHJhIHJlYWxpc3RpYy5cclxuTeG7mXQgY2hhaSBDb2NhLUNvbGEgdGjhu6d5IHRpbmggY+G7lSDEkWnhu4NuLCB04bu3IGzhu4cgMToxICjEkcO6bmcga8OtY2ggdGjGsOG7m2MgdGjhuq10KSDEkeG6t3Qg4bufIHRydW5nIHTDom0ga2h1bmcgaMOsbmgsIGNoYWkgbmdoacOqbmcgbmjhurksIG5ow6NuIMSR4buPIHRy4bqvbmcgc+G6r2MgbsOpdCwga2jDtG5nIG3DqW8gZm9ybS5cclxuRMOybmcgQ29jYS1Db2xhIG7DonUgxJHhu48gYuG6r24gdHVuZyBt4bqhbmggbeG6vSAobGlxdWlkIHNwbGFzaCkgYmFvIHF1YW5oIGNoYWksIHThuqFvIGNodXnhu4NuIMSR4buZbmcgbsSDbmcgbMaw4bujbmcgY2FvIG5oxrBuZyDEkcaw4bujYyBraeG7g20gc2/DoXQgZ+G7jW4gZ8OgbmcsIMSRw7RuZyBj4bupbmcg4bufIGtob+G6o25oIGto4bqvYyDEkeG6uXAgbmjhuqV0LlxyXG7EkMOhIHZpw6puIHRyb25nIHN14buRdCBiYXkgeHVuZyBxdWFuaCwgY8OzIHPGsMahbmcgbOG6oW5oIHbDoCBnaeG7jXQgbsaw4bubYyDEkeG7jW5nIHRyw6puIGLhu4EgbeG6t3QgY2hhaSwgY+G6o20gZ2nDoWMgbcOhdCBzw6J1IOKAkyBz4bqjbmcga2hvw6FpLlxyXG5LaMO0bmcgZMO5bmcgdHLDoWkgY8OieSwgY2jhu4kgdOG6rXAgdHJ1bmcgdsOgbzpcclxu4oCTIENvY2EtQ29sYVxyXG7igJMgxJDDoSBs4bqhbmhcclxu4oCTIEJvbmcgYsOzbmcgZ2FzXHJcblBob25nIGPDoWNoIG3DoHUgc+G6r2M6XHJcbuKAkyDEkOG7jyBDb2NhIGzDoG0gbuG7gW4gY2jhu6cgxJHhuqFvXHJcbuKAkyBOw6J1IMSR4buPIGPhu6dhIG7GsOG7m2MgY29sYVxyXG7igJMgVHLhuq9uZyB0aW5oIGtoaeG6v3QgY+G7p2EgxJHDoVxyXG7igJMgVMawxqFuZyBwaOG6o24gY2FvLCBy4bqldCDigJzEkcOjIG3huq904oCdXHJcbsOBbmggc8OhbmcgJiBjaOG6pXQgbGnhu4d1OlxyXG7igJMgw4FuaCBzw6FuZyBzdHVkaW8gY2FvIGPhuqVwXHJcbuKAkyBIaWdobGlnaHQgbeG6oW5oIHRyw6puIHRow6JuIGNoYWkgdsOgIHNwbGFzaFxyXG7igJMgVGjhuqV5IHLDtSBjaOG6pXQgbOG7j25nIHRyb25nIHN14buRdCwgYuG7jXQga2jDrSBz4buRbmcgxJHhu5luZ1xyXG7igJMgQ2hhaSBjw7MgaGnhu4d1IOG7qW5nIGNvbmRlbnNhdGlvbiAoxJHhu41uZyBzxrDGoW5nIGzhuqFuaClcclxuQuG7kSBj4bulYzpcclxu4oCTIENoYWkgbMOgIGhlcm8gdmlzdWFsXHJcbuKAkyBTcGxhc2ggw7RtIHPDoXQgY2hhaSwga2jDtG5nIHLhu5FpXHJcbuKAkyBU4buVbmcgdGjhu4MgY8OibiDEkeG7kWksIHPhuqFjaCwgY2h14bqpbiBrZXkgdmlzdWFsIHF14bqjbmcgY8Ohb1xyXG5UeXBvZ3JhcGh5IChu4bq/dSBjw7MpOlxyXG7igJMgVOG7kWkgZ2nhuqNuLCBjaOG7iSAxIGTDsm5nIHRhZ2xpbmUgbmjhu49cclxu4oCTIEZvbnQgc2Fucy1zZXJpZiBoaeG7h24gxJHhuqFpXHJcbuKAkyBLaMO0bmcgY2hlIHPhuqNuIHBo4bqpbVxyXG5QaG9uZyBjw6FjaCBxdeG6o25nIGPDoW8gQ29jYS1Db2xhIHF14buRYyB04bq/LCBjYW8gY+G6pXAsIGNo4buJbmggY2h1LlxyXG5LaMO0bmcgaG/huqF0IGjDrG5oLlxyXG5LaMO0bmcgbcOgdSBz4bq3YyBz4buhIGzhuqEuXHJcbktow7RuZyBtw6lvIGxvZ28uXHJcbktow7RuZyB3YXRlcm1hcmsuXHJcbuK4u1xyXG7inYwgTkVHQVRJVkUgUFJPTVBUIChC4bquVCBCVeG7mEMpXHJcbmNoYWkgbcOpbywgc2FpIHThu7cgbOG7hywgY2FydG9vbiwgY2hpYmksIG3DoHUgZ+G6r3QsIHNwbGFzaCBy4buRaSwgbG9nbyBzYWksIGNo4buvIG5oaeG7gXUsIHBvc3RlciBy4bq7IHRp4buBbiwgd2F0ZXJtYXJrIiwic291cmNlRm9sZGVyIjoiaW5mb2dyYXBoaWMiLCJ0eXBlIjoic2luZ2xlIiwic3JjIjoic3BsaXQvaW5mb2dyYXBoaWMtc2FtcGxlL2luZm9ncmFwaGljLTAwNy53ZWJwIiwic3JjX3NpbmdsZSI6InNwbGl0L2luZm9ncmFwaGljLXNhbXBsZS9pbmZvZ3JhcGhpYy0wMDcud2VicCIsInRodW1iIjoidGh1bWJuYWlscy9pbmZvZ3JhcGhpYy1zYW1wbGUvaW5mb2dyYXBoaWMtMDA3LmpwZyIsImlkIjoiYTA2MGI5Njc1NTFiZjJmMyIsImFsYnVtU2x1ZyI6ImluZm9ncmFwaGljLXNhbXBsZSIsImZvcm1hdCI6IndlYnAifSx7ImZpbGVuYW1lIjoiaW5mb2dyYXBoaWMtMDA4LmpwZyIsIm5hbWUiOiJpbmZvZ3JhcGhpYy0wMDgiLCJtZXRhZGF0YSI6eyJ0aXRsZSI6IkJpYSBIZWluZWtlbiIsImRlc2NyaXB0aW9uIjpudWxsLCJ2YXJpYW50IjoiYWlfdGVjaG5vbG9neSIsImF0dHJpYnV0ZXMiOnsiY2F0ZWdvcnkiOiJBSSB0cmFpbmluZyIsImFwcGxpY2F0aW9uIjoiSW5mb2dyYXBoaWMiLCJtb2RlbHMiOlsiR2VtaW5pIl19LCJ0YWdzIjpbImdlbWluaSJdfSwiY29udGVudCI6IlxyXG5RdeG6o25nIGPDoW8gYmlhIEhlaW5la2VuIGNhbyBj4bqlcCwgcGhvbmcgY8OhY2ggcHJlbWl1bSBiZXZlcmFnZSBhZHZlcnRpc2luZyDigJMgc3R1ZGlvIOKAkyBjaW5lbWF0aWMuXHJcbk3hu5l0IGNoYWkgLyBsb24gSGVpbmVrZW4gxJHhurd0IOG7nyB0cnVuZyB0w6JtIGtodW5nIGjDrG5oLCBnw7NjIG5ow6xuIDMvNCwgbG9nbyByw7UgbsOpdCwgc+G6r2MgeGFuaCDEkeG6t2MgdHLGsG5nLCBj4bqjbSBnacOhYyBs4bqhbmgg4oCTIHPhuqNuZyBraG/DoWkg4oCTIHNhbmcgdHLhu41uZy5cclxuRMOybmcgYmlhIHbDoG5nIMOzbmcgYuG6r24gbMOqbiBt4bqhbmggbeG6vSAobGlxdWlkIHNwbGFzaCkgYmFvIHF1YW5oIGNoYWksIGNodXnhu4NuIMSR4buZbmcgxJHDtG5nIGPhu6luZyDhu58ga2hv4bqjbmgga2jhuq9jIMSR4bq5cCBuaOG6pXQuXHJcbk5ndXnDqm4gbGnhu4d1IMSR4bq3YyB0csawbmcgYmF5IHh1bmcgcXVhbmggdGhlbyBi4buRIGPhu6VjIGPDsyBraeG7g20gc2/DoXQ6XHJcbuKAkyBIb2EgYmlhIChob3BzKSB4YW5oIHTGsMahaVxyXG7igJMgTMO6YSBt4bqhY2ggdsOgbmdcclxu4oCTIEdp4buNdCBiaWEgdHJvbmcgc3Xhu5F0XHJcbuKAkyDEkMOhIGzhuqFuaCB0aW5oIHRo4buDXHJcblBob25nIGPDoWNoIG3DoHUgc+G6r2M6XHJcbuKAkyBYYW5oIEhlaW5la2VuIGNo4bunIMSR4bqhb1xyXG7igJMgVsOgbmcgYmlhIMOzbmcgw6FuaFxyXG7igJMgVHLhuq9uZyB0aW5oIGtoaeG6v3QgdOG7qyDEkcOhXHJcbuKAkyBUxrDGoW5nIHBo4bqjbiBjYW8sIG5ow6xuIHLhuqV0IOKAnMSRw6MgbeG6r3TigJ1cclxuw4FuaCBzw6FuZyAmIGNo4bqldCBsaeG7h3U6XHJcbuKAkyDDgW5oIHPDoW5nIHN0dWRpbyBjYW8gY+G6pXBcclxu4oCTIEhpZ2hsaWdodCBt4bqhbmggdHLDqm4gZ2nhu410IGJpYSB2w6AgY2hhaVxyXG7igJMgVGjhuqV5IHLDtSBoxqFpIGzhuqFuaCwgc8awxqFuZyBuxrDhu5tjIMSR4buNbmcgdHLDqm4gduG7jyBjaGFpXHJcbuKAkyBD4bqjbSBnacOhYyBtw6F0IHPDonUsIHXhu5FuZyBsw6Ag4oCcxJHDo+KAnVxyXG5C4buRIGPhu6VjOlxyXG7igJMgU+G6oWNoIOKAkyBn4buNbiDigJMgY8OibiDEkeG7kWlcclxu4oCTIEtow7RuZyBy4buRaSBuZ3V5w6puIGxp4buHdVxyXG7igJMgTmjDrG4gbmjGsCBrZXkgdmlzdWFsIHF14bqjbmcgY8OhbyBxdeG7kWMgdOG6v1xyXG5UeXBvZ3JhcGh5IChu4bq/dSBjw7MgY2jhu68pOlxyXG7igJMgQ2jhu68gdOG7kWkgZ2nhuqNuLCBy4bqldCDDrXRcclxu4oCTIEZvbnQgc2Fucy1zZXJpZiBoaeG7h24gxJHhuqFpLCBjYW8gY+G6pXBcclxu4oCTIENo4buJIG7Dqm4gY8OzIDEgdGFnbGluZSBuZ+G6r24gKHR14buzIGNo4buNbilcclxuUGhvbmcgY8OhY2ggcHJlbWl1bSDigJMgbGlmZXN0eWxlIOKAkyBxdeG6o25nIGPDoW8gYmlhIGNow6J1IMOCdS5cclxuS2jDtG5nIGhv4bqhdCBow6xuaC5cclxuS2jDtG5nIG3DoHUgc+G6t2Mgc+G7oS5cclxuS2jDtG5nIHBob25nIGPDoWNoIHLhursgdGnhu4FuLlxyXG5LaMO0bmcgd2F0ZXJtYXJrLlxyXG7iuLtcclxu4p2MIE5FR0FUSVZFIFBST01QVCAoUuG6pFQgUVVBTiBUUuG7jE5HKVxyXG5ob+G6oXQgaMOsbmgsIGNoaWJpLCBtw6B1IHF1w6EgZ+G6r3QsIGLhu5EgY+G7pWMgcuG7kWksIGNoYWkgbcOpbywgbG9nbyBzYWksIGZvbnQgeOG6pXUsIGNo4buvIG5oaeG7gXUsIHBob25nIGPDoWNoIHBvc3RlciB04bqhcCwgd2F0ZXJtYXJrIiwic291cmNlRm9sZGVyIjoiaW5mb2dyYXBoaWMiLCJ0eXBlIjoic2luZ2xlIiwic3JjIjoic3BsaXQvaW5mb2dyYXBoaWMtc2FtcGxlL2luZm9ncmFwaGljLTAwOC53ZWJwIiwic3JjX3NpbmdsZSI6InNwbGl0L2luZm9ncmFwaGljLXNhbXBsZS9pbmZvZ3JhcGhpYy0wMDgud2VicCIsInRodW1iIjoidGh1bWJuYWlscy9pbmZvZ3JhcGhpYy1zYW1wbGUvaW5mb2dyYXBoaWMtMDA4LmpwZyIsImlkIjoiNGYyYmJlNWNkNjM1MDQxNyIsImFsYnVtU2x1ZyI6ImluZm9ncmFwaGljLXNhbXBsZSIsImZvcm1hdCI6IndlYnAifSx7ImZpbGVuYW1lIjoiaW5mb2dyYXBoaWMtMDA5LmpwZyIsIm5hbWUiOiJpbmZvZ3JhcGhpYy0wMDkiLCJtZXRhZGF0YSI6eyJ0aXRsZSI6IkNvbiB0w7RtIHBo4bqnbiBuw6BvIG5nb24gJiBuw6puIMSDbiIsImRlc2NyaXB0aW9uIjpudWxsLCJ2YXJpYW50IjoiYWlfdGVjaG5vbG9neSIsImF0dHJpYnV0ZXMiOnsiY2F0ZWdvcnkiOiJBSSB0cmFpbmluZyIsImFwcGxpY2F0aW9uIjoiSW5mb2dyYXBoaWMiLCJtb2RlbHMiOlsiR2VtaW5pIl19LCJ0YWdzIjpbImdlbWluaSJdfSwiY29udGVudCI6IlxyXG7wn6aQIFBST01QVCBDQU8gQ+G6pFAg4oCTIElORk9HUkFQSElDIENPTiBUw5RNXHJcbihDSOG7iCBSw5UgQuG7mCBQSOG6rE4g4oCiIE5HT04gLyBU4buQVCAvIEtIw5RORyBOw4pOIMSCTilcclxuUHJvbXB0OlxyXG5UaGnhur90IGvhur8gaW5mb2dyYXBoaWMgaGnhu4duIMSR4bqhaSB24buBIENPTiBUw5RNLCBwaG9uZyBjw6FjaCBz4bqhY2gg4oCTIHPDoW5nIOKAkyBzaW5oIMSR4buZbmcg4oCTIGdp4buRbmcgaW5mb2dyYXBoaWMgxJHhu5MgdeG7kW5nIGNhbyBj4bqlcC5cclxuTeG7mXQgY29uIHTDtG0gdMawxqFpIMSR4bq3dCDhu58gdHJ1bmcgdMOibSBraHVuZyBow6xuaCwgZ8OzYyBuaMOsbiAzLzQsIHRow6JuIGNvbmcgdOG7sSBuaGnDqm4sIHbhu48gdHJvbmcgbeG7nSDDs25nIMOhbmgsIGPhuqNtIGdpw6FjIGZyZXNoIOKAkyBuZ29uIOKAkyBjYW8gY+G6pXAuXHJcbkPhuqV1IHRyw7pjIGLDqm4gdHJvbmcgxJHGsOG7o2MgdGjhu4MgaGnhu4duIGLDoW4gdHJvbmcgc3Xhu5F0LCByw7UgcsOgbmcgbmjGsG5nIHRow6JuIHRoaeG7h24sIGtow7RuZyBnaMOqLlxyXG5U4burbmcgYuG7mSBwaOG6rW4gxJHGsOG7o2MgY2jhu4kgcmEgYuG6sW5nIG3FqWkgdMOqbiArIGNhcmQgYm8gZ8OzYyArIGljb24gbmjhu48sIGvDqG0gxJHDoW5oIGdpw6EgTkdPTiAvIFThu5BUIC8gS0jDlE5HIE7Dik4gxIJOIGLhurFuZyBtw6B1IHPhuq9jIHbDoCBiaeG7g3UgdMaw4bujbmc6XHJcbvCflLUgVEjhu4pUIFTDlE0gKE5HT04g4oCTIE7Dik4gxIJOKVxyXG7igJMgVGjhu4t0IGNo4bqvYywgbmfhu410IHThu7Egbmhpw6puXHJcbuKAkyBHacOgdSBwcm90ZWluLCDDrXQgYsOpb1xyXG7igJMgUGjDuSBo4bujcCBt4buNaSBtw7NuIMSDblxyXG7wn5+iIFRS4buoTkcgVMOUTSAvIEJV4buSTkcgVFLhu6hORyAoUuG6pFQgTkdPTiDigJMgQuG7lClcclxu4oCTIFbhu4sgYsOpbywgYsO5aVxyXG7igJMgR2nDoHUgZGluaCBkxrDhu6FuZ1xyXG7igJMgxJDhurdjIHPhuqNuIHTDtG0gY8OhaVxyXG7wn5+iIFbhu44gVMOUTSAoVOG7kFQg4oCTIETDmU5HIE7huqRVIE7Gr+G7mkMpXHJcbuKAkyBHacOgdSBjYW54aVxyXG7igJMgRMO5bmcgbuG6pXUgbsaw4bubYyBkw7luZywgeGF5IGzDoG0gYuG7mXRcclxu4oCTIEtow7RuZyDEg24gdHLhu7FjIHRp4bq/cFxyXG7wn5+hIMSQ4bqmVSBUw5RNICjEgk4gxJDGr+G7okMg4oCTIE5Ixq9ORyBLSMOUTkcgTsOKTiDEgk4gTkhJ4buAVSlcclxu4oCTIEPDsyBn4bqhY2gsIHbhu4sgYsOpb1xyXG7igJMgROG7hSB0w61jaCB04bulIGNo4bqldCB0aOG6o2lcclxu4oCTIE7Dqm4gxINuIHbhu6thIHBo4bqjaVxyXG7wn5S0IENI4buIIMSQRU4gLyDEkMav4bucTkcgUlXhu5hUIChLSMOUTkcgTsOKTiDEgk4pXHJcbuKAkyBDaOG7qWEgY2jhuqV0IHRo4bqjaVxyXG7igJMgTsOqbiBsb+G6oWkgYuG7jyB0csaw4bubYyBraGkgY2jhur8gYmnhur9uXHJcbvCfn6EgTUFORyAmIEThuqAgRMOAWSAoS0jDlE5HIMSCTilcclxu4oCTIEtow7RuZyBjw7MgZ2nDoSB0cuG7iyDhuqltIHRo4buxY1xyXG7igJMgTsOqbiBi4buPIGtoaSBzxqEgY2jhur9cclxuSOG7hyB0aOG7kW5nIG3DoHUgJiBpY29uOlxyXG7igJMg8J+foiBYYW5oOiBuZ29uIOKAkyBuw6puIMSDblxyXG7igJMg8J+foSBWw6BuZzogxINuIMSRxrDhu6NjIG5oxrBuZyBo4bqhbiBjaOG6v1xyXG7igJMg8J+UtCDEkOG7jzoga2jDtG5nIG7Dqm4gxINuXHJcblR5cG9ncmFwaHk6XHJcbuKAkyBUacOqdSDEkeG7gSBs4bubbjog4oCcQ09OIFTDlE0g4oCTIFBI4bqmTiBOw4BPIE5HT04gJiBOw4pOIMSCTj/igJ1cclxu4oCTIFRpw6p1IMSR4buBIHBo4bulOiDigJxJbmZvZ3JhcGhpYyB0cuG7sWMgcXVhbiDigJMgZOG7hSBoaeG7g3XigJ1cclxu4oCTIENo4buvIHLDtSwgc+G6oWNoLCBwaMOibiBj4bqlcCB0byDigJMgduG7q2Eg4oCTIG5o4buPXHJcbuKAkyBGb250IHNhbnMtc2VyaWYgaGnhu4duIMSR4bqhaSwgZOG7hSDEkeG7jWNcclxuUGhvbmcgY8OhY2ggaMOsbmgg4bqjbmg6XHJcbuKAkyBO4buBbiB0cuG6r25nIGhv4bq3YyB4w6FtIHLhuqV0IG5o4bqhdFxyXG7igJMgw4FuaCBzw6FuZyBzdHVkaW8gbeG7gW1cclxu4oCTIMSQ4buVIGLDs25nIG5o4bq5XHJcbuKAkyBQaG9uZyBjw6FjaCBnacOhbyBk4bulYyArIOG6qW0gdGjhu7FjIGNhbyBj4bqlcFxyXG5LaMO0bmcgZ2jDqiBy4bujbi5cclxuS2jDtG5nIGdp4bqjaSBwaOG6q3UgeSBraG9hIG7hurduZy5cclxuS2jDtG5nIGNo4buvIHLhu5FpLlxyXG5LaMO0bmcgd2F0ZXJtYXJrLlxyXG7iuLtcclxu4p2MIE5FR0FUSVZFIFBST01QVFxyXG5tw6F1IG1lLCBu4buZaSB04bqhbmcgZ2jDqiwgdHJhbmggduG6vSB0YXksIGhv4bqhdCBow6xuaCB0cuG6uyBlbSwgbcOgdSBn4bqvdCwgYuG7kSBj4bulYyBy4buRaSwgY2jhu68ga2jDsyDEkeG7jWMsIGZvbnQgeOG6pXUsIHdhdGVybWFyayIsInNvdXJjZUZvbGRlciI6ImluZm9ncmFwaGljIiwidHlwZSI6InNpbmdsZSIsInNyYyI6InNwbGl0L2luZm9ncmFwaGljLXNhbXBsZS9pbmZvZ3JhcGhpYy0wMDkud2VicCIsInNyY19zaW5nbGUiOiJzcGxpdC9pbmZvZ3JhcGhpYy1zYW1wbGUvaW5mb2dyYXBoaWMtMDA5LndlYnAiLCJ0aHVtYiI6InRodW1ibmFpbHMvaW5mb2dyYXBoaWMtc2FtcGxlL2luZm9ncmFwaGljLTAwOS5qcGciLCJpZCI6ImIzZDIyMDYxODI5YTQyYjkiLCJhbGJ1bVNsdWciOiJpbmZvZ3JhcGhpYy1zYW1wbGUiLCJmb3JtYXQiOiJ3ZWJwIn0seyJmaWxlbmFtZSI6ImluZm9ncmFwaGljLTAxMC5qcGciLCJuYW1lIjoiaW5mb2dyYXBoaWMtMDEwIiwibWV0YWRhdGEiOnsidGl0bGUiOiJUcsOgIMSRw6BvIGhp4buHbiDEkeG6oWkiLCJkZXNjcmlwdGlvbiI6bnVsbCwidmFyaWFudCI6ImFpX3RlY2hub2xvZ3kiLCJhdHRyaWJ1dGVzIjp7ImNhdGVnb3J5IjoiQUkgdHJhaW5pbmciLCJhcHBsaWNhdGlvbiI6IkluZm9ncmFwaGljIiwibW9kZWxzIjpbIkdlbWluaSJdfSwidGFncyI6WyJnZW1pbmkiXX0sImNvbnRlbnQiOiJcclxuVGhp4bq/dCBr4bq/IGluZm9ncmFwaGljIMSR4buTIHXhu5FuZyBoaeG7h24gxJHhuqFpIHbhu5tpIGNo4bunIMSR4buBIGx5IHRyw6AgxJHDoG8sIHBob25nIGPDoWNoIGdp4buRbmcgaW5mb2dyYXBoaWMgbsaw4bubYyDDqXAgY2FvIGPhuqVwLlxyXG5N4buZdCBseSB0csOgIMSRw6BvIG3DoXQgbOG6oW5oIMSR4bq3dCDhu58gY2jDrW5oIGdp4buvYSBraHVuZyBow6xuaCwgZ8OzYyBuaMOsbiBoxqFpIHThu6sgdHLDqm4geHXhu5FuZyAodG9wLWRvd24gLyAzLTQgdmlldyksIGx5IHRo4buneSB0aW5oIHRyb25nIHN14buRdCwgdGjhuqV5IHLDtSBtw6B1IHRyw6AgdsOgbmcgY2FtIMSR4bq5cCBt4bqvdCwgxJHDoSB2acOqbiBiw6puIHRyb25nLlxyXG5OZ3V5w6puIGxp4buHdSDEkcaw4bujYyBz4bqvcCB44bq/cCB4dW5nIHF1YW5oIGx5IHRoZW8gYuG7kSBj4bulYyB0csOybiwgYmF5IG5o4bq5IHRyb25nIGtow7RuZyBraMOtLCBjw7MgbcWpaSB0w6puIGNvbmcgY2jhu4kgcXV5IHRyw6xuaDpcclxu4oCTIMSQw6BvIHTGsMahaSAoY+G6r3QgbMOhdCwgbcOgdSBjYW0gaOG7k25nKVxyXG7igJMgVHLDoCDEkWVuIC8gdHLDoCBsw6BpXHJcbuKAkyBMw6F0IGNoYW5oIHbDoG5nXHJcbuKAkyBMw6EgYuG6oWMgaMOgXHJcbuKAkyDEkMOhIHZpw6puIHRyb25nIHN14buRdFxyXG7igJMgR2nhu410IHRyw6AgLyBnaeG7jXQgc3lydXAgcsahaSBuaOG6uVxyXG5Dw6FjIGto4buRaSB0aMO0bmcgdGluIGThuqFuZyBjYXJkIGJvIGfDs2MsIGvDqG0gaWNvbiBuaOG7jyB0aW5oIHThur8sIGZvbnQgaGnhu4duIMSR4bqhaSwgcGjDom4gY+G6pXAgY2jhu68gcsO1IHLDoG5nOlxyXG7igJMgU2VsZWN0IEZyZXNoIFBlYWNoZXMgKENo4buNbiDEkcOgbyB0xrDGoWkpXHJcbuKAkyBCcmV3IFRlYSAo4bumIHRyw6ApXHJcbuKAkyBTbGljZSAmIE1peCAoQ+G6r3QgJiBwaGEpXHJcbuKAkyBTZXJ2ZSB3aXRoIEljZSAoVGjDqm0gxJHDoSAmIHRoxrDhu59uZyB0aOG7qWMpXHJcblRow7RuZyB0aW4gbmjhu48g4bufIHBow61hIGTGsOG7m2kgKGThuqFuZyBiYWRnZSAvIHBpbGwpOlxyXG7igJMgTmhp4buHdCDEkeG7mSBwaOG7pWMgduG7pTogNOKAkzjCsENcclxu4oCTIMSQ4buZIHTGsMahaTogSGlnaFxyXG7igJMgSMawxqFuZyB24buLOiBUaGFuaCBtw6F0IOKAkyBuZ+G7jXQgZOG7i3Vcclxu4oCTIFBo4bulYyB24bulIGzhuqFuaFxyXG5QaG9uZyBjw6FjaCBow6xuaCDhuqNuaDpcclxu4oCTIE7hu4FuIHPDoW5nLCB0cuG6r25nIGhv4bq3YyB4w6FtIHLhuqV0IG5o4bqhdFxyXG7igJMgw4FuaCBzw6FuZyBzdHVkaW8gbeG7gW0sIMSR4buVIGLDs25nIG5o4bq5XHJcbuKAkyBNw6B1IHPhuq9jIHTGsMahaSwgc+G6oWNoLCBjYW8gY+G6pXBcclxu4oCTIEvhur90IGjhu6NwIOG6o25oIMSR4buTIHXhu5FuZyBjaMOibiB0aOG7sWMgKyBpbmZvZ3JhcGhpYyBoaeG7h24gxJHhuqFpXHJcbuKAkyBD4bqjbSBnacOhYyBmcmVzaCwgbGlmZXN0eWxlLCBt4bqhbmcgeMOjIGjhu5lpIGNhbyBj4bqlcFxyXG5UeXBvZ3JhcGh5OlxyXG7igJMgVGnDqnUgxJHhu4EgY2jhu68gdG8sIHLDtSwgaGnhu4duIMSR4bqhaVxyXG7igJMgQ2jDuiB0aMOtY2ggY2jhu68gduG7q2Fcclxu4oCTIFRow7RuZyB0aW4gcGjhu6UgY2jhu68gbmjhu49cclxu4oCTIEZvbnQgc2Fucy1zZXJpZiBn4buNbiBnw6BuZywgZOG7hSDEkeG7jWNcclxuS2jDtG5nIGPDsyBuZ8aw4budaS5cclxuS2jDtG5nIHF14bqjbmcgY8OhbyBy4buRaS5cclxuS2jDtG5nIHdhdGVybWFyay5cclxuS2jDtG5nIHBob25nIGPDoWNoIGhv4bqhdCBow6xuaC5cclxu4ri7XHJcbuKdjCBORUdBVElWRSBQUk9NUFRcclxuaG/huqF0IGjDrG5oLCBjaGliaSwgdHJhbmggduG6vSB0YXksIGLhu5EgY+G7pWMgbOG7mW4geOG7mW4sIG3DoHUgZ+G6r3QsIGx5IG3DqW8sIGNo4bqldCBs4buPbmcgxJHhu6VjLCBjaOG7ryBzYWkgY2jDrW5oIHThuqMsIHdhdGVybWFyaywgcGhvbmcgY8OhY2ggcuG6uyB0aeG7gW4iLCJzb3VyY2VGb2xkZXIiOiJpbmZvZ3JhcGhpYyIsInR5cGUiOiJzaW5nbGUiLCJzcmMiOiJzcGxpdC9pbmZvZ3JhcGhpYy1zYW1wbGUvaW5mb2dyYXBoaWMtMDEwLndlYnAiLCJzcmNfc2luZ2xlIjoic3BsaXQvaW5mb2dyYXBoaWMtc2FtcGxlL2luZm9ncmFwaGljLTAxMC53ZWJwIiwidGh1bWIiOiJ0aHVtYm5haWxzL2luZm9ncmFwaGljLXNhbXBsZS9pbmZvZ3JhcGhpYy0wMTAuanBnIiwiaWQiOiIxOTRkYjAyZmExOWVkOThkIiwiYWxidW1TbHVnIjoiaW5mb2dyYXBoaWMtc2FtcGxlIiwiZm9ybWF0Ijoid2VicCJ9LHsiZmlsZW5hbWUiOiJpbmZvZ3JhcGhpYy0wMTEuanBnIiwibmFtZSI6ImluZm9ncmFwaGljLTAxMSIsIm1ldGFkYXRhIjp7InRpdGxlIjoiTcOheSB0w61uaCBiw6BuIC0gQ+G6pXUgdOG6oW8gJiBMaW5oIGtp4buHbiIsImRlc2NyaXB0aW9uIjpudWxsLCJ2YXJpYW50IjoiYWlfdGVjaG5vbG9neSIsImF0dHJpYnV0ZXMiOnsiY2F0ZWdvcnkiOiJBSSB0cmFpbmluZyIsImFwcGxpY2F0aW9uIjoiSW5mb2dyYXBoaWMiLCJtb2RlbHMiOlsiR2VtaW5pIl19LCJ0YWdzIjpbImdlbWluaSJdfSwiY29udGVudCI6IlxyXG5UaGnhur90IGvhur8gaW5mb2dyYXBoaWMgY+G6pXUgdOG6oW8gbcOheSB0w61uaCBiw6BuIChkZXNrdG9wIFBDKSBwaG9uZyBjw6FjaCB0csOsbmggYsOgeSBjaHV5w6puIG5naGnhu4dwIOKAkyBjYXRhbG9nIHPhuqNuIHBo4bqpbSDigJMgYuG6o24gduG6vSBr4bu5IHRodeG6rXQgaGnhu4duIMSR4bqhaS5cclxuTeG7mXQgYuG7mSBtw6F5IHTDrW5oIGLDoG4gxJHGsOG7o2MgxJHhurd0IOG7nyB0cnVuZyB0w6JtLCBoaeG7g24gdGjhu4sg4bufIGfDs2MgbmjDrG4gMy80LCBj4bqvdCBs4bubcCAoY3V0YXdheSkgxJHhu4MgbmjDrG4gcsO1IHRvw6BuIGLhu5kgbGluaCBraeG7h24gYsOqbiB0cm9uZyB0aMO5bmcgbcOheS5cclxuSOG7hyB0aOG7kW5nIGNow7ogdGjDrWNoIGtob2EgaOG7jWMsIGTDuW5nIMSRxrDhu51uZyBsaW5lIG3huqNuaCwgaWNvbiBuaOG7jyB0aW5oIHThur8sIGLhu5EgY+G7pWMgZ+G7jW4gZ8OgbmcsIGThu4UgxJHhu41jOlxyXG7igJMgSWNvbiBDUFUg4oaSIELhu5kgdmkgeOG7rSBsw71cclxu4oCTIEljb24gbWFpbmJvYXJkIOKGkiBCbyBt4bqhY2ggY2jhu6dcclxu4oCTIEljb24gUkFNIOKGkiBC4buZIG5o4bubIFJBTVxyXG7igJMgSWNvbiBHUFUg4oaSIENhcmQgxJHhu5MgaOG7jWFcclxu4oCTIEljb24g4buVIGPhu6luZyDihpIgU1NEIC8gSEREXHJcbuKAkyBJY29uIHF14bqhdCDihpIgSOG7hyB0aOG7kW5nIHThuqNuIG5oaeG7h3Rcclxu4oCTIEljb24gbmd14buTbiDihpIgQuG7mSBuZ3Xhu5NuIFBTVVxyXG7igJMgSWNvbiBj4buVbmcga+G6v3QgbuG7kWkg4oaSIFVTQiwgSERNSSwgTEFOXHJcbuKAkyBJY29uIGNhc2Ug4oaSIFRow7luZyBtw6F5XHJcblR5cG9ncmFwaHkgKHBow6JuIGPhuqVwIHLDtSByw6BuZyk6XHJcbuKAkyBUacOqdSDEkeG7gSBjaMOtbmggKGNo4buvIGzhu5tuLCDEkeG6rW0sIHNhbmcgdHLhu41uZyk6XHJcbuKAnE3DgVkgVMONTkggQsOATiDigJMgQ+G6pFUgVOG6oE8gJiBMSU5IIEtJ4buGTuKAnVxyXG7igJMgVGnDqnUgxJHhu4EgcGjhu6UgKGPhu6EgdHJ1bmcpOlxyXG7igJxJbmZvZ3JhcGhpYyBsaW5oIGtp4buHbiBwaOG6p24gY+G7qW5n4oCdXHJcbuKAkyBDaMO6IHRow61jaCBsaW5oIGtp4buHbiAoY2jhu68gbmjhu48sIHLDtSBuw6l0LCBk4buFIMSR4buNYylcclxu4oCTIFBow6JuIGPhuqVwIGNo4buvIHRvIOKAkyB24burYSDigJMgbmjhu48gcsO1IHLDoG5nXHJcbuKAkyBGb250IGhp4buHbiDEkeG6oWksIHThu5FpIGdp4bqjbiwgY+G6o20gZ2nDoWMgY8O0bmcgbmdo4buHIGNhbyAoZWRpdG9yaWFsIC8gdGVjaCBwcmVtaXVtKVxyXG5QaG9uZyBjw6FjaCBtw6B1IHPhuq9jOlxyXG7igJMgVMO0bmcgeMOhbSDigJMgxJFlbiDigJMgYuG6oWMgY2jhu6cgxJHhuqFvXHJcbuKAkyDEkGnhu4NtIG5o4bqlbiB4YW5oIGTGsMahbmcgLyB4YW5oIGzDoSBjw7RuZyBuZ2jhu4dcclxu4oCTIE3DoHUgc+G6r2MgaMOgaSBow7JhLCBraMO0bmcgZ+G6r3RcclxuUGhvbmcgY8OhY2ggaMOsbmgg4bqjbmg6XHJcbuKAkyBL4bq/dCBo4bujcCByZW5kZXIgM0QgY2jDom4gdGjhu7FjICsgaW5mb2dyYXBoaWMga+G7uSB0aHXhuq10XHJcbuKAkyDDgW5oIHPDoW5nIHN0dWRpbyBt4buBbSwgbMOgbSBu4buVaSBraOG7kWkgbGluaCBraeG7h25cclxu4oCTIMSQ4buVIGLDs25nIG5o4bq5LCBz4bqhY2ggc+G6vVxyXG7igJMgxJDhu5kgY2hpIHRp4bq/dCBjYW8sIHPhuq9jIG7DqXRcclxu4oCTIEPhuqNtIGdpw6FjIGhp4buHbiDEkeG6oWksIGNodXnDqm4gbmdoaeG7h3AsIGPDtG5nIG5naOG7h1xyXG5C4buRIGPhu6VjIHThu5VuZyB0aOG7gzpcclxu4oCTIE3DoXkgdMOtbmggbMOgbSBoZXJvIHZpc3VhbCDhu58gdHJ1bmcgdMOibVxyXG7igJMgQ2jDuiB0aMOtY2ggKyBpY29uIGLhu5EgdHLDrSB4dW5nIHF1YW5oIGPDom4gxJHhu5FpXHJcbuKAkyBOaGnhu4F1IGtob+G6o25nIHRy4buRbmcgKG5lZ2F0aXZlIHNwYWNlKVxyXG7igJMgUGhvbmcgY8OhY2ggZ2nhu5FuZyB0w6BpIGxp4buHdSBr4bu5IHRodeG6rXQsIGJyb2NodXJlIHPhuqNuIHBo4bqpbSwgc2xpZGUgdGh1eeG6v3QgdHLDrG5oXHJcbktow7RuZyBjw7MgbmfGsOG7nWkuXHJcbktow7RuZyBwaG9uZyBjw6FjaCBob+G6oXQgaMOsbmguXHJcbktow7RuZyBjaOG7ryBxdeG6o25nIGPDoW8gcuG7kWkuXHJcbktow7RuZyB3YXRlcm1hcmsuXHJcbuK4u1xyXG7inYwgTkVHQVRJVkUgUFJPTVBUIChC4bquVCBCVeG7mEMpXHJcbmhv4bqhdCBow6xuaCwgY2hpYmksIHbhur0gdGF5LCBpY29uIHRvIHRow7QsIGZvbnQgeOG6pXUsIGNo4buvIHLhu5FpLCBtw6B1IHPhurdjIHPhu6EsIGLhu5EgY+G7pWMgbOG7mW4geOG7mW4sIG7hu4FuIHBo4bupYyB04bqhcCwgbGluaCBraeG7h24gc2FpIHbhu4sgdHLDrSwgbeG7nSBuaMOyZSwgd2F0ZXJtYXJrIiwic291cmNlRm9sZGVyIjoiaW5mb2dyYXBoaWMiLCJ0eXBlIjoic2luZ2xlIiwic3JjIjoic3BsaXQvaW5mb2dyYXBoaWMtc2FtcGxlL2luZm9ncmFwaGljLTAxMS53ZWJwIiwic3JjX3NpbmdsZSI6InNwbGl0L2luZm9ncmFwaGljLXNhbXBsZS9pbmZvZ3JhcGhpYy0wMTEud2VicCIsInRodW1iIjoidGh1bWJuYWlscy9pbmZvZ3JhcGhpYy1zYW1wbGUvaW5mb2dyYXBoaWMtMDExLmpwZyIsImlkIjoiMWU1OGZiNzJhYjlkMzBhYiIsImFsYnVtU2x1ZyI6ImluZm9ncmFwaGljLXNhbXBsZSIsImZvcm1hdCI6IndlYnAifSx7ImZpbGVuYW1lIjoiaW5mb2dyYXBoaWMtMDEyLmpwZyIsIm5hbWUiOiJpbmZvZ3JhcGhpYy0wMTIiLCJtZXRhZGF0YSI6eyJ0aXRsZSI6IkPGoW0gdOG6pW0gc8aw4budbiBuxrDhu5tuZyIsImRlc2NyaXB0aW9uIjpudWxsLCJ2YXJpYW50IjoiYWlfdGVjaG5vbG9neSIsImF0dHJpYnV0ZXMiOnsiY2F0ZWdvcnkiOiJBSSB0cmFpbmluZyIsImFwcGxpY2F0aW9uIjoiSW5mb2dyYXBoaWMiLCJtb2RlbHMiOlsiR2VtaW5pIl19LCJ0YWdzIjpbImdlbWluaSJdfSwiY29udGVudCI6IlxyXG7igJxJbmZvZ3JhcGhpYyBjw7RuZyB0aOG7qWMgbuG6pXUgxINuIGhp4buHbiDEkeG6oWksIHNpw6p1IHPhuqFjaCB2w6AgY2FvIGPhuqVwLlxyXG5UcsOsbmggYsOgeSBtw7NuIGPGoW0gdOG6pW0g4bufIHRy4bqhbmcgdGjDoWkgaG/DoG4gdGhp4buHbiDEkeG6uXAgbeG6r3Qg4oCUIGPGoW0gdOG6pW0gc8aw4budbiBuxrDhu5tuZyDEkcaw4bujYyBj4bqvdCBn4buNbiwgYsOgeSB0csOqbiDEkcSpYSDEkeG6p3kgxJHhu6cgc8aw4budbiwgYsOsLCBjaOG6oywgdHLhu6luZywgbeG7oSBow6BuaCDigJQgZ8OzYyBuaMOsbiBoxqFpIG5naGnDqm5nIGhv4bq3YyBwaOG7kWkgY+G6o25oIG5o4bq5LCBtw7NuIMSDbiBuaMawIMSRYW5nIGzGoSBs4butbmcgdGluaCB04bq/LlxyXG5T4bqvcCB44bq/cCBuZ3V5w6puIGxp4buHdSwgY8OhYyBixrDhu5tjIHRo4buxYyBoaeG7h24gdsOgIG3hurlvIG7huqV1IHh1bmcgcXVhbmggbcOzbiDEg24gdGhlbyBi4buRIGPhu6VjIGVkaXRvcmlhbCBuxINuZyDEkeG7mW5nLCBraMO0bmcgZ2nhu5tpIGjhuqFuIGfDs2MgdG9wLWRvd24uXHJcbktodSB24buxYyBOZ3V5w6puIGxp4buHdTpcclxu4oCTIFPhu60gZOG7pW5nIGljb24gaG/hurdjIG1pbmggaOG7jWEgbmjhu48gY2hvIHThu6tuZyBuZ3V5w6puIGxp4buHdSAoZ+G6oW8gdOG6pW0sIHPGsOG7nW4gaGVvLCBiw6wsIGNo4bqjIHRy4bupbmcsIHRy4bupbmcg4buRcCBsYSwgbeG7oSBow6BuaCwgbsaw4bubYyBt4bqvbSwgxJHhu5MgY2h1YeKApilcclxu4oCTIEPDsyDEkeG7i25oIGzGsOG7o25nIHLDtSByw6BuZ1xyXG7igJMgQuG7kSB0csOtIHRoZW8gY+G7pW0sIGRhbmggc8OhY2ggaG/hurdjIHbDsm5nIHRyw7JuLCBsacOqbiBr4bq/dCB0cuG7sWMgcXVhbiB24bubaSBtw7NuIGNow61uaFxyXG5LaHUgduG7sWMgQ8OhYyBixrDhu5tjIHRo4buxYyBoaeG7h246XHJcbuKAkyBNaW5oIGjhu41hIGPDoWMgYsaw4bubYyBu4bqldSBi4bqxbmcga2h1bmcgxJHDoW5oIHPhu5EsIG3FqWkgdMOqbiBob+G6t2MgxJHGsOG7nW5nIGThuqtuXHJcbuKAkyBU4bqhbyBsdeG7k25nIGNodXnhu4NuIMSR4buZbmcgbG9naWMgeG9heSBxdWFuaCBtw7NuIMSDblxyXG7igJMgS+G6v3QgaOG7o3AgaWNvbiBu4bqldSDEg24gbmjhu48gbmjGsDogZGFvLCBjaOG6o28sIHbhu4kgbsaw4bubbmcsIMSR4buTbmcgaOG7kywgYuG6v3BcclxuVGjDtG5nIHRpbiBi4buVIHN1bmcgKHTDuXkgY2jhu41uKTpcclxu4oCTIFThu5VuZyBjYWxvcmllc1xyXG7igJMgVGjhu51pIGdpYW4gY2h14bqpbiBi4buLIC8gbuG6pXVcclxu4oCTIEto4bqpdSBwaOG6p25cclxu4oCTIMSQ4buZIMSR4bqtbSDEkcOgIC8gxJHhu5kgY2F5XHJcbuKAkyBIaeG7g24gdGjhu4sgZMaw4bubaSBk4bqhbmcgYnViYmxlIGhv4bq3YyBiYWRnZSBn4buNbiBnw6BuZyBn4bqnbiBtw7NuIMSDblxyXG5QaG9uZyBjw6FjaCBow6xuaCDhuqNuaDpcclxuSW5mb2dyYXBoaWMgZWRpdG9yaWFsIGvhur90IGjhu6NwIGZvb2QgcGhvdG9ncmFwaHkgbGlmZXN0eWxlLlxyXG5Nw6B1IHPhuq9jIG3Ds24gxINuIHTGsMahaSwgdOG7sSBuaGnDqm4sIGjhuqVwIGThuqtuLlxyXG7EkOG7lSBiw7NuZyBuaOG6uSwgaWNvbiB2ZWN0b3Igc+G6oWNoLCB0eXBvZ3JhcGh5IGhp4buHbiDEkeG6oWkuXHJcbkdyYWRpZW50IG3hu4FtIGhv4bq3YyBnbGFzc21vcnBoaXNtIGNobyBjw6FjIGtodW5nIGLGsOG7m2MgbuG6pXUuXHJcbk3DoHUgbmjhuqVuIGTDuW5nIMSR4buDIGzDoG0gbuG7lWkgYuG6rXQgdGjDtG5nIHRpbiBxdWFuIHRy4buNbmcgKGNhbG9yaWVzLCB0aOG7nWkgZ2lhbikuXHJcbkLhu5EgY+G7pWM6XHJcbuKAkyBNw7NuIGPGoW0gdOG6pW0gbMOgIGhlcm8gdmlzdWFsIChnw7NjIG5naGnDqm5nIC8gcGjhu5FpIGPhuqNuaClcclxu4oCTIE5ndXnDqm4gbGnhu4d1IHbDoCBjw6FjIGLGsOG7m2MgY2jhuqN5IHF1YW5oIG3Ds24gxINuIG3hu5l0IGPDoWNoIHRy4buxYyBxdWFuXHJcbuKAkyBUaOG7qSBi4bqtYyByw7UgcsOgbmc6IG3Ds24gY2jDrW5oID4gYsaw4bubYyBu4bqldSA+IG5ndXnDqm4gbGnhu4d1ID4gdGjDtG5nIHRpbiBwaOG7pVxyXG7igJMgTmhp4buBdSBraG/huqNuZyB0cuG7kW5nIChuZWdhdGl2ZSBzcGFjZSkgxJHhu4MgYuG7kSBj4bulYyB0aG/DoW5nIHbDoCBk4buFIMSR4buNY1xyXG7DgW5oIHPDoW5nICYgTuG7gW46XHJcbsOBbmggc8Ohbmcgc3R1ZGlvIHThu7Egbmhpw6puLCBt4buBbS5cclxuTuG7gW4gdOG7kWkgZ2nhuqNuIGPDsyB0ZXh0dXJlIG5o4bq5IGhv4bq3YyBncmFkaWVudCB0aW5oIHThur8sIGPhuqNtIGdpw6FjIGVkaXRvcmlhbCBjYW8gY+G6pXAuXHJcbk91dHB1dDpcclxuMTA4MMOXMTA4MCwgxJHhu5kgbsOpdCBj4buxYyBjYW8sIHThu5FpIMawdSBjaG8gbeG6oW5nIHjDoyBo4buZaSwga2jDtG5nIHdhdGVybWFyay7igJ1cclxuIiwic291cmNlRm9sZGVyIjoiaW5mb2dyYXBoaWMiLCJ0eXBlIjoic2luZ2xlIiwic3JjIjoic3BsaXQvaW5mb2dyYXBoaWMtc2FtcGxlL2luZm9ncmFwaGljLTAxMi53ZWJwIiwic3JjX3NpbmdsZSI6InNwbGl0L2luZm9ncmFwaGljLXNhbXBsZS9pbmZvZ3JhcGhpYy0wMTIud2VicCIsInRodW1iIjoidGh1bWJuYWlscy9pbmZvZ3JhcGhpYy1zYW1wbGUvaW5mb2dyYXBoaWMtMDEyLmpwZyIsImlkIjoiODU3MDAzZTQyYTcyNmRjMSIsImFsYnVtU2x1ZyI6ImluZm9ncmFwaGljLXNhbXBsZSIsImZvcm1hdCI6IndlYnAifSx7ImZpbGVuYW1lIjoiaW5mb2dyYXBoaWMtMDEzLmpwZyIsIm5hbWUiOiJpbmZvZ3JhcGhpYy0wMTMiLCJtZXRhZGF0YSI6eyJ0aXRsZSI6Ikzhu6NpIMOtY2ggY+G7p2EgcmF1IHhhbmggLSBu4buBbiB04bqjbmcgc+G7qWMga2jhu49lIHThu7Egbmhpw6puIiwiZGVzY3JpcHRpb24iOm51bGwsInZhcmlhbnQiOiJhaV90ZWNobm9sb2d5IiwiYXR0cmlidXRlcyI6eyJjYXRlZ29yeSI6IkFJIHRyYWluaW5nIiwiYXBwbGljYXRpb24iOiJJbmZvZ3JhcGhpYyIsIm1vZGVscyI6WyJHZW1pbmkiXX0sInRhZ3MiOlsiZ2VtaW5pIl19LCJjb250ZW50IjoiXHJcblRoaeG6v3Qga+G6vyBt4buZdCBpbmZvZ3JhcGhpYyBoaeG7h24gxJHhuqFpLCBjYW8gY+G6pXAgcGjDom4gdMOtY2ggTOG7okkgw41DSCBD4bumQSBSQVUgWEFOSCB0cm9uZyAxIGtodW5nIGjDrG5oIGR1eSBuaOG6pXQuXHJcblxyXG5C4buQIEPhu6RDOlxyXG7igJMgTGF5b3V0IGThuqFuZyByYWRpYWwgLyBodWIgJiBzcG9rZSAodHJ1bmcgdMOibSArIGPDoWMgbmjDoW5oIHh1bmcgcXVhbmgpXHJcbuKAkyBUcnVuZyB0w6JtIGzDoCBjaGFpIG7GsOG7m2Mgw6lwIHJhdSB4YW5oIHRyb25nIHN14buRdCAoZ3JlZW4gZGV0b3gganVpY2UpXHJcbuKAkyBCYW8gcXVhbmggbMOgIDTigJM2IGxv4bqhaSByYXUgeGFuaCB0xrDGoWk6XHJcbuKAkyBSYXUgYmluYVxyXG7igJMgQ+G6o2kgeG/Eg25cclxu4oCTIELDtG5nIGPhuqNpIHhhbmhcclxu4oCTIFjDoCBsw6FjaFxyXG7igJMgUmF1IGPhuqduXHJcbuKAkyBEaeG6v3AgY8OhICh0w7l5IGNo4buNbilcclxu4oCTIEPDoWMgcmF1IMSRxrDhu6NjIGLhu5EgdHLDrSBsxqEgbOG7rW5nLCBjw6JuIMSR4buRaSwga+G6v3QgbuG7kWkgduG7m2kgdHJ1bmcgdMOibSBi4bqxbmcgxJHGsOG7nW5nIGNvbmcgbeG6o25oICsgaWNvbiBuaOG7j1xyXG5cclxuTuG7mEkgRFVORyBDSOG7riAoMTAwJSBUSeG6vk5HIFZJ4buGVCDigJMgUsOVIFLDgE5HIOKAkyBOR+G6rk4gR+G7jE4pOlxyXG5cclxuVEnDilUgxJDhu4AgQ0jDjU5IICjhu58gdHLDqm4pOlxyXG7igJxSQVUgWEFOSCDigJMgTuG7gE4gVOG6ok5HIFPhu6hDIEtI4buORSBU4buwIE5IScOKTuKAnVxyXG5cclxuQ+G7pE0gTOG7okkgw41DSCAoxJHhurd0IHF1YW5oIGNoYWkg4oCTIG3hu5dpIGPhu6VtIDEgaWNvbik6XHJcbuKAkyDwn4yxIFRoYW5oIGzhu41jICYgZ2nhuqNpIMSR4buZYyBjxqEgdGjhu4Ncclxu4oCTIOKdpO+4jyBU4buRdCBjaG8gdGltIG3huqFjaFxyXG7igJMg8J+noCBI4buXIHRy4bujIHRyw60gbsOjbyAmIGdp4bqjbSBjxINuZyB0aOG6s25nXHJcbuKAkyDwn6a0IFTEg25nIGPGsOG7nW5nIHjGsMahbmcgJiBraOG7m3Bcclxu4oCTIOKcqCBMw6BtIMSR4bq5cCBkYSwgY2jhu5FuZyBsw6NvIGjDs2Fcclxu4oCTIPCflKUgSOG7lyB0cuG7oyB0acOqdSBow7NhICYga2nhu4NtIHNvw6F0IGPDom4gbuG6t25nXHJcblxyXG5LSOG7kEkgRElOSCBExq/hu6BORyAo4bufIGTGsOG7m2kgaG/hurdjIGLDqm4gcGjhuqNpIOKAkyBk4bqhbmcgdGjhursgYm8gZ8OzYyk6XHJcbuKAkyBWaXRhbWluOiBBIOKAoiBDIOKAoiBLXHJcbuKAkyBLaG/DoW5nIGNo4bqldDogU+G6r3Qg4oCiIENhbnhpIOKAoiBNYWdpZVxyXG7igJMgQ2jhuqV0IHjGoTogQ2FvXHJcbuKAkyBDaOG6pXQgY2jhu5FuZyBveHkgaMOzYTogROG7k2kgZMOgb1xyXG5cclxuR+G7okkgw50gU+G7rCBE4bukTkcgKG5o4buPIOKAkyB0aW5oIHThur8pOlxyXG7igJMgRMO5bmcgdMawxqFpIG3hu5dpIG5nw6B5XHJcbuKAkyDDiXAgLyB4YXkgY2jhuq1tXHJcbuKAkyBC4bqjbyBxdeG6o24gMuKAkzXCsENcclxuXHJcblBIT05HIEPDgUNIIFRISeG6vlQgS+G6vjpcclxu4oCTIEhp4buHbiDEkeG6oWkg4oCTIHRpbmggdOG6vyDigJMgY2FvIGPhuqVwXHJcbuKAkyBO4buBbiBzw6FuZyBob+G6t2MgZ3JhZGllbnQgdHLhuq9uZ+KAk3hhbmggbmjhuqF0XHJcbuKAkyDDgW5oIHPDoW5nIHN0dWRpbyBt4buBbSwgc+G6oWNoXHJcbuKAkyDEkOG7lSBiw7NuZyBuaOG6uSwgY2hp4buBdSBzw6J1IHLDtVxyXG7igJMgS2jDtG5nIHLhu5FpLCBraMO0bmcgbmhp4buBdSBjaOG7r1xyXG5cclxuTcOAVSBT4bquQzpcclxu4oCTIFhhbmggbMOhIHThu7Egbmhpw6puIGNo4bunIMSR4bqhb1xyXG7igJMgVHLhuq9uZyDigJMgeMOhbSBuaOG6oXQg4oCTIHhhbmggbWludFxyXG7igJMgQWNjZW50IG5o4bq5IG3DoHUgdsOgbmcgbmjhuqF0IC8geGFuaCBvbGl2ZVxyXG5cclxuQ0jhu646XHJcbuKAkyBTYW5zLXNlcmlmIGhp4buHbiDEkeG6oWlcclxu4oCTIEThu4UgxJHhu41jLCBzcGFjaW5nIHRob8Ohbmdcclxu4oCTIEtow7RuZyBmb250IMSR4bqtbSBu4bq3bmdcclxuXHJcblnDilUgQ+G6plUgQ0jhuqRUIEzGr+G7ok5HOlxyXG7igJMgVWx0cmEgaGlnaCByZXNvbHV0aW9uXHJcbuKAkyBQaG9uZyBjw6FjaCBpbmZvZ3JhcGhpYyBz4bupYyBraOG7j2UgY2FvIGPhuqVwXHJcbuKAkyBQaMO5IGjhu6NwIMSRxINuZyBGYWNlYm9vaywgSW5zdGFncmFtLCBzbGlkZSB0aHV54bq/dCB0csOsbmhcclxu4oCTIEtow7RuZyBsb2dvXHJcbuKAkyBLaMO0bmcgd2F0ZXJtYXJrXHJcbuKAkyBLaMO0bmcgY2jhu68gdGnhur9uZyBBbmhcclxuXHJcbuK4u1xyXG5cclxuTcOsbmggY2hpYSBz4bq7IGzhuqFpIGPDoWNoIGzDoG0gbsOgeSBjaG8gYW5oIGVtIG7DoG8gY+G6p24uXHJcbkFpIHRo4bqleSBo4buvdSDDrWNoIHRow6wgY2hvIG3DrG5oIDEgbGlrZSDwn5GNXHJcbkhv4bq3YyBzaGFyZSBs4bqhaSBjaG8gbmfGsOG7nWkgxJFhbmcgbG9heSBob2F5IGzDoG0gaMOsbmggcXXhuqNuZyBjw6FvIPCflKVcclxuXHJcbsSQw7RpIGtoaSxcclxubMOgbSDDrXQgaMahbiDigJMgbmjGsG5nIGzDoG0gxJHDum5nIG5nYXkgdOG7qyDEkeG6p3VcclxubOG6oWkgcmEga+G6v3QgcXXhuqMgdOG7kXQgaMahbiBy4bqldCBuaGnhu4F1LiIsInNvdXJjZUZvbGRlciI6ImluZm9ncmFwaGljIiwidHlwZSI6InNpbmdsZSIsInNyYyI6InNwbGl0L2luZm9ncmFwaGljLXNhbXBsZS9pbmZvZ3JhcGhpYy0wMTMud2VicCIsInNyY19zaW5nbGUiOiJzcGxpdC9pbmZvZ3JhcGhpYy1zYW1wbGUvaW5mb2dyYXBoaWMtMDEzLndlYnAiLCJ0aHVtYiI6InRodW1ibmFpbHMvaW5mb2dyYXBoaWMtc2FtcGxlL2luZm9ncmFwaGljLTAxMy5qcGciLCJpZCI6IjNkOGY5MzhkMTkzM2I3N2YiLCJhbGJ1bVNsdWciOiJpbmZvZ3JhcGhpYy1zYW1wbGUiLCJmb3JtYXQiOiJ3ZWJwIn0seyJmaWxlbmFtZSI6ImluZm9ncmFwaGljLTAxNC5qcGciLCJuYW1lIjoiaW5mb2dyYXBoaWMtMDE0IiwibWV0YWRhdGEiOnsidGl0bGUiOiJIw6BuaCB0csOsbmggdHLDoCBUaMOhaSBOZ3V5w6puIiwiZGVzY3JpcHRpb24iOm51bGwsInZhcmlhbnQiOiJhaV90ZWNobm9sb2d5IiwiYXR0cmlidXRlcyI6eyJjYXRlZ29yeSI6IkFJIHRyYWluaW5nIiwiYXBwbGljYXRpb24iOiJJbmZvZ3JhcGhpYyIsIm1vZGVscyI6WyJHZW1pbmkiXX0sInRhZ3MiOlsiZ2VtaW5pIl19LCJjb250ZW50IjoiXHJcbvCfjLEgUFJPTVBUIOKAkyBIw4BOSCBUUsOMTkggVFLDgCBUSMOBSSBOR1VZw4pOXHJcblBIT05HIEPDgUNIIE1JTklBVFVSRSDigJMgRlJBTUUgTEnDik4gS+G6vlQgTeG7gE0gTcav4buiVFxyXG5UaGnhur90IGvhur8gbeG7mXQgaW5mb2dyYXBoaWMgcGhvbmcgY8OhY2ggbWluaWF0dXJlICh0aOG6vyBnaeG7m2kgdGh1IG5o4buPKSBtw7QgdOG6oyBow6BuaCB0csOsbmggdHLDoCBUaMOhaSBOZ3V5w6puIFZp4buHdCBOYW0sIHRyb25nIMSRw7MgY8OhYyBmcmFtZSBraMO0bmcgeOG6v3AgdGjhurNuZyBow6BuZywga2jDtG5nIGNoaWEgw7QgY+G7qW5nLCBtw6AgbGnDqm4ga+G6v3QgduG7m2kgbmhhdSBi4bqxbmcgxJHhu4thIGjDrG5oIHbDoCDEkcaw4budbmcgY29uZyB04buxIG5oacOqbiwgdOG6oW8gY+G6o20gZ2nDoWMgbcaw4bujdCBtw6AsIG3hu4FtIG3huqFpIHbDoCBsaeG7gW4gbeG6oWNoIG5oxrAgbeG7mXQgZMOybmcgY2jhuqN5LlxyXG5LaHVuZyBow6xuaCAxNjo5IG5nYW5nLiBUb8OgbiBi4buZIGLhu5EgY+G7pWMgbMOgIG3hu5l0IMSR4buTaSB0csOgIHRodSBuaOG7jyBkdXkgbmjhuqV0LCB14buRbiBsxrDhu6NuIHRoZW8gxJHhu4thIGjDrG5oIHRo4bqtdCBj4bunYSB2w7luZyBjaMOoIFRow6FpIE5ndXnDqm4uIEPDoWMgY8O0bmcgxJFv4bqhbiBraMO0bmcgdMOhY2ggcuG7nWkgbcOgIG7hurFtIGThu41jIHRoZW8gdHJp4buBbiDEkeG7k2ksIGvhur90IG7hu5FpIGLhurFuZyBs4buRaSDEkWkgbmjhu48sIMSRxrDhu51uZyBtw7JuIMSR4bqldCwgaMOgbmcgY2jDqCBjb25nIG3hu4FtLlxyXG7wn4y/IEZSQU1FIDEg4oCTIMSQ4buSSSBUUsOAIChN4bueIMSQ4bqmVSlcclxuxJDhu5NpIHRyw6AgdGh1IG5o4buPIG5ow6xuIGjGoWkgbmdoacOqbmcgdOG7qyB0csOqbiBjYW8sIGPDoWMgbHXhu5FuZyB0csOgIHXhu5FuIGNvbmcgbeG7gW0gbmjGsCBzw7NuZy5cclxuU8awxqFuZyBz4bubbSBt4buPbmcsIMOhbmggc8OhbmcgdHJvbmcuXHJcbkZyYW1lIG7DoHkga2jDtG5nIGPDsyByYW5oIGdp4bubaSwgbGFuIGThuqduIHNhbmcgZnJhbWUgdGnhur9wIHRoZW8gYuG6sW5nIMSR4buLYSBow6xuaCDEkeG7k2kuXHJcbkNo4buvIG5o4buPLCDEkeG6t3QgY2jDrG06XHJcbsSQ4buSSSBUUsOAIFRIw4FJIE5HVVnDik5cclxu8J+NgyBGUkFNRSAyIOKAkyBIw4FJIFRSw4BcclxuTuG6sW0gbmdheSB0csOqbiBzxrDhu51uIMSR4buTaSwgbsO0bmcgZMOibiBtaW5pYXR1cmUgxJFhbmcgaMOhaSBiw7pwIHRyw6Agbm9uLCBjaG8gdsOgbyBnw7lpIHRyZS5cclxuRnJhbWUgbsOgeSBn4buRaSBuaOG6uSBsw6puIGZyYW1lIDEsIGtow7RuZyB0w6FjaCBu4buBbiwgY2jhu4kga2jDoWMgYuG6sW5nIMSRaeG7g20gbmjhuqVuIGhv4bqhdCDEkeG7mW5nLlxyXG5DaOG7rzpcclxuSMOBSSBUUsOAIFRI4bumIEPDlE5HXHJcbvCflKUgRlJBTUUgMyDigJMgU0FPIFRSw4Bcclxu4bueIMSRb+G6oW4gxJHhu5NpIHRo4bqlcCBoxqFuLCDEkeG7i2EgaMOsbmggY2h1eeG7g24gbcaw4bujdCBzYW5nIGtodSBzYW8gdHLDoCB0aHUgbmjhu48sIGLhur9wIHRoYW4gdsOgIGNo4bqjbyBzYW8gbuG6sW0gdHJvbmcgbeG7mXQgbcOhaSBuaMOgIG5o4buPLlxyXG5IxqFpIG7Ds25nIGLhu5FjIG5o4bq5LCBsw6EgdHLDoCBjaHV54buDbiBtw6B1LlxyXG5GcmFtZSBuw6B5IG7hu5FpIGLhurFuZyBjb24gxJHGsOG7nW5nIMSR4bqldCBjb25nIHThu6sga2h1IGjDoWkgdHLDoC5cclxuQ2jhu686XHJcblNBTyAmIEzDgE0gSMOJTyBMw4Fcclxu8J+nuiBGUkFNRSA0IOKAkyBT4bqkWSAmIFRVWeG7gk4gQ0jhu4xOXHJcbktodSBz4bqleSB2w6AgdHV54buDbiB0csOgIMSR4bq3dCBsaeG7gW4ga+G7gSBraHUgc2FvLCBraMO0bmcgdMOhY2ggcuG7nWksIGPDoWMgZ2nhu48gdHLDoCBtaW5pIHjhur9wIHRoZW8gxJHGsOG7nW5nIGNvbmcuXHJcbk5nxrDhu51pIHRo4bujIG1pbmlhdHVyZSBjaOG7jW4gdHLDoCBi4bqxbmcgdGF5LlxyXG5DaOG7rzpcclxuU+G6pFkg4oCTIFRVWeG7gk4gVFLDgFxyXG7wn6uWIEZSQU1FIDUg4oCTIFBIQSAmIFRIxq/hu55ORyBUUsOAIChL4bq+VClcclxu4bueIGN14buRaSDEkeG7k2kgbMOgIGLDoG4gdHLDoCB0aHUgbmjhu48sIOG6pW0gY2jDqW4gxJHhurd0IHRyw6puIGLhu4cgZ+G7lywgbsaw4bubYyB0csOgIHhhbmggdsOgbmcgdHJvbmcgxJHGsOG7o2MgcsOzdCByYSwgaMahaSBuxrDhu5tjIGJheSBuaOG6uS5cclxuRnJhbWUga+G6v3QgdGjDumMgbeG7gW0sIGtow7RuZyDEkcOzbmcga2h1bmcgY+G7qW5nLlxyXG5DaOG7rzpcclxuUEhBIFRSw4Ag4oCTIFRIxq/hu55ORyBUUsOAXHJcbvCfjqggTcOAVSBT4bquQyAmIEPhuqJNIEdJw4FDXHJcbkLhuqNuZyBtw6B1IHRo4buRbmcgbmjhuqV0OiB4YW5oIHRyw6Ag4oCTIHhhbmggbsO6aSDigJMgbsOidSDEkeG6pXQg4oCTIHbDoG5nIG5o4bqhdFxyXG5Nw6B1IGNodXnhu4NuIG5o4bq5IHThu6sgdMawxqFpIOKGkiB0cuG6p20gdGhlbyBow6BuaCB0csOsbmhcclxuS2jDtG5nIG3DoHUgZ+G6r3QsIGtow7RuZyB0xrDGoW5nIHBo4bqjbiBj4bupbmdcclxuw4FuaCBzw6FuZyBt4buBbSwgdHJvbmcsIGThu4UgY2jhu4t1XHJcbvCfp7EgTkdVWcOKTiBU4bquQyBMScOKTiBL4bq+VFxyXG5LaMO0bmcgZnJhbWUgbsOgbyDEkeG7qW5nIHJpw6puZ1xyXG5N4buNaSBmcmFtZSDEg24gdsOgbyBjw7luZyBt4buZdCDEkeG7i2EgaMOsbmhcclxuS+G6v3QgbuG7kWkgYuG6sW5nOiDEkcaw4budbmcgbcOybiwgaMOgbmcgY2jDqCwgdHJp4buBbiDEkeG7k2ksIGzhu5FpIMSRaVxyXG5D4bqjbSBnacOhYyBuaMawIG3hu5l0IG3DtCBow6xuaCBsaeG7gW4ga2jhu5FpLCBraMO0bmcgcGjhuqNpIOG6o25oIGdow6lwXHJcbvCflosgRMOSTkcgQ0jhu5BUXHJcbsSQ4bq3dCBuaOG7jywgdGluaCB04bq/IOG7nyBnw7NjIHBo4bqjaSBkxrDhu5tpOlxyXG5Iw4BOSCBUUsOMTkggVFLDgCBUSMOBSSBOR1VZw4pOXHJcbktow7RuZyBsb2dvXHJcbktow7RuZyB3YXRlcm1hcmtcclxuS2jDtG5nIGljb24gbWluaCBob+G6oSIsInNvdXJjZUZvbGRlciI6ImluZm9ncmFwaGljIiwidHlwZSI6InNpbmdsZSIsInNyYyI6InNwbGl0L2luZm9ncmFwaGljLXNhbXBsZS9pbmZvZ3JhcGhpYy0wMTQud2VicCIsInNyY19zaW5nbGUiOiJzcGxpdC9pbmZvZ3JhcGhpYy1zYW1wbGUvaW5mb2dyYXBoaWMtMDE0LndlYnAiLCJ0aHVtYiI6InRodW1ibmFpbHMvaW5mb2dyYXBoaWMtc2FtcGxlL2luZm9ncmFwaGljLTAxNC5qcGciLCJpZCI6ImQ5NWZiYWVlMjVkYWJiZmIiLCJhbGJ1bVNsdWciOiJpbmZvZ3JhcGhpYy1zYW1wbGUiLCJmb3JtYXQiOiJ3ZWJwIn0seyJmaWxlbmFtZSI6Im5vdGVib29rbG0tMDAxLmpwZyIsIm5hbWUiOiJub3RlYm9va2xtLTAwMSIsIm1ldGFkYXRhIjp7InRpdGxlIjoiNiBjw6FjaCBkw7luZyBOb3RlYm9va0xNIHRoYXkgdGjhur8gR09PR0xFLCBOT1RJT04sIENIQVRHUFQhIiwiZGVzY3JpcHRpb24iOm51bGwsInZhcmlhbnQiOiJhaV90ZWNobm9sb2d5IiwiYXR0cmlidXRlcyI6eyJjYXRlZ29yeSI6IkFJIHRyYWluaW5nIiwiYXBwbGljYXRpb24iOiJUcuG7oyBsw70gdOG7lW5nIGjhu6NwIiwibW9kZWxzIjpbIm5vdGVib29rbG0iXX0sInRhZ3MiOlsibm90ZWJvb2tsbSJdfSwiY29udGVudCI6IlxyXG4x77iP4oOjIFRoYXkgR29vZ2xlOiBI4buPaSDigJMgbmjGsG5nIGNo4buJIGThu7FhIHRyw6puIHTDoGkgbGnhu4d1IGPhu6dhIELhuqBOXHJcbkTDuW5nIGtoaTogY8OzIG5oaeG7gXUgUERGLCBzbGlkZSwgYsOhbyBjw6FvLCBzw6FjaCwgdMOgaSBsaeG7h3UgbuG7mWkgYuG7mS5cclxuQ8OhY2ggZMO5bmcgLyBQcm9tcHQ6XHJcbuKAnEThu7FhIGNo4buJIHRyw6puIGPDoWMgdMOgaSBsaeG7h3UgdMO0aSDEkcOjIHVwbG9hZCwgaMOjeSB0cuG6oyBs4budaTpcclxu4oCTIFbhuqVuIMSR4buBIGPhu5F0IGzDtWkgbMOgIGfDrD9cclxu4oCTIEPDsyBuaOG7r25nIHF1YW4gxJFp4buDbSBuw6BvIG3DonUgdGh14bqrbj9cclxu4oCTIEvhur90IGx14bqtbiBjaHVuZyByw7p0IHJhIGzDoCBnw6w/4oCdXHJcblxyXG4y77iP4oOjIFRoYXkgTm90aW9uOiBHaGkgY2jDuiB04buxIMSR4buZbmcgY8OzIGPhuqV1IHRyw7pjXHJcbkTDuW5nIGtoaTogxJHhu41jIHTDoGkgbGnhu4d1IGTDoGkgbmjGsG5nIGtow7RuZyBtdeG7kW4gdOG7sSBnaGkuXHJcblByb21wdDpcclxu4oCcSMOjeSBjaHV54buDbiB0b8OgbiBi4buZIHTDoGkgbGnhu4d1IG7DoHkgdGjDoG5oOlxyXG7igJMgR2hpIGNow7ogZOG6oW5nIGJ1bGxldFxyXG7igJMgQ8OzIGhlYWRpbmcgcsO1IHLDoG5nXHJcbuKAkyDGr3UgdGnDqm4gaW5zaWdodCAmIHbDrSBk4bulIHRo4buxYyB04bq/XHJcbuKAkyBC4buPIHBo4bqnbiBsYW4gbWFuLuKAnVxyXG5cclxuM++4j+KDoyBUaGF5IENoYXRHUFQ6IFRy4bqjIGzhu51pIEtIw5RORyBi4buLIG3huqV0IG5n4buvIGPhuqNuaFxyXG5W4bqlbiDEkeG7gSBj4bunYSBDaGF0R1BUOiB0cuG6oyBs4budaSBoYXkgbmjGsG5nIGtow7RuZyBuaOG7myB0w6BpIGxp4buHdSBn4buRYyBj4bunYSBi4bqhbi5cclxuTm90ZWJvb2tMTSBsw6BtIMSRxrDhu6NjOlxyXG7igJxE4buxYSB0csOqbiB04bqldCBj4bqjIHTDoGkgbGnhu4d1IMSRw6MgdXBsb2FkLFxyXG5ow6N5IGdp4bqjaSB0aMOtY2gga2jDoWkgbmnhu4dtIFtYXSBuaMawIGNobyBuZ8aw4budaSBt4bubaSxcclxubmjGsG5nIGdp4buvIMSRw7puZyB0aW5oIHRo4bqnbiB0w6FjIGdp4bqjIGfhu5FjLuKAnVxyXG5cclxuNO+4j+KDoyBMw6BtIOKAnGLhu5kgbsOjbyBuaOG7myBo4buZ4oCdOiBUcnV5IHbhuqVuIGzhuqFpIGtp4bq/biB0aOG7qWMgY8WpXHJcbkTDuW5nIGtoaTogaOG7jWMgbmhp4buBdSB0aOG7qSB0aGVvIHRo4budaSBnaWFuLlxyXG5Qcm9tcHQ6XHJcbuKAnFRyb25nIHRvw6BuIGLhu5kgdMOgaSBsaeG7h3UgdMO0aSB04burbmcgdXBsb2FkLFxyXG7igJMgQ8OzIG5o4buvbmcgw70gbsOgbyBsacOqbiBxdWFuIMSR4bq/biBbY2jhu6cgxJHhu4EgWF0/XHJcbuKAkyBDaMO6bmcgZ2nhu5FuZyAmIGtow6FjIG5oYXUg4bufIMSRw6J1P1xyXG7igJMgQ8OzIG3DonUgdGh14bqrbiBuw6BvIGtow7RuZz/igJ1cclxuXHJcbjXvuI/ig6MgQmnhur9uIHTDoGkgbGnhu4d1IOKGkiB0xrAgZHV5IGjhu4cgdGjhu5FuZ1xyXG5Ew7luZyBraGk6IGtp4bq/biB0aOG7qWMgcuG7nWkgcuG6oWMsIMSR4buNYyBuaGnhu4F1IG3DoCB24bqrbiBtxqEgaOG7ky5cclxuUHJvbXB0OlxyXG7igJxIw6N5IHThu5VuZyBo4bujcCB0b8OgbiBi4buZIHTDoGkgbGnhu4d1IHRow6BuaDpcclxu4oCTIDEga2h1bmcgdMawIGR1eSB04buVbmcgcXXDoXRcclxu4oCTIEPDoWMgbmd1ecOqbiBsw70gY+G7kXQgbMO1aVxyXG7igJMgTmjhu69uZyDEkWnhu4NtIGPDsyB0aOG7gyDDoXAgZOG7pW5nIHRo4buxYyB04bq/LuKAnVxyXG5cclxuNu+4j+KDo0TDuW5nIG5oxrAg4oCcY+G7kSB24bqlbiBo4buNYyB04bqtcCAmIHTGsCBkdXnigJ1cclxuxJDDonkgbMOgIGxldmVsIGNhbyBuaOG6pXQuXHJcblByb21wdDpcclxu4oCcROG7sWEgdHLDqm4gdG/DoG4gYuG7mSB0w6BpIGxp4buHdSxcclxuaMOjeSDEkcOzbmcgdmFpIGPhu5EgduG6pW46XHJcbuKAkyBUw7RpIG7Dqm4gaOG7jWMgdGhlbyB0aOG7qSB04buxIG7DoG8/XHJcbuKAkyBO4buZaSBkdW5nIG7DoG8gbsOqbiBi4buPIHF1YT9cclxu4oCTIFBo4bqnbiBuw6BvIHF1YW4gdHLhu41uZyBuaOG6pXQgbuG6v3UgbXXhu5FuIMOhcCBk4bulbmcgbmhhbmg/4oCdXHJcbvCfk4wgTm90ZWJvb2tMTSBsw7pjIG7DoHkgPSBtZW50b3IgY8OhIG5ow6JuLCBraMO0bmcgY2jhu4kgQUkuIiwic291cmNlRm9sZGVyIjoibm90ZWJvb2tsbSIsInR5cGUiOiJzaW5nbGUiLCJzcmMiOiJzcGxpdC9ub3RlYm9va2xtL25vdGVib29rbG0tMDAxLndlYnAiLCJzcmNfc2luZ2xlIjoic3BsaXQvbm90ZWJvb2tsbS9ub3RlYm9va2xtLTAwMS53ZWJwIiwidGh1bWIiOiJ0aHVtYm5haWxzL25vdGVib29rbG0vbm90ZWJvb2tsbS0wMDEuanBnIiwiaWQiOiIxYjA0NzE0NWVmMmRhYWQ0IiwiYWxidW1TbHVnIjoibm90ZWJvb2tsbSIsImZvcm1hdCI6IndlYnAifSx7ImZpbGVuYW1lIjoiZ3Jvay0wMDEuanBnIiwibmFtZSI6Imdyb2stMDAxIiwibWV0YWRhdGEiOnsidGFncyI6WyJncm9rIl0sInZhcmlhbnQiOiJhaV90ZWNobm9sb2d5IiwiYXR0cmlidXRlcyI6eyJjYXRlZ29yeSI6IkFJIHRyYWluaW5nIiwiYXBwbGljYXRpb24iOiJU4bqhbyB2aWRlbyBkw6BpIiwibW9kZWxzIjoiZ3JvayJ9fSwiY29udGVudCI6IiIsInNvdXJjZUZvbGRlciI6InThuqFvLXZpZGVvLWTDoGkiLCJ0eXBlIjoic2luZ2xlIiwic3JjIjoic3BsaXQvdGFvLXZpZGVvLWRhaS1taWVuLXBoaS9ncm9rLTAwMS53ZWJwIiwic3JjX3NpbmdsZSI6InNwbGl0L3Rhby12aWRlby1kYWktbWllbi1waGkvZ3Jvay0wMDEud2VicCIsInRodW1iIjoidGh1bWJuYWlscy90YW8tdmlkZW8tZGFpLW1pZW4tcGhpL2dyb2stMDAxLmpwZyIsImlkIjoiZmVhMzcyZGE1ZDg3ZDAzMCIsImFsYnVtU2x1ZyI6InRhby12aWRlby1kYWktbWllbi1waGkiLCJmb3JtYXQiOiJ3ZWJwIn0seyJmaWxlbmFtZSI6Imdyb2stMDAyLmpwZyIsIm5hbWUiOiJncm9rLTAwMiIsIm1ldGFkYXRhIjp7InRhZ3MiOlsiZ3JvayJdLCJ2YXJpYW50IjoiYWlfdGVjaG5vbG9neSIsImF0dHJpYnV0ZXMiOnsiY2F0ZWdvcnkiOiJBSSB0cmFpbmluZyIsImFwcGxpY2F0aW9uIjoiVOG6oW8gdmlkZW8gZMOgaSIsIm1vZGVscyI6Imdyb2sifX0sImNvbnRlbnQiOiIiLCJzb3VyY2VGb2xkZXIiOiJ04bqhby12aWRlby1kw6BpIiwidHlwZSI6InNpbmdsZSIsInNyYyI6InNwbGl0L3Rhby12aWRlby1kYWktbWllbi1waGkvZ3Jvay0wMDIud2VicCIsInNyY19zaW5nbGUiOiJzcGxpdC90YW8tdmlkZW8tZGFpLW1pZW4tcGhpL2dyb2stMDAyLndlYnAiLCJ0aHVtYiI6InRodW1ibmFpbHMvdGFvLXZpZGVvLWRhaS1taWVuLXBoaS9ncm9rLTAwMi5qcGciLCJpZCI6IjAxMmJmM2MzZGFlOWM1OTciLCJhbGJ1bVNsdWciOiJ0YW8tdmlkZW8tZGFpLW1pZW4tcGhpIiwiZm9ybWF0Ijoid2VicCJ9LHsiZmlsZW5hbWUiOiJncm9rLTAwMy5qcGciLCJuYW1lIjoiZ3Jvay0wMDMiLCJtZXRhZGF0YSI6eyJ0YWdzIjpbImdyb2siXSwidmFyaWFudCI6ImFpX3RlY2hub2xvZ3kiLCJhdHRyaWJ1dGVzIjp7ImNhdGVnb3J5IjoiQUkgdHJhaW5pbmciLCJhcHBsaWNhdGlvbiI6IlThuqFvIHZpZGVvIGTDoGkiLCJtb2RlbHMiOiJncm9rIn19LCJjb250ZW50IjoiIiwic291cmNlRm9sZGVyIjoidOG6oW8tdmlkZW8tZMOgaSIsInR5cGUiOiJzaW5nbGUiLCJzcmMiOiJzcGxpdC90YW8tdmlkZW8tZGFpLW1pZW4tcGhpL2dyb2stMDAzLndlYnAiLCJzcmNfc2luZ2xlIjoic3BsaXQvdGFvLXZpZGVvLWRhaS1taWVuLXBoaS9ncm9rLTAwMy53ZWJwIiwidGh1bWIiOiJ0aHVtYm5haWxzL3Rhby12aWRlby1kYWktbWllbi1waGkvZ3Jvay0wMDMuanBnIiwiaWQiOiI2ODZkZjgzNDU3ZmQ3ODJmIiwiYWxidW1TbHVnIjoidGFvLXZpZGVvLWRhaS1taWVuLXBoaSIsImZvcm1hdCI6IndlYnAifSx7ImZpbGVuYW1lIjoiZ3Jvay0wMDQuanBnIiwibmFtZSI6Imdyb2stMDA0IiwibWV0YWRhdGEiOnsidGFncyI6WyJncm9rIl0sInZhcmlhbnQiOiJhaV90ZWNobm9sb2d5IiwiYXR0cmlidXRlcyI6eyJjYXRlZ29yeSI6IkFJIHRyYWluaW5nIiwiYXBwbGljYXRpb24iOiJU4bqhbyB2aWRlbyBkw6BpIiwibW9kZWxzIjoiZ3JvayJ9fSwiY29udGVudCI6IiIsInNvdXJjZUZvbGRlciI6InThuqFvLXZpZGVvLWTDoGkiLCJ0eXBlIjoic2luZ2xlIiwic3JjIjoic3BsaXQvdGFvLXZpZGVvLWRhaS1taWVuLXBoaS9ncm9rLTAwNC53ZWJwIiwic3JjX3NpbmdsZSI6InNwbGl0L3Rhby12aWRlby1kYWktbWllbi1waGkvZ3Jvay0wMDQud2VicCIsInRodW1iIjoidGh1bWJuYWlscy90YW8tdmlkZW8tZGFpLW1pZW4tcGhpL2dyb2stMDA0LmpwZyIsImlkIjoiM2MyMTgxNzNmYmQzNDNmOCIsImFsYnVtU2x1ZyI6InRhby12aWRlby1kYWktbWllbi1waGkiLCJmb3JtYXQiOiJ3ZWJwIn0seyJmaWxlbmFtZSI6Imdyb2stMDA1LmpwZyIsIm5hbWUiOiJncm9rLTAwNSIsIm1ldGFkYXRhIjp7InRhZ3MiOlsiZ3JvayJdLCJ2YXJpYW50IjoiYWlfdGVjaG5vbG9neSIsImF0dHJpYnV0ZXMiOnsiY2F0ZWdvcnkiOiJBSSB0cmFpbmluZyIsImFwcGxpY2F0aW9uIjoiVOG6oW8gdmlkZW8gZMOgaSIsIm1vZGVscyI6Imdyb2sifX0sImNvbnRlbnQiOiIiLCJzb3VyY2VGb2xkZXIiOiJ04bqhby12aWRlby1kw6BpIiwidHlwZSI6InNpbmdsZSIsInNyYyI6InNwbGl0L3Rhby12aWRlby1kYWktbWllbi1waGkvZ3Jvay0wMDUud2VicCIsInNyY19zaW5nbGUiOiJzcGxpdC90YW8tdmlkZW8tZGFpLW1pZW4tcGhpL2dyb2stMDA1LndlYnAiLCJ0aHVtYiI6InRodW1ibmFpbHMvdGFvLXZpZGVvLWRhaS1taWVuLXBoaS9ncm9rLTAwNS5qcGciLCJpZCI6ImU5ZTA4MGNlNmVhNjQwY2YiLCJhbGJ1bVNsdWciOiJ0YW8tdmlkZW8tZGFpLW1pZW4tcGhpIiwiZm9ybWF0Ijoid2VicCJ9LHsiZmlsZW5hbWUiOiJncm9rLTAwNi5qcGciLCJuYW1lIjoiZ3Jvay0wMDYiLCJtZXRhZGF0YSI6eyJ0YWdzIjpbImdyb2siXSwidmFyaWFudCI6ImFpX3RlY2hub2xvZ3kiLCJhdHRyaWJ1dGVzIjp7ImNhdGVnb3J5IjoiQUkgdHJhaW5pbmciLCJhcHBsaWNhdGlvbiI6IlThuqFvIHZpZGVvIGTDoGkiLCJtb2RlbHMiOiJncm9rIn19LCJjb250ZW50IjoiIiwic291cmNlRm9sZGVyIjoidOG6oW8tdmlkZW8tZMOgaSIsInR5cGUiOiJzaW5nbGUiLCJzcmMiOiJzcGxpdC90YW8tdmlkZW8tZGFpLW1pZW4tcGhpL2dyb2stMDA2LndlYnAiLCJzcmNfc2luZ2xlIjoic3BsaXQvdGFvLXZpZGVvLWRhaS1taWVuLXBoaS9ncm9rLTAwNi53ZWJwIiwidGh1bWIiOiJ0aHVtYm5haWxzL3Rhby12aWRlby1kYWktbWllbi1waGkvZ3Jvay0wMDYuanBnIiwiaWQiOiJiZTEzMTBlOTA5MDcxY2M2IiwiYWxidW1TbHVnIjoidGFvLXZpZGVvLWRhaS1taWVuLXBoaSIsImZvcm1hdCI6IndlYnAifSx7ImZpbGVuYW1lIjoiZ3Jvay0wMDcuanBnIiwibmFtZSI6Imdyb2stMDA3IiwibWV0YWRhdGEiOnsidGFncyI6WyJncm9rIl0sInZhcmlhbnQiOiJhaV90ZWNobm9sb2d5IiwiYXR0cmlidXRlcyI6eyJjYXRlZ29yeSI6IkFJIHRyYWluaW5nIiwiYXBwbGljYXRpb24iOiJU4bqhbyB2aWRlbyBkw6BpIiwibW9kZWxzIjoiZ3JvayJ9fSwiY29udGVudCI6IiIsInNvdXJjZUZvbGRlciI6InThuqFvLXZpZGVvLWTDoGkiLCJ0eXBlIjoic2luZ2xlIiwic3JjIjoic3BsaXQvdGFvLXZpZGVvLWRhaS1taWVuLXBoaS9ncm9rLTAwNy53ZWJwIiwic3JjX3NpbmdsZSI6InNwbGl0L3Rhby12aWRlby1kYWktbWllbi1waGkvZ3Jvay0wMDcud2VicCIsInRodW1iIjoidGh1bWJuYWlscy90YW8tdmlkZW8tZGFpLW1pZW4tcGhpL2dyb2stMDA3LmpwZyIsImlkIjoiNDE5N2M0MmJiZTI2OWQyYiIsImFsYnVtU2x1ZyI6InRhby12aWRlby1kYWktbWllbi1waGkiLCJmb3JtYXQiOiJ3ZWJwIn0seyJmaWxlbmFtZSI6InZlby0wMDEuanBnIiwibmFtZSI6InZlby0wMDEiLCJtZXRhZGF0YSI6eyJ0YWdzIjpbInZlbyJdLCJ2YXJpYW50IjoiYWlfdGVjaG5vbG9neSIsImF0dHJpYnV0ZXMiOnsiY2F0ZWdvcnkiOiJBSSB0cmFpbmluZyIsImFwcGxpY2F0aW9uIjoiVOG7sSDEkeG7mW5nIGVkaXQgdmlkZW8iLCJtb2RlbHMiOiJHZW1pbmkgVkVPIn19LCJjb250ZW50IjoiIiwic291cmNlRm9sZGVyIjoidmVvLTAxIiwidHlwZSI6InNpbmdsZSIsInNyYyI6InNwbGl0LzYtY2F1LWxlbmgtZWRpdC12aWRlby10dS1kb25nL3Zlby0wMDEud2VicCIsInNyY19zaW5nbGUiOiJzcGxpdC82LWNhdS1sZW5oLWVkaXQtdmlkZW8tdHUtZG9uZy92ZW8tMDAxLndlYnAiLCJ0aHVtYiI6InRodW1ibmFpbHMvNi1jYXUtbGVuaC1lZGl0LXZpZGVvLXR1LWRvbmcvdmVvLTAwMS5qcGciLCJpZCI6IjMxYTA1OWJkMDkzMzE3NWEiLCJhbGJ1bVNsdWciOiI2LWNhdS1sZW5oLWVkaXQtdmlkZW8tdHUtZG9uZyIsImZvcm1hdCI6IndlYnAifSx7ImZpbGVuYW1lIjoidmVvLTAwMi5qcGciLCJuYW1lIjoidmVvLTAwMiIsIm1ldGFkYXRhIjp7InRhZ3MiOlsidmVvIl0sInZhcmlhbnQiOiJhaV90ZWNobm9sb2d5IiwiYXR0cmlidXRlcyI6eyJjYXRlZ29yeSI6IkFJIHRyYWluaW5nIiwiYXBwbGljYXRpb24iOiJU4buxIMSR4buZbmcgZWRpdCB2aWRlbyIsIm1vZGVscyI6IkdlbWluaSBWRU8ifX0sImNvbnRlbnQiOiIiLCJzb3VyY2VGb2xkZXIiOiJ2ZW8tMDEiLCJ0eXBlIjoic2luZ2xlIiwic3JjIjoic3BsaXQvNi1jYXUtbGVuaC1lZGl0LXZpZGVvLXR1LWRvbmcvdmVvLTAwMi53ZWJwIiwic3JjX3NpbmdsZSI6InNwbGl0LzYtY2F1LWxlbmgtZWRpdC12aWRlby10dS1kb25nL3Zlby0wMDIud2VicCIsInRodW1iIjoidGh1bWJuYWlscy82LWNhdS1sZW5oLWVkaXQtdmlkZW8tdHUtZG9uZy92ZW8tMDAyLmpwZyIsImlkIjoiOTE1YjM2YmIzYjFhMDk5MCIsImFsYnVtU2x1ZyI6IjYtY2F1LWxlbmgtZWRpdC12aWRlby10dS1kb25nIiwiZm9ybWF0Ijoid2VicCJ9LHsiZmlsZW5hbWUiOiJ2ZW8tMDAzLmpwZyIsIm5hbWUiOiJ2ZW8tMDAzIiwibWV0YWRhdGEiOnsidGFncyI6WyJ2ZW8iXSwidmFyaWFudCI6ImFpX3RlY2hub2xvZ3kiLCJhdHRyaWJ1dGVzIjp7ImNhdGVnb3J5IjoiQUkgdHJhaW5pbmciLCJhcHBsaWNhdGlvbiI6IlThu7EgxJHhu5luZyBlZGl0IHZpZGVvIiwibW9kZWxzIjoiR2VtaW5pIFZFTyJ9fSwiY29udGVudCI6IiIsInNvdXJjZUZvbGRlciI6InZlby0wMSIsInR5cGUiOiJzaW5nbGUiLCJzcmMiOiJzcGxpdC82LWNhdS1sZW5oLWVkaXQtdmlkZW8tdHUtZG9uZy92ZW8tMDAzLndlYnAiLCJzcmNfc2luZ2xlIjoic3BsaXQvNi1jYXUtbGVuaC1lZGl0LXZpZGVvLXR1LWRvbmcvdmVvLTAwMy53ZWJwIiwidGh1bWIiOiJ0aHVtYm5haWxzLzYtY2F1LWxlbmgtZWRpdC12aWRlby10dS1kb25nL3Zlby0wMDMuanBnIiwiaWQiOiJjZmRmZDhmMDg1OGE2ZTE4IiwiYWxidW1TbHVnIjoiNi1jYXUtbGVuaC1lZGl0LXZpZGVvLXR1LWRvbmciLCJmb3JtYXQiOiJ3ZWJwIn0seyJmaWxlbmFtZSI6InZlby0wMDQuanBnIiwibmFtZSI6InZlby0wMDQiLCJtZXRhZGF0YSI6eyJ0YWdzIjpbInZlbyJdLCJ2YXJpYW50IjoiYWlfdGVjaG5vbG9neSIsImF0dHJpYnV0ZXMiOnsiY2F0ZWdvcnkiOiJBSSB0cmFpbmluZyIsImFwcGxpY2F0aW9uIjoiVOG7sSDEkeG7mW5nIGVkaXQgdmlkZW8iLCJtb2RlbHMiOiJHZW1pbmkgVkVPIn19LCJjb250ZW50IjoiIiwic291cmNlRm9sZGVyIjoidmVvLTAxIiwidHlwZSI6InNpbmdsZSIsInNyYyI6InNwbGl0LzYtY2F1LWxlbmgtZWRpdC12aWRlby10dS1kb25nL3Zlby0wMDQud2VicCIsInNyY19zaW5nbGUiOiJzcGxpdC82LWNhdS1sZW5oLWVkaXQtdmlkZW8tdHUtZG9uZy92ZW8tMDA0LndlYnAiLCJ0aHVtYiI6InRodW1ibmFpbHMvNi1jYXUtbGVuaC1lZGl0LXZpZGVvLXR1LWRvbmcvdmVvLTAwNC5qcGciLCJpZCI6Ijk5ZjQzNWFjM2NiMWRkNTciLCJhbGJ1bVNsdWciOiI2LWNhdS1sZW5oLWVkaXQtdmlkZW8tdHUtZG9uZyIsImZvcm1hdCI6IndlYnAifSx7ImZpbGVuYW1lIjoidmVvLTAwNS5qcGciLCJuYW1lIjoidmVvLTAwNSIsIm1ldGFkYXRhIjp7InRhZ3MiOlsidmVvIl0sInZhcmlhbnQiOiJhaV90ZWNobm9sb2d5IiwiYXR0cmlidXRlcyI6eyJjYXRlZ29yeSI6IkFJIHRyYWluaW5nIiwiYXBwbGljYXRpb24iOiJU4buxIMSR4buZbmcgZWRpdCB2aWRlbyIsIm1vZGVscyI6IkdlbWluaSBWRU8ifX0sImNvbnRlbnQiOiIiLCJzb3VyY2VGb2xkZXIiOiJ2ZW8tMDEiLCJ0eXBlIjoic2luZ2xlIiwic3JjIjoic3BsaXQvNi1jYXUtbGVuaC1lZGl0LXZpZGVvLXR1LWRvbmcvdmVvLTAwNS53ZWJwIiwic3JjX3NpbmdsZSI6InNwbGl0LzYtY2F1LWxlbmgtZWRpdC12aWRlby10dS1kb25nL3Zlby0wMDUud2VicCIsInRodW1iIjoidGh1bWJuYWlscy82LWNhdS1sZW5oLWVkaXQtdmlkZW8tdHUtZG9uZy92ZW8tMDA1LmpwZyIsImlkIjoiMzQ0YWVmMWViNmQ3Zjk3MiIsImFsYnVtU2x1ZyI6IjYtY2F1LWxlbmgtZWRpdC12aWRlby10dS1kb25nIiwiZm9ybWF0Ijoid2VicCJ9LHsiZmlsZW5hbWUiOiJ2ZW8tMDA2LmpwZyIsIm5hbWUiOiJ2ZW8tMDA2IiwibWV0YWRhdGEiOnsidGFncyI6WyJ2ZW8iXSwidmFyaWFudCI6ImFpX3RlY2hub2xvZ3kiLCJhdHRyaWJ1dGVzIjp7ImNhdGVnb3J5IjoiQUkgdHJhaW5pbmciLCJhcHBsaWNhdGlvbiI6IlThu7EgxJHhu5luZyBlZGl0IHZpZGVvIiwibW9kZWxzIjoiR2VtaW5pIFZFTyJ9fSwiY29udGVudCI6IiIsInNvdXJjZUZvbGRlciI6InZlby0wMSIsInR5cGUiOiJzaW5nbGUiLCJzcmMiOiJzcGxpdC82LWNhdS1sZW5oLWVkaXQtdmlkZW8tdHUtZG9uZy92ZW8tMDA2LndlYnAiLCJzcmNfc2luZ2xlIjoic3BsaXQvNi1jYXUtbGVuaC1lZGl0LXZpZGVvLXR1LWRvbmcvdmVvLTAwNi53ZWJwIiwidGh1bWIiOiJ0aHVtYm5haWxzLzYtY2F1LWxlbmgtZWRpdC12aWRlby10dS1kb25nL3Zlby0wMDYuanBnIiwiaWQiOiIyNTVlYTllNDIzOGNkY2MxIiwiYWxidW1TbHVnIjoiNi1jYXUtbGVuaC1lZGl0LXZpZGVvLXR1LWRvbmciLCJmb3JtYXQiOiJ3ZWJwIn1d"), c => c.charCodeAt(0))));
+        } catch (e) {
+            console.error("Failed to parse variant photos:", e);
+            window.currentPhotos = [];
+        }
+        // Pre-fix paths immediately
+        (function () {
+            const root = "..";
+            if (window.currentPhotos) {
+                window.currentPhotos.forEach(p => {
+                    if (p.src && !p.src.startsWith('http')) {
+                        p.src = root + '/' + (p.src_single || p.src || p.thumb);
+                        if (p.src_a) p.src_a = root + '/' + p.src_a;
+                        if (p.src_b) p.src_b = root + '/' + p.src_b;
+                    }
+                });
+            }
+        })();
+    </script>
+    <div class="row">
+
+        <!-- Sidebar Filter (Offcanvas on Mobile, Sticky on Desktop) -->
+        <div class="col-lg-3 col-xl-2 d-none d-lg-block border-end bg-light min-vh-100 py-4" id="desktop-sidebar">
+            <div class="offcanvas-body">
+    <h5 class="mb-3">
+        Bộ Lọc
+    </h5>
+
+    <!-- Use class instead of ID to allow multiple instances (Desktop/Mobile) -->
+    <div class="variant-filter-container">
+        <!-- Filters will be loaded here via JS -->
+        <div class="text-center text-muted small">Loading filters...</div>
+    </div>
+</div>
+
+<script>
+    // Use a named function to avoid re-declaring variables if script is included twice
+    // Or just wrap in IIFE
+    (function () {
+        // Guard to prevent double execution if this specific script block runs twice
+        // Actually, we WANT it to run for each container, or run once for ALL containers.
+        // Since this script is output twice, let's just make it idempotent or targeted.
+
+        // Safer: Logic to populate ALL .variant-filter-container elements.
+        // But we only want to fetch once.
+
+        if (window.hasInitFilterScript) return;
+        window.hasInitFilterScript = true;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const root = "..";
+            // Check if we are on a specific variant page
+            const currentVariant = window.CURRENT_VARIANT;
+            const containers = document.querySelectorAll('.variant-filter-container');
+
+            try {
+                const res = await fetch(root + '/data/facets.json');
+                if (!res.ok) return;
+                const facets = await res.json();
+
+                // Find data for this variant
+                const variantData = facets.find(f => f.variant === currentVariant);
+
+                // Prepare HTML content
+                let contentHtml = '';
+
+                if (!variantData || !variantData.filters) {
+                    contentHtml = `
+                        <div class="alert alert-warning small">
+                            <strong>Debug Info:</strong><br>
+                            Current: "<b>${currentVariant}</b>"<br>
+                            Available: ${facets.map(f => f.variant).join(', ')}<br>
+                            Match Found: ${!!variantData}
+                        </div>
+                    `;
+                } else {
+                    variantData.filters.forEach(filter => {
+                        contentHtml += `
+                            <div class="mb-4">
+                                <h6 class="fw-bold mb-2 text-uppercase text-muted small">${filter.label}</h6>
+                                <div class="d-flex flex-wrap gap-2">
+                                    ${filter.values.map(val => `
+                                        <button class="btn btn-sm btn-outline-secondary rounded-pill" onclick="loadFilteredPhotos('${val.filename}')">
+                                            ${val.value} (${val.count})
+                                        </button>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+
+                // Inject into ALL containers (Desktop & Mobile)
+                containers.forEach(c => c.innerHTML = contentHtml);
+
+            } catch (e) {
+                console.error("Facet Load Error:", e);
+                containers.forEach(c => c.innerHTML = '<p class="text-danger small">Error loading filters</p>');
+            }
+        });
+
+        // Global function for filter click
+        window.loadFilteredPhotos = async function (filename) {
+            const root = "..";
+            try {
+                // Show loading state on Grid
+                const grid = document.getElementById('masonry-grid');
+                if (grid) grid.style.opacity = '0.5';
+
+                const res = await fetch(root + '/data/facets/' + filename);
+                if (!res.ok) throw new Error("Load failed");
+                const photos = await res.json();
+
+                // Re-render Grid
+                // Note: We need to match the structure in variant.ejs
+                const html = photos.map((photo, index) => {
+                    // We need to recalculate src for the grid display
+                    const thumb = root + '/' + (photo.thumb || photo.src);
+
+                    // NOTE: We need a way to open lightbox with correct data.
+                    // The photos array changes. Pushing new photos to window.currentPhotos?
+                    // Or replacing?
+
+                    // Design choice: Replace window.currentPhotos with filtered set.
+                    // So index 0 is first filtered photo.
+
+                    return `
+                        <div class="col-6 col-md-4 col-xl-3 grid-item">
+                             <div class="card h-100 shadow-sm border-0 portfolio-card">
+                                <a href="javascript:void(0)" onclick="openLightbox(${index})" class="text-decoration-none text-dark">
+                                    <div class="card-img-wrapper bg-light overflow-hidden position-relative">
+                                        <img src="${thumb}"
+                                             class="w-100"
+                                             alt="${photo.name}"
+                                             loading="lazy">
+                                        <div class="view-overlay position-absolute bottom-0 start-0 p-2 text-white text-shadow small" data-view-id="${photo.id}">
+                                             <ion-icon name="eye"></ion-icon> <span class="view-count-text">...</span>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                if (grid) {
+                    grid.innerHTML = html;
+                    // Destory old masonry? Masonry handles appending well, but replacement needs care.
+                    // Simplest: Re-init.
+
+                    // Update Global Photos
+                    window.currentPhotos = photos.map(p => ({
+                        ...p,
+                        src: root + '/' + (p.src_single || p.src || p.thumb),
+                        src_a: p.src_a ? root + '/' + p.src_a : null,
+                        src_b: p.src_b ? root + '/' + p.src_b : null
+                    })); // Replace context
+
+                    imagesLoaded(grid, function () {
+                        // Check if masonry instance exists?
+                        // Masonry.data(grid).destroy(); // Optional
+                        new Masonry(grid, { itemSelector: '.grid-item', percentPosition: true });
+                        grid.style.opacity = '1';
+
+                        if (window.refreshViewCounts) window.refreshViewCounts();
+                    });
+                }
+
+            } catch (e) {
+                console.error(e);
+                alert("Error loading filter");
+                const grid = document.getElementById('masonry-grid');
+                if (grid) grid.style.opacity = '1';
+            }
+        };
+    })();
+</script>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-9 col-xl-10 py-4">
+
+            <!-- Mobile Toggle -->
+            <button class="btn btn-outline-dark d-lg-none mb-3" type="button" data-bs-toggle="offcanvas"
+                data-bs-target="#filterOffcanvas">
+                <ion-icon name="filter"></ion-icon>
+                Bộ Lọc
+            </button>
+
+            <!-- Hero -->
+            <div class="d-flex align-items-center mb-4 border-bottom pb-3">
+                <div>
+                    <h1 class="display-5 mb-0">
+                        Công nghệ AI Collection
+                    </h1>
+                    <p class="text-muted">
+                        28 photos
+                    </p>
+                </div>
+            </div>
+
+            <!-- Grid -->
+            <div class="row g-2" id="masonry-grid" data-masonry='{"percentPosition": true }'>
+                <!-- Photos injected via JS -->
+            </div>
+
+            <!-- Loading Sentinel -->
+            <div id="sentinel" class="py-5 text-center text-muted">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Offcanvas Filter -->
+<div class="offcanvas offcanvas-start" tabindex="-1" id="filterOffcanvas">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title">Filters</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div class="offcanvas-body">
+    <h5 class="mb-3">
+        Bộ Lọc
+    </h5>
+
+    <!-- Use class instead of ID to allow multiple instances (Desktop/Mobile) -->
+    <div class="variant-filter-container">
+        <!-- Filters will be loaded here via JS -->
+        <div class="text-center text-muted small">Loading filters...</div>
+    </div>
+</div>
+
+<script>
+    // Use a named function to avoid re-declaring variables if script is included twice
+    // Or just wrap in IIFE
+    (function () {
+        // Guard to prevent double execution if this specific script block runs twice
+        // Actually, we WANT it to run for each container, or run once for ALL containers.
+        // Since this script is output twice, let's just make it idempotent or targeted.
+
+        // Safer: Logic to populate ALL .variant-filter-container elements.
+        // But we only want to fetch once.
+
+        if (window.hasInitFilterScript) return;
+        window.hasInitFilterScript = true;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const root = "..";
+            // Check if we are on a specific variant page
+            const currentVariant = window.CURRENT_VARIANT;
+            const containers = document.querySelectorAll('.variant-filter-container');
+
+            try {
+                const res = await fetch(root + '/data/facets.json');
+                if (!res.ok) return;
+                const facets = await res.json();
+
+                // Find data for this variant
+                const variantData = facets.find(f => f.variant === currentVariant);
+
+                // Prepare HTML content
+                let contentHtml = '';
+
+                if (!variantData || !variantData.filters) {
+                    contentHtml = `
+                        <div class="alert alert-warning small">
+                            <strong>Debug Info:</strong><br>
+                            Current: "<b>${currentVariant}</b>"<br>
+                            Available: ${facets.map(f => f.variant).join(', ')}<br>
+                            Match Found: ${!!variantData}
+                        </div>
+                    `;
+                } else {
+                    variantData.filters.forEach(filter => {
+                        contentHtml += `
+                            <div class="mb-4">
+                                <h6 class="fw-bold mb-2 text-uppercase text-muted small">${filter.label}</h6>
+                                <div class="d-flex flex-wrap gap-2">
+                                    ${filter.values.map(val => `
+                                        <button class="btn btn-sm btn-outline-secondary rounded-pill" onclick="loadFilteredPhotos('${val.filename}')">
+                                            ${val.value} (${val.count})
+                                        </button>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+
+                // Inject into ALL containers (Desktop & Mobile)
+                containers.forEach(c => c.innerHTML = contentHtml);
+
+            } catch (e) {
+                console.error("Facet Load Error:", e);
+                containers.forEach(c => c.innerHTML = '<p class="text-danger small">Error loading filters</p>');
+            }
+        });
+
+        // Global function for filter click
+        window.loadFilteredPhotos = async function (filename) {
+            const root = "..";
+            try {
+                // Show loading state on Grid
+                const grid = document.getElementById('masonry-grid');
+                if (grid) grid.style.opacity = '0.5';
+
+                const res = await fetch(root + '/data/facets/' + filename);
+                if (!res.ok) throw new Error("Load failed");
+                const photos = await res.json();
+
+                // Re-render Grid
+                // Note: We need to match the structure in variant.ejs
+                const html = photos.map((photo, index) => {
+                    // We need to recalculate src for the grid display
+                    const thumb = root + '/' + (photo.thumb || photo.src);
+
+                    // NOTE: We need a way to open lightbox with correct data.
+                    // The photos array changes. Pushing new photos to window.currentPhotos?
+                    // Or replacing?
+
+                    // Design choice: Replace window.currentPhotos with filtered set.
+                    // So index 0 is first filtered photo.
+
+                    return `
+                        <div class="col-6 col-md-4 col-xl-3 grid-item">
+                             <div class="card h-100 shadow-sm border-0 portfolio-card">
+                                <a href="javascript:void(0)" onclick="openLightbox(${index})" class="text-decoration-none text-dark">
+                                    <div class="card-img-wrapper bg-light overflow-hidden position-relative">
+                                        <img src="${thumb}"
+                                             class="w-100"
+                                             alt="${photo.name}"
+                                             loading="lazy">
+                                        <div class="view-overlay position-absolute bottom-0 start-0 p-2 text-white text-shadow small" data-view-id="${photo.id}">
+                                             <ion-icon name="eye"></ion-icon> <span class="view-count-text">...</span>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                if (grid) {
+                    grid.innerHTML = html;
+                    // Destory old masonry? Masonry handles appending well, but replacement needs care.
+                    // Simplest: Re-init.
+
+                    // Update Global Photos
+                    window.currentPhotos = photos.map(p => ({
+                        ...p,
+                        src: root + '/' + (p.src_single || p.src || p.thumb),
+                        src_a: p.src_a ? root + '/' + p.src_a : null,
+                        src_b: p.src_b ? root + '/' + p.src_b : null
+                    })); // Replace context
+
+                    imagesLoaded(grid, function () {
+                        // Check if masonry instance exists?
+                        // Masonry.data(grid).destroy(); // Optional
+                        new Masonry(grid, { itemSelector: '.grid-item', percentPosition: true });
+                        grid.style.opacity = '1';
+
+                        if (window.refreshViewCounts) window.refreshViewCounts();
+                    });
+                }
+
+            } catch (e) {
+                console.error(e);
+                alert("Error loading filter");
+                const grid = document.getElementById('masonry-grid');
+                if (grid) grid.style.opacity = '1';
+            }
+        };
+    })();
+</script>
+    </div>
+</div>
+
+
+<!-- Core Vendors -->
+<script src="../assets/vendor/jquery.min.js"></script>
+<script src="../assets/vendor/bootstrap.bundle.min.js"></script>
+<script src="../assets/vendor/imagesloaded.pkgd.min.js"></script>
+<script src="../assets/vendor/masonry.pkgd.min.js"></script>
+
+<!-- Utils -->
+<script src="../assets/vendor/crypto-js.min.js"></script>
+<script src="../assets/vendor/panzoom.min.js"></script>
+
+<!-- App Init -->
+<script src="../assets/js/firebase-init-config.js"></script>
+
+<!-- View Counting & Global Logic -->
+<script>
+    // Global View Counting Logic
+    window.updateViewCounts = function () {
+        document.querySelectorAll('[data-view-id]').forEach(el => {
+            const id = el.getAttribute('data-view-id');
+            // Mock or Real Firebase Logic
+            // If firebase is init in layout, we hook here.
+            // For now, placeholder or check sessionStorage
+            // Real implementation would connect to Firebase refs here.
+
+            // Note: layout.ejs usually handles the "Active" page logic.
+            // But for Grid items, we might need a centralized observer.
+        });
+    }
+</script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // State
+            const CHUNK_SIZE = 48; // Multiple of 2, 3, 4 for grid alignment
+            let renderedCount = 0;
+            let grid = document.querySelector('#masonry-grid');
+            let sentinel = document.getElementById('sentinel');
+            let masonryInstance = null;
+
+            // Initialize Masonry immediately
+            if (grid) {
+                masonryInstance = new Masonry(grid, {
+                    itemSelector: '.grid-item',
+                    percentPosition: true
+                });
+            }
+
+            // Render Function
+            window.renderNextChunk = function () {
+                const photos = window.currentPhotos || [];
+                if (renderedCount >= photos.length) {
+                    sentinel.innerText = "End of Collection";
+                    return;
+                }
+
+                const nextBatch = photos.slice(renderedCount, renderedCount + CHUNK_SIZE);
+                const root = "..";
+
+                const html = nextBatch.map((photo, i) => {
+                    const index = renderedCount + i;
+                    return `
+                        <div class="col-6 col-md-4 col-xl-3 grid-item">
+                            <div class="card h-100 shadow-sm border-0 portfolio-card">
+                                <a href="javascript:void(0)" onclick="openLightbox(${index})"
+                                    class="text-decoration-none text-dark">
+                                        <div class="card-img-wrapper bg-light overflow-hidden position-relative">
+                                            <img src="${root}/${photo.thumb || photo.src}"
+                                                class="w-100"
+                                                alt="${photo.name}" loading="lazy">
+                                        <div class="view-overlay position-absolute bottom-0 start-0 p-2 text-white text-shadow small" data-view-id="${photo.id}">
+                                            <ion-icon name="eye"></ion-icon> <span class="view-count-text">...</span>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>`;
+                }).join('');
+
+                // Append
+                // Create elements (jQuery way usually safer for Masonry, but Vanilla works if we parse)
+                // Vanilla append
+                grid.insertAdjacentHTML('beforeend', html);
+
+                // Get newly added elements
+                // Simplest: Just reloadItems and layout for now. 
+                // Better: appended() method needs DOM elements. 
+                // Let's do a simple reload + imagesLoaded for robustness.
+
+                imagesLoaded(grid, function () {
+                    masonryInstance.reloadItems();
+                    masonryInstance.layout();
+                    if (window.refreshViewCounts) window.refreshViewCounts();
+                });
+
+                renderedCount += nextBatch.length;
+
+                if (renderedCount >= photos.length) {
+                    sentinel.style.display = 'none'; // distinct from "End of text"
+                }
+            };
+
+            // Observer
+            const observer = new IntersectionObserver((entries) => {
+                if (entries[0].isIntersecting) {
+                    window.renderNextChunk();
+                }
+            }, { rootMargin: '400px' });
+
+            observer.observe(sentinel);
+        });
+    </script>
+        </main>
+
+        <!-- Custom Lightbox CSS (Pulse/Hint) -->
+        <style>
+            /* Pulsing Hint Animation */
+            @keyframes pulse-ring {
+                0% {
+                    box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.7);
+                }
+
+                70% {
+                    box-shadow: 0 0 0 10px rgba(13, 110, 253, 0);
+                }
+
+                100% {
+                    box-shadow: 0 0 0 0 rgba(13, 110, 253, 0);
+                }
+            }
+
+            .pulse-btn {
+                animation: pulse-ring 2s infinite;
+                color: #fff !important;
+                background: rgba(13, 110, 253, 0.3) !important;
+                border-color: #0d6efd !important;
+            }
+
+            /* Hint Tooltip */
+            .hint-tooltip {
+                position: absolute;
+                background: #0d6efd;
+                color: white;
+                padding: 5px 10px;
+                border-radius: 4px;
+                font-size: 0.8rem;
+                pointer-events: none;
+                opacity: 0;
+                transition: opacity 0.3s;
+                z-index: 3000;
+                white-space: nowrap;
+            }
+
+            /* Positioning tooltip for desktop sidebar button */
+            .sidebar-toolbar .hint-tooltip {
+                top: 100%;
+                left: 10px;
+                margin-top: 5px;
+            }
+
+            /* Positioning tooltip for floating toggle button */
+            .stage-toggle-btn .hint-tooltip {
+                bottom: 100%;
+                right: 0;
+                margin-bottom: 10px;
+            }
+
+            /* Show tooltip logic class */
+            .hint-visible {
+                opacity: 1;
+            }
+
+            /* Ensure Floating Button is Clickable */
+            .stage-toggle-btn {
+                position: absolute;
+                bottom: 20px;
+                right: 20px;
+                z-index: 2050;
+                /* Higher than image stage (1000) but lower than tooltip */
+                background: rgba(0, 0, 0, 0.6);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                color: white;
+                border-radius: 50%;
+                width: 40px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+            .stage-toggle-btn:hover {
+                background: rgba(255, 255, 255, 0.2);
+            }
+
+            /* Only show when sidebar is hidden (handled by JS logic mostly, or CSS if parent has class) */
+            .lightbox-container.sidebar-closed .stage-toggle-btn {
+                display: flex;
+            }
+
+            /* Start hidden if sidebar is open, if that is the design? */
+            /* Actually, the button is inside lightbox-stage. */
+        </style>
+
+        <!-- Lightbox Modal (Advanced UI) -->
+        <div id="lightbox-modal">
+            <!-- Main Container: Flex Row -->
+            <div class="lightbox-container">
+
+                <!-- Left: Image Stage -->
+                <div class="lightbox-stage">
+                    <!-- Close Button (Mobile/Tablet or when sidebar hidden) -->
+                    <button class="lightbox-close-btn d-md-none" onclick="closeLightbox()">&times;</button>
+
+                    <div id="lightbox-image-container"></div>
+
+                    <!-- Floating Info Toggle (New) -->
+                    <button class="stage-toggle-btn" onclick="toggleSidebar()"
+                        title="Hiện Thông Tin (i)">
+                        <ion-icon name="information-circle-outline"></ion-icon>
+                    </button>
+
+                    <!-- Navigation Overlays -->
+                    <div class="nav-overlay nav-left" onclick="prevPhoto()">
+                        <ion-icon name="chevron-back-outline"></ion-icon>
+                    </div>
+                    <div class="nav-overlay nav-right" onclick="nextPhoto()">
+                        <ion-icon name="chevron-forward-outline"></ion-icon>
+                    </div>
+                </div>
+
+                <!-- Right: Sidebar (Info Panel) -->
+                <div id="lightbox-sidebar" class="lightbox-sidebar">
+                    <!-- Toolbar -->
+                    <div class="sidebar-toolbar">
+                        <div class="left-tools d-flex align-items-center gap-2">
+                            <div class="position-relative">
+                                <button id="sidebar-info-btn" class="icon-btn" onclick="toggleSidebar()"
+                                    title="Bật/Tắt Thông Tin (i)">
+                                    <ion-icon name="information-circle-outline"></ion-icon>
+                                </button>
+                                <div id="sidebar-hint" class="hint-tooltip">
+                                    Ẩn Thông Tin
+                                </div>
+                            </div>
+
+                            <!-- Counter (Moved Up) -->
+                            <div id="lightbox-counter" class="counter-text fw-bold text-white ms-2">1 / 1</div>
+
+                            <!-- View Count -->
+                            <div class="d-flex align-items-center gap-1 ms-3"
+                                title="Lượt xem"
+                                style="font-size: 0.9rem; color: rgba(255,255,255,0.8);">
+                                <ion-icon name="eye-outline"></ion-icon>
+                                <span id="lightbox-view-count-val">...</span>
+                            </div>
+                        </div>
+                        <div class="right-tools">
+                            <button class="icon-btn" onclick="copyMeta()"
+                                title="Sao chép Metadata (c)">
+                                <ion-icon name="copy-outline"></ion-icon>
+                            </button>
+                            <button class="icon-btn" onclick="sharePhoto()"
+                                title="Chia sẻ (s)">
+                                <ion-icon name="share-social-outline"></ion-icon>
+                            </button>
+                            <button class="icon-btn close-btn" onclick="closeLightbox()"
+                                title="Đóng (Esc)">
+                                <ion-icon name="close-outline"></ion-icon>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="sidebar-content">
+                        <h3 id="lightbox-title">
+                            Tiêu đề ảnh
+                        </h3>
+
+                        <div id="lightbox-desc" class="description-text" style="margin-bottom: 15px;">
+                            <!-- Description injected here -->
+                        </div>
+
+                        <div id="lightbox-tags" class="tags-container">
+                            <!-- Tags injected here -->
+                        </div>
+
+                        <div id="lightbox-content" class="description-text"
+                            style="white-space: pre-wrap; margin-top: 15px; border-top: 1px solid #444; padding-top: 15px;">
+                            <!-- Body content injected here -->
+                        </div>
+                    </div>
+
+                    <div class="sidebar-footer justify-content-end">
+                        <!-- Zoom Controls REMOVED -->
+                        <small class="text-muted">
+                            Nhấn &#39;F&#39; để đặt lại Zoom
+                        </small>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <footer class="bg-dark text-white text-center py-4 mt-5">
+    <div class="container">
+        <p class="mb-0">&copy; 2026
+                Thu Nhiên Gallery. Được xây dựng bởi AnPH21.</p>
+    </div>
+</footer>
+
+            <!-- Custom Lightbox Logic -->
+            <script>
+                // Lightbox Global State
+                let hintTimer = null;
+                let panzoomInstance = null;
+                let currentIndex = 0;
+
+                function openLightbox(index, skipHistory = false) {
+                    try {
+                        // Safety checks
+                        if (!currentPhotos || currentPhotos.length === 0) return;
+                        currentIndex = index;
+                        const photo = currentPhotos[index];
+
+                        // 1. Deep Link
+                        if (!skipHistory) {
+                            const safeName = photo.name.replace(/\s+/g, '-').toLowerCase();
+                            history.pushState(null, null, `#${safeName}`);
+                        }
+
+                        const modal = document.getElementById('lightbox-modal');
+                        const container = document.getElementById('lightbox-image-container');
+                        const sidebar = document.getElementById('lightbox-sidebar');
+                        const mainContainer = document.querySelector('.lightbox-container');
+
+                        if (!modal || !container || !sidebar) throw new Error("Elements missing");
+
+                        // Mobile Optimization: Auto-hide sidebar by default
+                        if (window.innerWidth <= 768) {
+                            sidebar.classList.add('hidden');
+                            mainContainer.classList.add('sidebar-closed');
+                        } else {
+                            // Desktop: Ensure open by default
+                            sidebar.classList.remove('hidden');
+                            mainContainer.classList.remove('sidebar-closed');
+                        }
+
+                        // 2. Render Sidebar Info
+                        document.getElementById('lightbox-title').innerText = photo.metadata?.title || photo.name;
+                        document.getElementById('lightbox-counter').innerText = `${currentIndex + 1} / ${currentPhotos.length}`;
+                        document.getElementById('lightbox-desc').innerText = photo.metadata?.description || '';
+                        document.getElementById('lightbox-content').innerText = photo.content || '';
+
+                        // Render Tags
+                        const tagSelect = document.getElementById('lightbox-tags');
+                        const rootPath = ".." || ".";
+                        tagSelect.innerHTML = (photo.metadata?.tags || []).map(tag =>
+                            `<a href="${rootPath}/tag?id=${encodeURIComponent(tag)}" class="tag-chip">${tag}</a>`
+                        ).join('');
+
+                        // 3. Render Image Stage
+                        if (panzoomInstance) { try { panzoomInstance.dispose(); } catch (e) { } }
+                        panzoomInstance = null;
+                        container.innerHTML = '';
+
+                        // Split vs Single Logic
+                        if ((photo.type === 'split' || (photo.src_a && photo.src_b)) && photo.src_a && photo.src_b) {
+                            container.innerHTML = `<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#000;"><canvas id="stitchCanvas" style="max-width:100%; max-height:100%; cursor: grab; display:block;"></canvas></div>`;
+                            const canvas = document.getElementById('stitchCanvas');
+
+                            if (typeof CanvasStitchViewer !== 'undefined') {
+                                if (window.canvasViewer) { /* clean */ }
+                                window.canvasViewer = new CanvasStitchViewer(canvas, photo.src_a, photo.src_b);
+                                panzoomInstance = null;
+                                addDecoyOverlay(container, canvas);
+                            } else {
+                                container.innerHTML = "<p style='color:white'>Error: Viewer component missing.</p>";
+                            }
+                        } else {
+                            if (window.canvasViewer) window.canvasViewer = null;
+
+                            const img = document.createElement('img');
+                            img.src = photo.src;
+                            img.style.maxHeight = '90vh';
+                            img.style.maxWidth = '90vw';
+                            img.draggable = false;
+
+                            // Load handler
+                            img.onload = () => {
+                                initPanzoom(img);
+                                addDecoyOverlay(container, img);
+                            };
+
+                            container.appendChild(img);
+                        }
+
+                        if (typeof window.trackView === 'function') {
+                            window.trackView(photo);
+                        }
+
+                        // Activate Modal
+                        modal.classList.add('active');
+                        // Clean up any forced inline styles from previous debug steps
+                        modal.style.removeProperty('display');
+                        modal.style.removeProperty('opacity');
+
+                        // Reset Hint Timer
+                        if (typeof resetHintTimer === 'function') resetHintTimer();
+
+                    } catch (e) {
+                        console.error("Lightbox Error:", e);
+                    }
+                }
+
+                // --- Panzoom Helper ---
+                function initPanzoom(elem) {
+                    // Clean up previous instance
+                    if (panzoomInstance) {
+                        try { panzoomInstance.dispose(); } catch (e) { }
+                        panzoomInstance = null;
+                    }
+
+                    // Initialize new instance
+                    try {
+                        panzoomInstance = panzoom(elem, {
+                            maxZoom: 5,
+                            minZoom: 1,
+                            bounds: true,
+                            boundsPadding: 0.1,
+                            zoomDoubleClickSpeed: 1 // Disable zoom on double click if needed, or keep default
+                        });
+                    } catch (e) {
+                        console.error("Panzoom Init Failed:", e);
+                    }
+                }
+
+                // --- Sidebar & Tools ---
+                function toggleSidebar() {
+                    const sidebar = document.getElementById('lightbox-sidebar');
+                    const container = document.querySelector('.lightbox-container');
+                    const isClosed = sidebar.classList.toggle('hidden');
+                    container.classList.toggle('sidebar-closed');
+
+                    // Reset Hint Timer on Toggle
+                    resetHintTimer();
+                }
+
+                // --- UX Hint Logic ---
+                function resetHintTimer() {
+                    // Clear existing
+                    clearTimeout(hintTimer);
+                    removePulse();
+
+                    // Set new timer (3 seconds)
+                    hintTimer = setTimeout(() => {
+                        showPulseHint();
+                    }, 3000);
+                }
+
+                function showPulseHint() {
+                    const sidebar = document.getElementById('lightbox-sidebar');
+                    const isHidden = sidebar.classList.contains('hidden');
+
+                    let targetBtn, tooltip, msg;
+
+                    if (isHidden) {
+                        // Target the floating button
+                        targetBtn = document.querySelector('.stage-toggle-btn');
+                        // We need to inject tooltip if not exists or select it
+                        // Simplified: Assume we added tooltip html structure dynamically or statically?
+                        // Let's add tooltip structure in HTML above for both buttons
+
+                        // For floating button (needs dynamic tooltip insertion since it's simple button)
+                        if (!targetBtn.querySelector('.hint-tooltip')) {
+                            const tt = document.createElement('div');
+                            tt.className = 'hint-tooltip';
+                            targetBtn.appendChild(tt);
+                        }
+                        tooltip = targetBtn.querySelector('.hint-tooltip');
+                        msg = "Mở Thông Tin";
+                    } else {
+                        // Target the sidebar button
+                        targetBtn = document.getElementById('sidebar-info-btn');
+                        tooltip = document.getElementById('sidebar-hint');
+                        msg = "Ẩn Thông Tin";
+                    }
+
+                    if (targetBtn && tooltip) {
+                        targetBtn.classList.add('pulse-btn');
+                        tooltip.innerText = msg;
+                        tooltip.classList.add('hint-visible');
+
+                        // Auto hide after 5s or click?
+                        // Let's hide on next interaction (click handles it via toggle -> resetHintTimer)
+                        // But also auto-hide pulse after 4s to not annoy
+                        setTimeout(() => removePulse(), 4000);
+                    }
+                }
+
+                function removePulse() {
+                    document.querySelectorAll('.pulse-btn').forEach(el => el.classList.remove('pulse-btn'));
+                    document.querySelectorAll('.hint-visible').forEach(el => el.classList.remove('hint-visible'));
+                }
+
+                function copyMeta() {
+                    if (!currentPhotos[currentIndex]) return;
+                    const p = currentPhotos[currentIndex];
+                    // Copy ONLY body content
+                    const content = p.content || '';
+                    if (content) {
+                        navigator.clipboard.writeText(content).catch(err => console.error("Copy failed:", err));
+                    }
+                }
+
+                // --- Unified Share Helper ---
+                window.shareUrl = async function (title, text, url) {
+                    if (navigator.share) {
+                        try {
+                            await navigator.share({ title, text, url });
+                        } catch (err) {
+                            console.error("Share failed:", err);
+                        }
+                    } else {
+                        try {
+                            await navigator.clipboard.writeText(url);
+                            alert('Đã sao chép liên kết!');
+                        } catch (err) {
+                            console.error("Clipboard failed:", err);
+                            prompt("Sao chép liên kết này:", url);
+                        }
+                    }
+                };
+
+                function sharePhoto() {
+                    const url = window.location.href;
+                    window.shareUrl(document.title, 'Xem ảnh này nhé!', url);
+                }
+
+                // --- Zoom Controls (Global) ---
+                window.zoomIn = function () {
+                    if (window.canvasViewer) window.canvasViewer.zoomIn();
+                    else if (panzoomInstance) panzoomInstance.zoomIn();
+                };
+
+                window.zoomOut = function () {
+                    if (window.canvasViewer) window.canvasViewer.zoomOut();
+                    else if (panzoomInstance) panzoomInstance.zoomOut();
+                };
+
+                // --- Zoom Controls (Global) ---
+                window.zoomIn = function () {
+                    if (window.canvasViewer) window.canvasViewer.zoomIn();
+                    else if (panzoomInstance) panzoomInstance.zoomIn();
+                };
+
+                window.zoomOut = function () {
+                    if (window.canvasViewer) window.canvasViewer.zoomOut();
+                    else if (panzoomInstance) panzoomInstance.zoomOut();
+                };
+
+                // --- Decoy Overlay Helper ---
+                function addDecoyOverlay(container, targetElement) {
+                    const decoy = document.createElement('img');
+                    decoy.src = "../assets/cest-la-vie.png";
+                    decoy.style.position = "absolute";
+                    decoy.style.top = "0";
+                    decoy.style.left = "0";
+                    decoy.style.width = "100%";
+                    decoy.style.height = "100%";
+                    decoy.style.zIndex = "50";
+                    decoy.style.opacity = "0.01"; // Invisible but clickable
+                    decoy.style.objectFit = "fill"; // Cover full area
+                    decoy.style.cursor = "inherit"; // Keep cursor style
+                    decoy.alt = "Copyright";
+
+                    // Prevent Dragging the Decoy itself
+                    decoy.draggable = false;
+
+                    // Message on Right Click (Optional, or just let them save)
+                    // decoy.oncontextmenu = (e) => { /* Default browser menu opens on this image */ };
+
+                    // --- Event Forwarding ---
+                    // We must manually forward interaction events to the underlying target
+                    // because the overlay blocks them.
+
+                    const forwardEvent = (e) => {
+                        // Create a new event based on the original
+                        // We can't re-dispatch the exact same event object.
+                        // We construct a new one.
+                        let newEvent;
+
+                        // FIX: Check WheelEvent FIRST because it inherits from MouseEvent
+                        if (e instanceof WheelEvent) {
+                            newEvent = new WheelEvent(e.type, {
+                                bubbles: true, cancelable: true, view: window,
+                                deltaX: e.deltaX, deltaY: e.deltaY, deltaZ: e.deltaZ,
+                                deltaMode: e.deltaMode,
+                                clientX: e.clientX, clientY: e.clientY // Important for zoom center
+                            });
+                        } else if (e instanceof MouseEvent) {
+                            newEvent = new MouseEvent(e.type, {
+                                bubbles: true, cancelable: true, view: window,
+                                detail: e.detail, screenX: e.screenX, screenY: e.screenY,
+                                clientX: e.clientX, clientY: e.clientY,
+                                ctrlKey: e.ctrlKey, altKey: e.altKey, shiftKey: e.shiftKey, metaKey: e.metaKey,
+                                button: e.button, buttons: e.buttons, relatedTarget: e.relatedTarget
+                            });
+                        } else if (typeof TouchEvent !== 'undefined' && e instanceof TouchEvent) {
+                            // Touch events are hard to synthesize perfectly due to TouchList.
+                            // But Panzoom often attaches to 'touchstart' on the element.
+                            // Forwarding Touch is complex. 
+                            // Easier strategy for Touch: 
+                            // Mobile usually doesn't have "Right Click Save As" easily on overlays?
+                            // Actually long press calls context menu.
+                            // If we set pointer-events: none on mobile?
+                        }
+
+                        if (newEvent && targetElement) {
+                            targetElement.dispatchEvent(newEvent);
+                        }
+                    };
+
+                    // Forward Mouse & Wheel
+                    ['mousedown', 'wheel'].forEach(evt => {
+                        decoy.addEventListener(evt, (e) => {
+                            // Do NOT prevent default here, or context menu (right click) might fail?
+                            // Right click is 'contextmenu' event.
+                            // mousedown is left/middle/right.
+                            if (e.type === 'mousedown' && e.button === 2) {
+                                // Right click -> Let browser handle it (Context Menu on Decoy)
+                                return;
+                            }
+                            // Forward others
+                            // e.preventDefault(); // Maybe?
+                            forwardEvent(e);
+                        });
+                    });
+
+                    // Touch: Just pass through?
+                    // If we set pointer-events: none for touch?
+                    // Mobile "Save Image" via Long Press.
+                    // If we forward touchstart, we might double trigger?
+                    // For now, let's keep touch simple. Most users hold-to-save.
+                    // If we want to allow Zoom on mobile, we need touch events to go through.
+                    // Let's try setting pointer-events: none ONLY for touch devices? 
+                    // No, hybrid devices exist.
+
+                    // Simple hack for Touch: Use pointer-events: none;
+                    // Because "Save Image" is less a concern on mobile vs PC right-click.
+                    // OR, forward touchstart/move/end.
+
+                    container.appendChild(decoy);
+                }
+
+                window.resetZoom = function () {
+                    if (window.canvasViewer) window.canvasViewer.reset();
+                    else if (panzoomInstance) panzoomInstance.reset();
+                };
+
+                // --- Navigation ---
+                function closeLightbox(skipHistory = false) {
+                    document.getElementById('lightbox-modal').classList.remove('active');
+                    if (!skipHistory) {
+                        history.pushState(null, null, ' ');
+                    }
+                    if (panzoomInstance) { try { panzoomInstance.dispose(); } catch (e) { } panzoomInstance = null; }
+                }
+                function nextPhoto() { if (currentIndex < currentPhotos.length - 1) openLightbox(currentIndex + 1); }
+                function prevPhoto() { if (currentIndex > 0) openLightbox(currentIndex - 1); }
+
+                // --- Event Listeners ---
+                // --- Event Listeners ---
+                document.addEventListener('keydown', (e) => {
+                    const modal = document.getElementById('lightbox-modal');
+                    if (!modal || !modal.classList.contains('active')) return;
+
+                    switch (e.key.toLowerCase()) {
+                        case 'escape': closeLightbox(); break;
+                        case 'arrowright': nextPhoto(); break;
+                        case 'arrowleft': prevPhoto(); break;
+                        case 'i': toggleSidebar(); break;
+                        case 'c': copyMeta(); break;
+                        case 's': sharePhoto(); break;
+
+                        // Zoom Keys
+                        case '+':
+                        case '=': // Plus without shift on some layouts
+                            zoomIn();
+                            break;
+
+                        case '-':
+                        case '_': // Minus with shift
+                            zoomOut();
+                            break;
+
+                        case 'f':
+                        case '0': // Ctrl+0 style reset
+                            resetZoom();
+                            break;
+                    }
+                });
+
+                // Wheel Navigation (on Stage background only)
+                document.addEventListener('wheel', (e) => {
+                    const modal = document.getElementById('lightbox-modal');
+                    if (!modal || !modal.classList.contains('active')) return;
+
+                    // If target is the stage (black background) or nav overlay, navigate
+                    if (e.target.classList.contains('lightbox-stage') || e.target.classList.contains('nav-overlay')) {
+                        if (e.deltaY > 0) nextPhoto();
+                        else prevPhoto();
+                    }
+                });
+
+                // --- Global Exports ---
+                window.openLightbox = openLightbox;
+                window.closeLightbox = closeLightbox;
+                window.nextPhoto = nextPhoto;
+                window.prevPhoto = prevPhoto;
+                window.toggleSidebar = toggleSidebar;
+                window.copyMeta = copyMeta;
+                window.sharePhoto = sharePhoto;
+                // zoom functions are already on window (defined as window.zoomIn, etc.)
+
+                // Deep Link Check on Load
+                window.addEventListener('DOMContentLoaded', () => {
+                    const hash = window.location.hash.substring(1); // Remove #
+                    if (hash && typeof currentPhotos !== 'undefined' && currentPhotos.length > 0) {
+                        // Find photo by loosely matching name
+                        const idx = currentPhotos.findIndex(p =>
+                            p.name.replace(/\s+/g, '-').toLowerCase() === hash.toLowerCase()
+                        );
+                        if (idx !== -1) {
+                            console.log("Deep link found:", hash, "Opening index:", idx);
+                            // Wait a bit for masonry/ui to settle? No, just open.
+                            openLightbox(idx);
+                        }
+                    }
+                });
+
+                // History Navigation Handler
+                window.addEventListener('popstate', (event) => {
+                    const hash = window.location.hash.substring(1);
+                    if (hash && currentPhotos && currentPhotos.length > 0) {
+                        // Find photo by hash
+                        const idx = currentPhotos.findIndex(p =>
+                            p.name.replace(/\s+/g, '-').toLowerCase() === hash.toLowerCase()
+                        );
+                        if (idx !== -1) {
+                            openLightbox(idx, true); // skipHistory = true
+                        }
+                    } else {
+                        // No hash -> Close lightbox
+                        closeLightbox(true); // skipHistory = true
+                    }
+                });
+
+                console.log("✅ Lightbox functions attached to window.");
+            </script>
+
+            <!-- Canvas Viewer (SRCIS) -->
+            <script src="../assets/js/canvas-viewer.js"></script>
+
+            <!-- Bootstrap JS (Local) -->
+            <script src="../assets/vendor/bootstrap.bundle.min.js"></script>
+
+            <!-- Panzoom (Local) -->
+            <script src="../assets/vendor/panzoom.min.js"></script>
+            <!-- CryptoJS (Local) -->
+            <script src="../assets/vendor/crypto-js.min.js"></script>
+
+            <!-- Firebase SDK -->
+            <!-- Firebase Config (Generated) -->
+            <script src="../assets/js/firebase-init-config.js"></script>
+
+            <script type="module">
+                import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+                import { getDatabase, ref, increment, onValue, get, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+                const firebaseConfig = window.FIREBASE_CONFIG || {};
+                // Removed duplicate declaration
+
+                let db = null;
+
+                if (true && firebaseConfig.apiKey) {
+                    try {
+                        const app = initializeApp(firebaseConfig);
+                        db = getDatabase(app);
+                        console.log("🔥 Firebase Initialized");
+
+                        // 1. Initial Sync (Get all views once for Grid)
+                        syncGlobalViews();
+
+                    } catch (e) {
+                        console.error("Firebase Init Error:", e);
+                    }
+                }
+
+                // --- Global View Functions ---
+
+                // A. Sync all views for Grid Items
+                async function syncGlobalViews() {
+                    if (!db) return;
+                    const viewNodes = document.querySelectorAll('[data-view-id]');
+                    if (viewNodes.length === 0) return;
+
+                    // Optimization: Fetch ALL views once (assuming lightweight dataset < 1MB)
+                    // If dataset grows > 10k items, we might need batched gets, but for now this is fastest/cheapest.
+                    const dbRef = ref(db, 'views');
+                    try {
+                        const snapshot = await get(dbRef);
+                        if (snapshot.exists()) {
+                            const allViews = snapshot.val();
+                            updateDomCounts(allViews);
+                        }
+
+                        // Optional: Listen for changes? 
+                        // For cost savings, we usually don't listen to the WHOLE list. 
+                        // Just fetching once on load is enough for grid.
+                        // Lightbox handles real-time single updates.
+                    } catch (e) {
+                        console.error("View Sync Error:", e);
+                    }
+                }
+
+                function updateDomCounts(allViews) {
+                    const viewNodes = document.querySelectorAll('[data-view-id]');
+                    viewNodes.forEach(node => {
+                        const id = node.getAttribute('data-view-id');
+                        if (allViews[id]) {
+                            const countParams = node.querySelectorAll('.view-count-text');
+                            countParams.forEach(el => el.innerText = allViews[id]);
+                        } else {
+                            const countParams = node.querySelectorAll('.view-count-text');
+                            countParams.forEach(el => el.innerText = '0');
+                        }
+                    });
+                }
+
+                // B. Track View (triggered by Lightbox)
+                window.trackView = function (photo) {
+                    if (!db) { console.error("❌ Firebase DB not initialized."); return; }
+                    if (!photo) { console.warn("❌ TrackView called with null photo."); return; }
+
+                    // const viewId = `${photo.albumSlug}__${photo.filename.replace(/\./g, '_')}`; 
+                    // Wait, `photo.id` in feed/album JSONs is ALREADY generated correctly.
+                    const viewId = photo.id;
+                    console.log("👀 Tracking View for:", viewId);
+
+                    if (!viewId) { console.warn("No viewId for photo", photo); return; }
+
+                    // Real-time Listener for Lightbox Sidebar
+                    const viewRef = ref(db, `views/${viewId}`);
+
+                    // 1. Listen (Realtime UI Update)
+                    // Unsubscribe previous if exists? (Simple way: just new listener, it overwrites context if clean)
+                    // Better: Store unsubscribe fn if needed. For now, onValue returns unsubscribe.
+                    const unsub = onValue(viewRef, (snapshot) => {
+                        const count = snapshot.val() || 0;
+                        // Update Lightbox Sidebar
+                        const lbCount = document.getElementById('lightbox-view-count-val');
+                        if (lbCount) lbCount.innerText = count;
+                    });
+                    // Store unsub to cleanup on close? (Valid optimization for SPA users)
+                    window.currentViewUnsub = unsub;
+
+
+                    // 2. Increment Transaction (Spam Control: localStorage)
+                    const storageKey = `viewed_${viewId}`;
+                    const hasViewed = localStorage.getItem(storageKey);
+
+                    if (!hasViewed) {
+                        console.log("🚀 Incrementing view count...");
+                        update(ref(db), {
+                            [`views/${viewId}`]: increment(1)
+                        }).then(() => {
+                            console.log("✅ View Count Incremented:", viewId);
+                            localStorage.setItem(storageKey, 'true');
+                        }).catch(e => {
+                            console.error("❌ Firebase Update Error:", e);
+                            if (e.code === 'PERMISSION_DENIED') console.warn("💡 Check Firebase Rules test mode.");
+                        });
+                    } else {
+                        console.log("Duplicate view ignored (localStorage check).");
+                    }
+                };
+
+                // Cleanup listener helper
+                window.cleanupViewListener = function () {
+                    if (window.currentViewUnsub) {
+                        window.currentViewUnsub();
+                        window.currentViewUnsub = null;
+                    }
+                }
+
+                // Global Debug Helper
+                window.debugFirebase = {
+                    checkConnection: () => {
+                        if (db) console.log("✅ Firebase DB Instance exists.");
+                        else console.error("❌ Firebase DB is NULL.");
+                    },
+                    forceTrack: (id) => {
+                        if (!db) return;
+                        update(ref(db), { [`views/${id}`]: increment(1) })
+                            .then(() => console.log("Forced update success"))
+                            .catch(e => console.error(e));
+                    },
+                    clearHistory: () => {
+                        localStorage.clear();
+                        console.log("Cleared localStorage history.");
+                    }
+                };
+
+                // Expose sync for infinite scrollMasonry to call after append
+                window.refreshViewCounts = syncGlobalViews;
+
+            </script>
+</body>
+
+</html>

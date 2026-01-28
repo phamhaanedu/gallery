@@ -370,22 +370,39 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="../index.html">Home</a>
+                    <a class="nav-link" href="../404.html">
+                        4Fun
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="../variants/AIPhotography">AI Photography</a>
+                    <a class="nav-link" href="../collections/ai_technology">
+                        AI Technology
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="../categories">Categories</a>
+                    <a class="nav-link" href="../collections/ai-photography">
+                        Nhiếp Ảnh AI
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="../photos.html">Photos</a>
+                    <a class="nav-link" href="../categories">
+                        Danh Mục
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="../albums.html">Albums</a>
+                    <a class="nav-link" href="../photos.html">
+                        Hình Ảnh
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="../tags.html">Tags</a>
+                    <a class="nav-link" href="../albums.html">
+                        Albums
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="../tags.html">
+                        Thẻ
+                    </a>
                 </li>
             </ul>
         </div>
@@ -607,7 +624,8 @@
                     <div id="lightbox-image-container"></div>
 
                     <!-- Floating Info Toggle (New) -->
-                    <button class="stage-toggle-btn" onclick="toggleSidebar()" title="Show Info (i)">
+                    <button class="stage-toggle-btn" onclick="toggleSidebar()"
+                        title="Hiện Thông Tin (i)">
                         <ion-icon name="information-circle-outline"></ion-icon>
                     </button>
 
@@ -627,30 +645,36 @@
                         <div class="left-tools d-flex align-items-center gap-2">
                             <div class="position-relative">
                                 <button id="sidebar-info-btn" class="icon-btn" onclick="toggleSidebar()"
-                                    title="Toggle Info (i)">
+                                    title="Bật/Tắt Thông Tin (i)">
                                     <ion-icon name="information-circle-outline"></ion-icon>
                                 </button>
-                                <div id="sidebar-hint" class="hint-tooltip">Close Info</div>
+                                <div id="sidebar-hint" class="hint-tooltip">
+                                    Ẩn Thông Tin
+                                </div>
                             </div>
 
                             <!-- Counter (Moved Up) -->
                             <div id="lightbox-counter" class="counter-text fw-bold text-white ms-2">1 / 1</div>
 
                             <!-- View Count -->
-                            <div class="d-flex align-items-center gap-1 ms-3" title="Total Views"
+                            <div class="d-flex align-items-center gap-1 ms-3"
+                                title="Lượt xem"
                                 style="font-size: 0.9rem; color: rgba(255,255,255,0.8);">
                                 <ion-icon name="eye-outline"></ion-icon>
                                 <span id="lightbox-view-count-val">...</span>
                             </div>
                         </div>
                         <div class="right-tools">
-                            <button class="icon-btn" onclick="copyMeta()" title="Copy Metadata (c)">
+                            <button class="icon-btn" onclick="copyMeta()"
+                                title="Sao chép Metadata (c)">
                                 <ion-icon name="copy-outline"></ion-icon>
                             </button>
-                            <button class="icon-btn" onclick="sharePhoto()" title="Share (s)">
+                            <button class="icon-btn" onclick="sharePhoto()"
+                                title="Chia sẻ (s)">
                                 <ion-icon name="share-social-outline"></ion-icon>
                             </button>
-                            <button class="icon-btn close-btn" onclick="closeLightbox()" title="Close (Escape)">
+                            <button class="icon-btn close-btn" onclick="closeLightbox()"
+                                title="Đóng (Esc)">
                                 <ion-icon name="close-outline"></ion-icon>
                             </button>
                         </div>
@@ -658,7 +682,9 @@
 
                     <!-- Content -->
                     <div class="sidebar-content">
-                        <h3 id="lightbox-title">Photo Title</h3>
+                        <h3 id="lightbox-title">
+                            Tiêu đề ảnh
+                        </h3>
 
                         <div id="lightbox-desc" class="description-text" style="margin-bottom: 15px;">
                             <!-- Description injected here -->
@@ -676,7 +702,9 @@
 
                     <div class="sidebar-footer justify-content-end">
                         <!-- Zoom Controls REMOVED -->
-                        <small class="text-muted">Press 'F' to Reset Zoom</small>
+                        <small class="text-muted">
+                            Nhấn &#39;F&#39; để đặt lại Zoom
+                        </small>
                     </div>
                 </div>
 
@@ -686,7 +714,7 @@
         <footer class="bg-dark text-white text-center py-4 mt-5">
     <div class="container">
         <p class="mb-0">&copy; 2026
-                Thu Nhiên Gallery. Built with Gallery AI.</p>
+                Thu Nhiên Gallery. Được xây dựng bởi AnPH21.</p>
     </div>
 </footer>
 
@@ -859,12 +887,12 @@
                             targetBtn.appendChild(tt);
                         }
                         tooltip = targetBtn.querySelector('.hint-tooltip');
-                        msg = "Open Info";
+                        msg = "Mở Thông Tin";
                     } else {
                         // Target the sidebar button
                         targetBtn = document.getElementById('sidebar-info-btn');
                         tooltip = document.getElementById('sidebar-hint');
-                        msg = "Hide Info";
+                        msg = "Ẩn Thông Tin";
                     }
 
                     if (targetBtn && tooltip) {
@@ -905,17 +933,17 @@
                     } else {
                         try {
                             await navigator.clipboard.writeText(url);
-                            alert('Link copied to clipboard!');
+                            alert('Đã sao chép liên kết!');
                         } catch (err) {
                             console.error("Clipboard failed:", err);
-                            prompt("Copy this link:", url);
+                            prompt("Sao chép liên kết này:", url);
                         }
                     }
                 };
 
                 function sharePhoto() {
                     const url = window.location.href;
-                    window.shareUrl(document.title, 'Check out this photo!', url);
+                    window.shareUrl(document.title, 'Xem ảnh này nhé!', url);
                 }
 
                 // --- Zoom Controls (Global) ---

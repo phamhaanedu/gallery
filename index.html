@@ -370,22 +370,39 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="./index.html">Home</a>
+                    <a class="nav-link" href="./404.html">
+                        4Fun
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="./variants/AIPhotography">AI Photography</a>
+                    <a class="nav-link" href="./collections/ai_technology">
+                        AI Technology
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="./categories">Categories</a>
+                    <a class="nav-link" href="./collections/ai-photography">
+                        Nhiếp Ảnh AI
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="./photos.html">Photos</a>
+                    <a class="nav-link" href="./categories">
+                        Danh Mục
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="./albums.html">Albums</a>
+                    <a class="nav-link" href="./photos.html">
+                        Hình Ảnh
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="./tags.html">Tags</a>
+                    <a class="nav-link" href="./albums.html">
+                        Albums
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="./tags.html">
+                        Thẻ
+                    </a>
                 </li>
             </ul>
         </div>
@@ -394,17 +411,58 @@
 
         <main>
             <div class="hero-section text-center">
-    <div class="container">
-        <h1 class="display-4 fw-bold mb-3">
-            Thu Nhiên Gallery
-        </h1>
-        <p class="lead text-muted">A private, static, and beautiful photo gallery.</p>
+    <div class="container proverb-container py-5 text-center fade-in">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <blockquote class="blockquote">
+                <p class="mb-3 proverb-content fs-4" style="font-style: italic;">
+                    <span class="spinner-border spinner-border-sm text-muted" role="status"></span> Loading...
+                </p>
+                <footer class="blockquote-footer proverb-author text-muted">Unknown</footer>
+            </blockquote>
+        </div>
     </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        (async function () {
+            try {
+                // Determine root path based on EJS variable or fallback
+                const root = '.';
+                const response = await fetch(`${root}/assets/proverb.json`);
+
+                if (!response.ok) throw new Error('Network response was not ok');
+
+                const proverbs = await response.json();
+                if (proverbs && proverbs.length > 0) {
+                    const random = proverbs[Math.floor(Math.random() * proverbs.length)];
+
+                    // Update only within this container to avoid conflicts if used multiple times
+                    // Actually, querySelectorAll is safer if we want all instances to update (though IDs should be unique if used)
+                    // Using specific classes for safety
+                    const contentEls = document.querySelectorAll('.proverb-content');
+                    const authorEls = document.querySelectorAll('.proverb-author');
+
+                    contentEls.forEach(el => el.textContent = `"${random.content}"`);
+                    authorEls.forEach(el => el.textContent = random.author);
+                }
+            } catch (e) {
+                console.error("Failed to load proverbs", e);
+                // Hide container if failed
+                const containers = document.querySelectorAll('.proverb-container');
+                containers.forEach(el => el.style.display = 'none');
+            }
+        })();
+    });
+</script>
 </div>
 
 <div class="container">
     <!-- Pinned / Latest Feed Section (Placeholder for Masonry) -->
-    <h3 class="mb-4 border-bottom pb-2">Favorite Photos</h3>
+    <h3 class="mb-4 border-bottom pb-2">
+        Ảnh Yêu Thích
+    </h3>
     <div class="row m-3 d-block" id="feed-grid" style="position: relative; min-height: 200px;">
         <!-- JS will load photos here -->
         <div class="col-12 text-center text-muted py-5">
@@ -413,7 +471,9 @@
     </div>
 
     <!-- Albums Sections -->
-    <h3 class="mb-4 border-bottom pb-2 mt-5" id="albums">Albums</h3>
+    <h3 class="mb-4 border-bottom pb-2 mt-5" id="albums">
+        Albums
+    </h3>
     <div class="row g-4">
         
             <div class="col-md-4 col-sm-6">
@@ -443,22 +503,22 @@
             
             <div class="col-md-4 col-sm-6">
                 <div class="card h-100 shadow-sm border-0">
-                    <a href="albums/tam-quan-chinh-te.html" class="text-decoration-none text-dark">
+                    <a href="albums/6-kieu-nguoi-se-bi-loai-khoi-cuoc-choi-tu-2026.html" class="text-decoration-none text-dark">
                         <div
                             style="height: 200px; background-color: #eee; overflow: hidden; border-radius: 8px 8px 0 0;">
                             
-                                    <img src="thumbnails/tam-quan-chinh-te-thumbnail.jpg" class="w-100 h-100 object-fit-cover"
-                                        alt="Tam quan chỉnh tề" onerror="this.src='assets/default-album 200x200.png'">
+                                    <img src="thumbnails/6-kieu-nguoi-se-bi-loai-khoi-cuoc-choi-tu-2026-thumbnail.jpg" class="w-100 h-100 object-fit-cover"
+                                        alt="6 Kiểu Người Sẽ Bị Loại Khỏi Cuộc Chơi Từ 2026" onerror="this.src='assets/default-album 200x200.png'">
                                     
                         </div>
                         <div class="card-body">
                             <h5 class="card-title text-truncate">
-                                Tam quan chỉnh tề
+                                6 Kiểu Người Sẽ Bị Loại Khỏi Cuộc Chơi Từ 2026
                             </h5>
 
                             
                                     <span class="badge bg-primary">
-                                        17 Photos
+                                        7 Photos
                                     </span>
                                     
                         </div>
@@ -468,22 +528,22 @@
             
             <div class="col-md-4 col-sm-6">
                 <div class="card h-100 shadow-sm border-0">
-                    <a href="albums/hoa-moc-lan.html" class="text-decoration-none text-dark">
+                    <a href="albums/7-hanh-vi-tu-pha-huy-hinh-anh-chuyen-nghiep-cua-ban-than.html" class="text-decoration-none text-dark">
                         <div
                             style="height: 200px; background-color: #eee; overflow: hidden; border-radius: 8px 8px 0 0;">
                             
-                                    <img src="thumbnails/hoa-moc-lan-thumbnail.jpg" class="w-100 h-100 object-fit-cover"
-                                        alt="Hoa mộc lan" onerror="this.src='assets/default-album 200x200.png'">
+                                    <img src="thumbnails/7-hanh-vi-tu-pha-huy-hinh-anh-chuyen-nghiep-cua-ban-than-thumbnail.jpg" class="w-100 h-100 object-fit-cover"
+                                        alt="7 hành vi tự phá hủy hình ảnh chuyên nghiệp của bản thân" onerror="this.src='assets/default-album 200x200.png'">
                                     
                         </div>
                         <div class="card-body">
                             <h5 class="card-title text-truncate">
-                                Hoa mộc lan
+                                7 hành vi tự phá hủy hình ảnh chuyên nghiệp của bản thân
                             </h5>
 
                             
                                     <span class="badge bg-primary">
-                                        9 Photos
+                                        7 Photos
                                     </span>
                                     
                         </div>
@@ -493,22 +553,22 @@
             
             <div class="col-md-4 col-sm-6">
                 <div class="card h-100 shadow-sm border-0">
-                    <a href="albums/tam-biet-2025-chao-2026.html" class="text-decoration-none text-dark">
+                    <a href="albums/infographic-sample.html" class="text-decoration-none text-dark">
                         <div
                             style="height: 200px; background-color: #eee; overflow: hidden; border-radius: 8px 8px 0 0;">
                             
-                                    <img src="thumbnails/tam-biet-2025-chao-2026-thumbnail.jpg" class="w-100 h-100 object-fit-cover"
-                                        alt="Tạm biệt 2025 - Chào 2026" onerror="this.src='assets/default-album 200x200.png'">
+                                    <img src="thumbnails/infographic-sample-thumbnail.jpg" class="w-100 h-100 object-fit-cover"
+                                        alt="infographic sample" onerror="this.src='assets/default-album 200x200.png'">
                                     
                         </div>
                         <div class="card-body">
                             <h5 class="card-title text-truncate">
-                                Tạm biệt 2025 - Chào 2026
+                                infographic sample
                             </h5>
 
                             
                                     <span class="badge bg-primary">
-                                        8 Photos
+                                        14 Photos
                                     </span>
                                     
                         </div>
@@ -518,24 +578,49 @@
             
             <div class="col-md-4 col-sm-6">
                 <div class="card h-100 shadow-sm border-0">
-                    <a href="albums/test-album-2024.html" class="text-decoration-none text-dark">
+                    <a href="albums/notebooklm.html" class="text-decoration-none text-dark">
                         <div
                             style="height: 200px; background-color: #eee; overflow: hidden; border-radius: 8px 8px 0 0;">
                             
-                                <div
-                                    class="d-flex align-items-center justify-content-center h-100 bg-secondary text-white">
-                                    <ion-icon name="lock-closed" size="large"></ion-icon>
-                                </div>
-                                
+                                    <img src="thumbnails/notebooklm-thumbnail.jpg" class="w-100 h-100 object-fit-cover"
+                                        alt="notebooklm" onerror="this.src='assets/default-album 200x200.png'">
+                                    
                         </div>
                         <div class="card-body">
                             <h5 class="card-title text-truncate">
-                                Test Album 2024
+                                notebooklm
                             </h5>
 
                             
-                                <span class="badge bg-secondary"><ion-icon name="lock-closed"></ion-icon> Locked</span>
-                                
+                                    <span class="badge bg-primary">
+                                        1 Photos
+                                    </span>
+                                    
+                        </div>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="col-md-4 col-sm-6">
+                <div class="card h-100 shadow-sm border-0">
+                    <a href="albums/tao-video-dai-mien-phi.html" class="text-decoration-none text-dark">
+                        <div
+                            style="height: 200px; background-color: #eee; overflow: hidden; border-radius: 8px 8px 0 0;">
+                            
+                                    <img src="thumbnails/tao-video-dai-mien-phi-thumbnail.jpg" class="w-100 h-100 object-fit-cover"
+                                        alt="Tạo video dài miễn phí" onerror="this.src='assets/default-album 200x200.png'">
+                                    
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title text-truncate">
+                                Tạo video dài miễn phí
+                            </h5>
+
+                            
+                                    <span class="badge bg-primary">
+                                        7 Photos
+                                    </span>
+                                    
                         </div>
                     </a>
                 </div>
@@ -753,7 +838,8 @@
                     <div id="lightbox-image-container"></div>
 
                     <!-- Floating Info Toggle (New) -->
-                    <button class="stage-toggle-btn" onclick="toggleSidebar()" title="Show Info (i)">
+                    <button class="stage-toggle-btn" onclick="toggleSidebar()"
+                        title="Hiện Thông Tin (i)">
                         <ion-icon name="information-circle-outline"></ion-icon>
                     </button>
 
@@ -773,30 +859,36 @@
                         <div class="left-tools d-flex align-items-center gap-2">
                             <div class="position-relative">
                                 <button id="sidebar-info-btn" class="icon-btn" onclick="toggleSidebar()"
-                                    title="Toggle Info (i)">
+                                    title="Bật/Tắt Thông Tin (i)">
                                     <ion-icon name="information-circle-outline"></ion-icon>
                                 </button>
-                                <div id="sidebar-hint" class="hint-tooltip">Close Info</div>
+                                <div id="sidebar-hint" class="hint-tooltip">
+                                    Ẩn Thông Tin
+                                </div>
                             </div>
 
                             <!-- Counter (Moved Up) -->
                             <div id="lightbox-counter" class="counter-text fw-bold text-white ms-2">1 / 1</div>
 
                             <!-- View Count -->
-                            <div class="d-flex align-items-center gap-1 ms-3" title="Total Views"
+                            <div class="d-flex align-items-center gap-1 ms-3"
+                                title="Lượt xem"
                                 style="font-size: 0.9rem; color: rgba(255,255,255,0.8);">
                                 <ion-icon name="eye-outline"></ion-icon>
                                 <span id="lightbox-view-count-val">...</span>
                             </div>
                         </div>
                         <div class="right-tools">
-                            <button class="icon-btn" onclick="copyMeta()" title="Copy Metadata (c)">
+                            <button class="icon-btn" onclick="copyMeta()"
+                                title="Sao chép Metadata (c)">
                                 <ion-icon name="copy-outline"></ion-icon>
                             </button>
-                            <button class="icon-btn" onclick="sharePhoto()" title="Share (s)">
+                            <button class="icon-btn" onclick="sharePhoto()"
+                                title="Chia sẻ (s)">
                                 <ion-icon name="share-social-outline"></ion-icon>
                             </button>
-                            <button class="icon-btn close-btn" onclick="closeLightbox()" title="Close (Escape)">
+                            <button class="icon-btn close-btn" onclick="closeLightbox()"
+                                title="Đóng (Esc)">
                                 <ion-icon name="close-outline"></ion-icon>
                             </button>
                         </div>
@@ -804,7 +896,9 @@
 
                     <!-- Content -->
                     <div class="sidebar-content">
-                        <h3 id="lightbox-title">Photo Title</h3>
+                        <h3 id="lightbox-title">
+                            Tiêu đề ảnh
+                        </h3>
 
                         <div id="lightbox-desc" class="description-text" style="margin-bottom: 15px;">
                             <!-- Description injected here -->
@@ -822,7 +916,9 @@
 
                     <div class="sidebar-footer justify-content-end">
                         <!-- Zoom Controls REMOVED -->
-                        <small class="text-muted">Press 'F' to Reset Zoom</small>
+                        <small class="text-muted">
+                            Nhấn &#39;F&#39; để đặt lại Zoom
+                        </small>
                     </div>
                 </div>
 
@@ -832,7 +928,7 @@
         <footer class="bg-dark text-white text-center py-4 mt-5">
     <div class="container">
         <p class="mb-0">&copy; 2026
-                Thu Nhiên Gallery. Built with Gallery AI.</p>
+                Thu Nhiên Gallery. Được xây dựng bởi AnPH21.</p>
     </div>
 </footer>
 
@@ -1005,12 +1101,12 @@
                             targetBtn.appendChild(tt);
                         }
                         tooltip = targetBtn.querySelector('.hint-tooltip');
-                        msg = "Open Info";
+                        msg = "Mở Thông Tin";
                     } else {
                         // Target the sidebar button
                         targetBtn = document.getElementById('sidebar-info-btn');
                         tooltip = document.getElementById('sidebar-hint');
-                        msg = "Hide Info";
+                        msg = "Ẩn Thông Tin";
                     }
 
                     if (targetBtn && tooltip) {
@@ -1051,17 +1147,17 @@
                     } else {
                         try {
                             await navigator.clipboard.writeText(url);
-                            alert('Link copied to clipboard!');
+                            alert('Đã sao chép liên kết!');
                         } catch (err) {
                             console.error("Clipboard failed:", err);
-                            prompt("Copy this link:", url);
+                            prompt("Sao chép liên kết này:", url);
                         }
                     }
                 };
 
                 function sharePhoto() {
                     const url = window.location.href;
-                    window.shareUrl(document.title, 'Check out this photo!', url);
+                    window.shareUrl(document.title, 'Xem ảnh này nhé!', url);
                 }
 
                 // --- Zoom Controls (Global) ---
